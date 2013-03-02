@@ -154,6 +154,9 @@ public class ArgsParser {
                 TVSHOW_INDEX = i;
             }
         }
+        if(arg.isFileSet()) {
+            return arg;
+        }
         if(arg.getSourceFolders().isEmpty()) {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
@@ -186,16 +189,20 @@ public class ArgsParser {
      * cannot be found. if length is set, and mediainfo binary cannot be found
      */
     public static void validate(Arguments arg) throws FileNotFoundException {
-        if(arg.isFileSet()) {
-            File f = arg.getFile();
-            if(f == null || !f.exists()) {
-                throw new FileNotFoundException("The input file does not exist", ExitCode.FILE_NOT_FOUND);
-            }
+        if(arg.isServerSet() || arg.isShutDownSet()) {
+            return;
         }
         if(arg.getMediaAction() == Action.LENGTH) {
             if(!new MediaInfo().exists()) {
                 throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
             }
+        }
+        if(arg.isFileSet()) {
+            File f = arg.getFile();
+            if(f == null || !f.exists()) {
+                throw new FileNotFoundException("The input file does not exist", ExitCode.FILE_NOT_FOUND);
+            }
+            return;
         }
         for(String source : arg.getSourceFolders()) {
             if(!new File(source).exists()) {
