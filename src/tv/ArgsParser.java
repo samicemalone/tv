@@ -26,7 +26,6 @@ public class ArgsParser {
      * @param args Arguments
      * @return Parsed Arguments instance or null if the help message is to be
      * displayed only
-     * cannot be found. if length, and mediainfo binary cannot be found
      * @throws MissingArgumentException if there is an argument missing
      * @throws InvalidArgumentException if windows 7, and library name is invalid
      * @throws ParseException if the episode string is not valid
@@ -183,7 +182,8 @@ public class ArgsParser {
      * Validates the given Arguments. Validation is successful
      * if no exceptions were thrown.
      * @param arg Parsed Arguments
-     * @throws FileNotFoundException if no show, source directories, input files
+     * @throws FileNotFoundException if show, source directories, input files
+     * cannot be found. if length is set, and mediainfo binary cannot be found
      */
     public static void validate(Arguments arg) throws FileNotFoundException {
         if(arg.isFileSet()) {
@@ -211,9 +211,9 @@ public class ArgsParser {
      * Prints the help message to stdout
      */
     public static void printHelp() {
-        System.out.println("Usage: vlc TVSHOW EPISODES (--source DIR)... [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
-        System.out.println("       vlc TVSHOW EPISODES --library NAME [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
-        System.out.println("       vlc -f FILE");
+        System.out.println("Usage: tv TVSHOW EPISODES (--source DIR)... [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
+        System.out.println("       tv TVSHOW EPISODES --library NAME [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
+        System.out.println("       tv -f FILE");
         System.out.println();
         System.out.println("    -q, --enqueue     Enqueue files. Default is to play immediately.");
         System.out.println("    -l, --list        List episodes matched.");
@@ -265,15 +265,15 @@ public class ArgsParser {
         System.out.println("media sources every time its run. Formats above marked with an asterisk (*)");
         System.out.println("will modify the pointer.");
         System.out.println();
-        System.out.println("Examples:    vlc Scrubs s01 --source 'D:\\TV'");
-        System.out.println("             vlc Scrubs s01e01 --library TV");
-        System.out.println("             vlc Scrubs next --source 'D:\\TV'");
-        System.out.println("             vlc Scrubs prev -u USER --library Television");
-        System.out.println("             vlc Scrubs s02e05- --library TV");
-        System.out.println("             vlc Scrubs s02e05-s02e13 --library TV");
-        System.out.println("             vlc Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'");
-        System.out.println("             vlc Scrubs s06 -c --library TV");
-        System.out.println("             vlc -f scrubs.s01e02.avi");
+        System.out.println("Examples:    tv Scrubs s01 --source 'D:\\TV'");
+        System.out.println("             tv Scrubs s01e01 --library TV");
+        System.out.println("             tv Scrubs next --source 'D:\\TV'");
+        System.out.println("             tv Scrubs prev -u USER --library Television");
+        System.out.println("             tv Scrubs s02e05- --library TV");
+        System.out.println("             tv Scrubs s02e05-s02e13 --library TV");
+        System.out.println("             tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'");
+        System.out.println("             tv Scrubs s06 -c --library TV");
+        System.out.println("             tv -f scrubs.s01e02.avi");
         System.out.println();
     }
     

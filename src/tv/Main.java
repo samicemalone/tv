@@ -146,7 +146,7 @@ public class Main {
     }
     
     /**
-     * Performs the action specified by VLC_ACTION on all episodes
+     * Performs the action specified by MEDIA_ACTION on all episodes
      * @param season Starting season (usually 1)
      */
     public static void allEpisodes(Season season) {
@@ -158,7 +158,7 @@ public class Main {
     }
     
     /**
-     * Performs the action specified by VLC_ACTION on the given episode
+     * Performs the action specified by MEDIA_ACTION on the given episode
      * @param season Season
      * @param episodeNo Episode No
      */
@@ -187,7 +187,7 @@ public class Main {
     }
     
     /**
-     * Performs the action specified by VLC_ACTION on the given episode pointer
+     * Performs the action specified by MEDIA_ACTION on the given episode pointer
      * @param season Season
      */
     public static void episodePointer(Season season) {
@@ -206,7 +206,7 @@ public class Main {
     }
     
     /**
-     * Performs the action specified by VLC_ACTION on the given episode range
+     * Performs the action specified by MEDIA_ACTION on the given episode range
      * @param season Season
      * @param rangeArray rangeArray[0]: start episode, rangeArray[1]: end episode
      */
@@ -219,7 +219,7 @@ public class Main {
     }
     
     /**
-     * Performs the action specified by VLC_ACTION on the episodes including
+     * Performs the action specified by MEDIA_ACTION on the episodes including
      * and greater than epString in the same season
      * @param season Season
      * @param epString Episode No e.g. 02
@@ -233,7 +233,7 @@ public class Main {
     }
 
     /**
-     * Performs the action specified by VLC_ACTION on the given season range
+     * Performs the action specified by MEDIA_ACTION on the given season range
      * @param season Starting season
      * @param rangeArray rangeArray[0]: start season, rangeArray[1]: end season e.g. s03
      */
@@ -246,7 +246,7 @@ public class Main {
     }
 
     /**
-     * Performs the action specified by VLC_ACTION on the seasons, including and greater
+     * Performs the action specified by MEDIA_ACTION on the seasons, including and greater
      * than Season.
      * @param season Starting season
      */

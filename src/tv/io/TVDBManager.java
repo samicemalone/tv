@@ -32,9 +32,9 @@ public class TVDBManager extends CSV_IO {
     
     public static File getTVDBFile() {
         if(LibraryManager.isWindows()) {
-            return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\vlc\\tvdb.csv");
+            return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.csv");
         } else {
-            return new File(System.getProperty("user.home") + "/.vlc/tvdb.csv");
+            return new File(System.getProperty("user.home") + "/.tv/tvdb.csv");
         }
     }
     

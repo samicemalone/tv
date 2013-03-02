@@ -18,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
-import tv.io.CSV_IO;
 import tv.io.TVDBManager;
 import tv.model.Episode;
 
@@ -108,7 +107,7 @@ public class VLCServer {
                     String[] args = new String[matchList.size() + 2]; //size - 1 + 3
                     args[0] = "C:\\Program Files (x86)\\Java\\jdk1.6.0_16\\bin\\java.exe";
                     args[1] = "-jar";
-                    args[2] = "J:\\Downloads\\Dev\\Java\\vlc\\dist\\vlc.jar";
+                    args[2] = "J:\\Downloads\\Dev\\Java\\tv\\dist\\tv.jar";
                     for(int i = 1; i < matchList.size(); i++) {
                         args[i+2] = matchList.get(i);
                     }

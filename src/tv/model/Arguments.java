@@ -174,7 +174,7 @@ public class Arguments {
 
     /**
      * Set the flag to only set the pointer without playing
-     * @param isSetOnly true to set pointer only, false to follow the VLC action
+     * @param isSetOnly true to set pointer only, false to follow the media action
      */
     public void setIsSetOnly(boolean isSetOnly) {
         this.isSetOnly = isSetOnly;
@@ -222,8 +222,8 @@ public class Arguments {
 
     /**
      * Sets the media action
-     * @param VLC_ACTION VLC action
-     * @see VLC
+     * @param ACTION media action
+     * @see Action
      */
     public void setMediaAction(int ACTION) {
         this.MEDIA_ACTION = ACTION;
@@ -231,8 +231,8 @@ public class Arguments {
     
     /**
      * Gets the media action
-     * @return VLC action
-     * @see VLC
+     * @return media action
+     * @see Action
      */
     public int getMediaAction() {
         return MEDIA_ACTION;
