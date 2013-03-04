@@ -12,8 +12,10 @@ import tv.exception.FileNotFoundException;
 import tv.exception.InvalidArgumentException;
 import tv.exception.MissingArgumentException;
 import tv.exception.ParseException;
+import tv.io.ConfigManager;
 import tv.io.LibraryManager;
 import tv.model.Arguments;
+import tv.model.Config;
 
 /**
  *
@@ -29,9 +31,12 @@ public class ArgsParser {
      * @throws MissingArgumentException if there is an argument missing
      * @throws InvalidArgumentException if windows 7, and library name is invalid
      * @throws ParseException if the episode string is not valid
+     * @throws FileNotFoundException if the config file is not found when used with
+     * the --config option.
      */
     public static Arguments parse(String[] args) throws ExitException {
         Arguments arg = new Arguments();
+        Config config = null;
         int TVSHOW_INDEX = -1; // TVSHOW required arg
         boolean isArg = false;
         for(int i = 0; i < args.length; i++) {
@@ -70,6 +75,18 @@ public class ArgsParser {
                 arg.setRandom(true);
                 continue;
             }
+            if(args[i].equals("--config")) {
+                if(i + 1 < args.length) {
+                    if(!new File(args[i+1]).exists()) {
+                        throw new FileNotFoundException("The config file given does not exist", ExitCode.CONFIG_FILE_NOT_FOUND);
+                    }
+                    config = ConfigManager.parseConfig(new File(args[i+1]));
+                    isArg = true;
+                    continue;
+                } else {
+                    throw new MissingArgumentException("You need to give an argument with the --config option", ExitCode.MISSING_CONFIG);
+                }
+            }
             if(args[i].equals("--source")) {
                 if(i + 1 < args.length) {
                     arg.addSourceFolder(args[i+1]);
@@ -83,7 +100,7 @@ public class ArgsParser {
                 if(i + 1 < args.length) {
                     if(LibraryManager.isWindows7()) {
                         if(LibraryManager.isValidLibraryName(args[i+1])) {
-                            arg.setSourceFolders(LibraryManager.parseLibraryFolders(args[i+1]));
+                            arg.getSourceFolders().addAll(LibraryManager.parseLibraryFolders(args[i+1]));
                         } else {
                             throw new InvalidArgumentException("Windows 7 Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
                         }
@@ -154,6 +171,7 @@ public class ArgsParser {
                 TVSHOW_INDEX = i;
             }
         }
+        ConfigManager.mergeArguments(config, arg);
         if(arg.isFileSet()) {
             return arg;
         }
@@ -193,7 +211,7 @@ public class ArgsParser {
             return;
         }
         if(arg.getMediaAction() == Action.LENGTH) {
-            if(!new MediaInfo().exists()) {
+            if(!MediaInfo.getExecutableFile().exists()) {
                 throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
             }
         }
@@ -240,6 +258,7 @@ public class ArgsParser {
         System.out.println("    -c, --count       Counts the episodes from the EPISODES range given.");
         System.out.println("                      EPISODES can be any format that isn't pointer syntax");
         System.out.println("    -p, --player MP   Sets the media player to use. Default is \"vlc\"");
+        System.out.println("    --config CONFIG   Sets the config file to use");
         System.out.println("    --source DIR      TV source folder. You can use this option multiple times");
         System.out.println("    --library NAME    Windows 7 Library NAME will be used to determine sources");
         System.out.println("    --size            Prints the total size of the EPISODES given");

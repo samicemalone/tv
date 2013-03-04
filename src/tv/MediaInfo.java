@@ -19,24 +19,26 @@ import tv.io.LibraryManager;
  */
 public class MediaInfo {
     
-    private File executable;
+    private static File executable;
     private List<String> filePaths;
     
     public MediaInfo() {
         filePaths = new ArrayList<String>();
-        if(LibraryManager.isWindows()) {
-            executable = new File(new File(getJarPath()).getParentFile(), "MediaInfo/MediaInfo.exe");
-        } else {
-            executable = new File("/usr/bin/mediainfo");
+    }
+    
+    public static File getExecutableFile() {
+        if(executable == null) {
+            if(LibraryManager.isWindows()) {
+                executable = new File("C:/Program Files/MediaInfo/MediaInfo.exe");
+            } else {
+                executable = new File("/usr/bin/mediainfo");
+            }
         }
+        return executable;
     }
     
-    public final String getJarPath() {
-        return getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-    }
-    
-    public boolean exists() {
-        return executable.exists();
+    public static void setExecutableFile(File binary) {
+        executable = binary;
     }
     
     public void addFile(String file) {

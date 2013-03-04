@@ -27,4 +27,6 @@ public class ExitCode {
     public final static int LIBRARY_NOT_FOUND = 15;  // library not found
     public final static int SOURCE_DIR_NOT_FOUND = 16;  // source dir not found
     public final static int SEASON_RANGE_NOT_FOUND = 17; // season range not found
+    public final static int MISSING_CONFIG = 18; // config is required with --config flag
+    public final static int CONFIG_FILE_NOT_FOUND = 19; // config file not found (with --config)
 }

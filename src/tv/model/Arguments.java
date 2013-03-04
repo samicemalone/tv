@@ -36,14 +36,6 @@ public class Arguments {
     public Arguments() {
         sourceFolders = new ArrayList<String>();
     }
-
-    /**
-     * Sets the list of source folders
-     * @param folders List of folders containing the full folder path
-     */
-    public void setSourceFolders(List<String> folders) {
-        this.sourceFolders = folders;
-    }
     
     /**
      * Adds a source folder argument
