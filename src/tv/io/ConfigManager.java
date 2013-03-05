@@ -6,11 +6,13 @@ package tv.io;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import tv.ExitCode;
 import tv.MediaInfo;
 import tv.exception.InvalidArgumentException;
+import tv.exception.ParseException;
 import tv.model.Arguments;
 import tv.model.Config;
 
@@ -27,7 +29,7 @@ public class ConfigManager {
      * @param args Arguments
      * @throws InvalidArgumentException if windows 7 library name isn't valid
      */
-    public static void mergeArguments(Config config, Arguments args) throws InvalidArgumentException {
+    public static void mergeArguments(Config config, Arguments args) throws InvalidArgumentException, ParseException {
         if(config == null) {
             config = parseConfig(getDefaultConfigFile());
         }
@@ -39,6 +41,9 @@ public class ConfigManager {
                     throw new InvalidArgumentException("Windows 7 Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
                 }
             }
+        }
+        if(config.getTVDBFile() != null) {
+            TVDBManager.setTVDBFile(new File(config.getTVDBFile()));
         }
         if(config.getMediainfoBinary() != null) {
             MediaInfo.setExecutableFile(new File(config.getMediainfoBinary()));
@@ -68,17 +73,26 @@ public class ConfigManager {
      * @param configFile Config File
      * @return Config
      */
-    public static Config parseConfig(File configFile) {
+    public static Config parseConfig(File configFile) throws ParseException {
         Config c = new Config();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(configFile));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(configFile), "UTF8"));
             String line;
+            boolean firstLine = true;
             while((line = br.readLine()) != null) {
+                if(firstLine) {
+                    if(line.startsWith("\uFEFF")) { // remove UTF8 BOM
+                        line = line.substring(1);
+                    }
+                    firstLine = false;
+                }
                 parseLine(c, line);
             }
             br.close();
         } catch(IOException e) {
             
+        } catch(ParseException e) {
+            throw e;
         }
         return c;
     }
@@ -89,13 +103,21 @@ public class ConfigManager {
      * @param c Config
      * @param line Line of Config File
      */
-    private static void parseLine(Config c, String line) {
+    private static void parseLine(Config c, String line) throws ParseException {
         if(line.isEmpty() || line.charAt(0) == '#') {
             return;
         }
-        int equalsIndex = line.indexOf('=');
-        String key = line.substring(0, equalsIndex);
-        String value = line.substring(equalsIndex + 1);
+        String key, value;
+        try {
+            int equalsIndex = line.indexOf('=');
+            key = line.substring(0, equalsIndex);
+            value = line.substring(equalsIndex + 1);
+        } catch(IndexOutOfBoundsException ex) {
+            throw new ParseException("Unable to parse the line " + line, ExitCode.CONFIG_PARSE_ERROR);
+        }
+        if(key.equals("TVDB_FILE")) {
+            c.setTVDBFile(value);
+        }
         if(key.equals("SOURCE")) {
             c.addSourceFolder(value);
         }

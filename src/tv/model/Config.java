@@ -17,6 +17,7 @@ public class Config {
     private List<String> sourceDirs;
     private String libraryName;
     private String mediainfoBinary;
+    private String tvdbFile;
     
     public Config() {
         sourceDirs = new ArrayList<String>();
@@ -52,6 +53,14 @@ public class Config {
 
     public void setMediainfoBinary(String mediainfoBinary) {
         this.mediainfoBinary = mediainfoBinary;
+    }
+
+    public String getTVDBFile() {
+        return tvdbFile;
+    }
+
+    public void setTVDBFile(String tvdbFile) {
+        this.tvdbFile = tvdbFile;
     }
     
 }

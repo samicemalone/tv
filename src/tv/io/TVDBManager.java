@@ -25,17 +25,34 @@ public class TVDBManager extends CSV_IO {
     private boolean isReadOnlyUser;
     
     private final static int CSV_COLUMNS = 4;
+    private static File TVDB_FILE = null;
     
     public TVDBManager() {
         super(getTVDBFile());
     }
     
+    /**
+     * Gets the TVDB File. The default will be used and returned if
+     * no TVDB File is already set.
+     * @return 
+     */
     public static File getTVDBFile() {
-        if(LibraryManager.isWindows()) {
-            return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.csv");
-        } else {
-            return new File(System.getProperty("user.home") + "/.tv/tvdb.csv");
+        if(TVDB_FILE == null) {
+            if(LibraryManager.isWindows()) {
+                TVDB_FILE = new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.csv");
+            } else {
+                TVDB_FILE = new File(System.getProperty("user.home") + "/.tv/tvdb.csv");
+            }
         }
+        return TVDB_FILE;
+    }
+    
+    /**
+     * Sets the File to be used for the TVDB
+     * @param TVDB 
+     */
+    public static void setTVDBFile(File TVDB) {
+        TVDB_FILE = TVDB;
     }
     
     /**

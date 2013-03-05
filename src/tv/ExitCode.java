@@ -29,4 +29,5 @@ public class ExitCode {
     public final static int SEASON_RANGE_NOT_FOUND = 17; // season range not found
     public final static int MISSING_CONFIG = 18; // config is required with --config flag
     public final static int CONFIG_FILE_NOT_FOUND = 19; // config file not found (with --config)
+    public final static int CONFIG_PARSE_ERROR = 20; // config file could not be parsed
 }
