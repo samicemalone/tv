@@ -21,7 +21,7 @@ public class Arguments {
     private String EPISODES;
     private String SHOW;
     private String FILE = "";
-    private String PLAYER = "";
+    private PlayerInfo PLAYER = new PlayerInfo();
     private List<String> sourceFolders = null;
     private boolean isSetOnly = false;
     private boolean isIgnoreSet = false;
@@ -264,18 +264,18 @@ public class Arguments {
     }
     
     /**
-     * Gets the media player string e.g. vlc, omxplayer
-     * @return media player string
+     * Gets the media player information i.e. type, exe, args
+     * @return media player information
      */
-    public String getPlayer() {
+    public PlayerInfo getPlayerInfo() {
         return PLAYER;
     }
     
     /**
-     * Sets the media player e.g. vlc, omxplayer
-     * @param player 
+     * Sets the media player information
+     * @param player media player information
      */
-    public void setPlayer(String player) {
+    public void setPlayerInfo(PlayerInfo player) {
         PLAYER = player;
     }
 

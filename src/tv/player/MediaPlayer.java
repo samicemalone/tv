@@ -13,6 +13,9 @@ import java.util.Arrays;
  */
 public abstract class MediaPlayer {
     
+    protected File EXECUTABLE;
+    protected String[] ARGUMENTS;
+    
     /**
      * Plays the given file list in the media player
      * @param list File List
@@ -26,10 +29,36 @@ public abstract class MediaPlayer {
     public abstract void enqueue(File[] list);
     
     /**
-     * Gets the path the to the media player executable
-     * @return 
+     * Gets the media player executable file
+     * @return Media Player Executable
      */
-    public abstract String getExecutablePath();
+    public File getExecutableFile() {
+        return EXECUTABLE;
+    }
+    
+    /**
+     * Sets the media player executable file
+     * @param binary 
+     */
+    public void setExecutableFile(File binary) {
+        EXECUTABLE = binary;
+    }
+    
+    /**
+     * Gets the arguments to be sent the to the media player executable
+     * @return Arguments or null if none set
+     */
+    public String[] getArguments() {
+        return ARGUMENTS;
+    }
+    
+    /**
+     * Sets the arguments to be sent to the media player executable
+     * @param args Arguments 
+     */
+    public void setArguments(String[] args) {
+        ARGUMENTS = args;
+    }
     
     /**
      * Gets a formatted path from an existing file path.
@@ -55,7 +84,7 @@ public abstract class MediaPlayer {
             offset = args.length + 1;
         }
         String[] command = new String[list.length + offset];
-        command[0] = getExecutablePath();
+        command[0] = getExecutableFile().getAbsolutePath();
         if(args.length > 0) {
             System.arraycopy(args, 0, command, 1, args.length);
         }

@@ -27,11 +27,6 @@ public class DummyPlayer extends MediaPlayer {
     }
 
     @Override
-    public String getExecutablePath() {
-        return "/not/used";
-    }
-
-    @Override
     protected String getFormattedPath(String fullPath) {
         return "/not/used";
     }

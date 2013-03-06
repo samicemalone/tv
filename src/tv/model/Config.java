@@ -14,6 +14,8 @@ import java.util.List;
 public class Config {
         
     private String player;
+    private String playerExecutable;
+    private List<String> playerArguments;
     private List<String> sourceDirs;
     private String libraryName;
     private String mediainfoBinary;
@@ -21,6 +23,7 @@ public class Config {
     
     public Config() {
         sourceDirs = new ArrayList<String>();
+        playerArguments = new ArrayList<String>();
     }
 
     public String getPlayer() {
@@ -61,6 +64,22 @@ public class Config {
 
     public void setTVDBFile(String tvdbFile) {
         this.tvdbFile = tvdbFile;
+    }
+
+    public String getPlayerExecutable() {
+        return playerExecutable;
+    }
+
+    public void setPlayerExecutable(String playerExecutable) {
+        this.playerExecutable = playerExecutable;
+    }
+
+    public String[] getPlayerArguments() {
+        return playerArguments.toArray(new String[] {});
+    }
+
+    public void addPlayerArgument(String playerArguments) {
+        this.playerArguments.add(playerArguments);
     }
     
 }

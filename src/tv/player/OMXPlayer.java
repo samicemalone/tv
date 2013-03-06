@@ -12,12 +12,15 @@ import java.io.IOException;
  * @author Ice
  */
 public class OMXPlayer extends MediaPlayer {
-    
-    private String OMX_PATH = "/home/pi/omxpipe";
+        
+    public OMXPlayer() {
+        setExecutableFile(new File("/home/pi/omxpipe"));
+        setArguments(new String[] {"-o", "hdmi"});
+    }
 
     @Override
     public void play(File[] list) {
-        String[] command = buildCommandString(list, "-o", "hdmi");
+        String[] command = buildCommandString(list, getArguments());
         try {
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
@@ -29,11 +32,6 @@ public class OMXPlayer extends MediaPlayer {
     public void enqueue(File[] list) {
         System.err.println("OMXPlayer does not support enqueuing files");
         //play(new File[] { list[0] });
-    }
-
-    @Override
-    public String getExecutablePath() {
-        return OMX_PATH;
     }
 
     @Override

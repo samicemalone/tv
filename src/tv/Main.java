@@ -54,7 +54,7 @@ public class Main {
             new VLCServer().shutdown();
             return;
         }
-        ActionHandler.MEDIA_PLAYER = MediaPlayerFactory.parsePlayer(ARGS.getPlayer());
+        ActionHandler.MEDIA_PLAYER = MediaPlayerFactory.parsePlayer(ARGS.getPlayerInfo());
         MEDIA_ACTION = ARGS.getMediaAction();
         if(ARGS.isFileSet()) {
             ActionHandler.performAction(ARGS.getFile(), MEDIA_ACTION);

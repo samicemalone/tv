@@ -15,6 +15,7 @@ import tv.exception.InvalidArgumentException;
 import tv.exception.ParseException;
 import tv.model.Arguments;
 import tv.model.Config;
+import tv.model.PlayerInfo;
 
 /**
  *
@@ -48,9 +49,19 @@ public class ConfigManager {
         if(config.getMediainfoBinary() != null) {
             MediaInfo.setExecutableFile(new File(config.getMediainfoBinary()));
         }
-        if(config.getPlayer() != null) {
-            args.setPlayer(config.getPlayer());
+        PlayerInfo p = new PlayerInfo();
+        if(args.getPlayerInfo().getPlayer() == null && config.getPlayer() != null) {
+            p.setPlayer(config.getPlayer());
+        } else {
+            p.setPlayer(args.getPlayerInfo().getPlayer());
         }
+        if(config.getPlayerExecutable() != null) {
+            p.setPlayerExecutable(config.getPlayerExecutable());
+        }
+        if(config.getPlayerArguments() != null && config.getPlayerArguments().length > 0) {
+            p.setPlayerArguments(config.getPlayerArguments());
+        }
+        args.setPlayerInfo(p);
         if(config.getSourceFolders() != null) {
             args.getSourceFolders().addAll(config.getSourceFolders());
         }
@@ -110,10 +121,13 @@ public class ConfigManager {
         String key, value;
         try {
             int equalsIndex = line.indexOf('=');
-            key = line.substring(0, equalsIndex);
-            value = line.substring(equalsIndex + 1);
+            key = line.substring(0, equalsIndex).trim();
+            value = line.substring(equalsIndex + 1).trim();
         } catch(IndexOutOfBoundsException ex) {
             throw new ParseException("Unable to parse the line " + line, ExitCode.CONFIG_PARSE_ERROR);
+        }
+        if(value.isEmpty()) {
+            value = null;
         }
         if(key.equals("TVDB_FILE")) {
             c.setTVDBFile(value);
@@ -129,6 +143,12 @@ public class ConfigManager {
         }
         if(key.equals("PLAYER")) {
             c.setPlayer(value);
+        }
+        if(key.equals("PLAYER_EXECUTABLE")) {
+            c.setPlayerExecutable(value);
+        }
+        if(key.equals("PLAYER_ARGUMENTS")) {
+            c.addPlayerArgument(value);
         }
     }
     

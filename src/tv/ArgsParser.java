@@ -141,7 +141,7 @@ public class ArgsParser {
                 continue;
             }
             if(args[i].equals("--player") || args[i].equals("-p")) {
-                arg.setPlayer(args[i+1]);
+                arg.getPlayerInfo().setPlayer(args[i+1]);
                 isArg = true;
                 continue;
             }
