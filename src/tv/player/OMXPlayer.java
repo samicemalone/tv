@@ -14,13 +14,14 @@ import java.io.IOException;
 public class OMXPlayer extends MediaPlayer {
         
     public OMXPlayer() {
-        setExecutableFile(new File("/home/pi/omxpipe"));
+        setExecutableFile(new File("/usr/local/bin/omxpipe"));
         setArguments(new String[] {"-o", "hdmi"});
     }
 
     @Override
     public void play(File[] list) {
-        String[] command = buildCommandString(list, getArguments());
+        // can only play one file at a time
+        String[] command = buildCommandString(new File[] { list[0] }, getArguments());
         try {
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {

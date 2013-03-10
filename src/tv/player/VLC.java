@@ -4,7 +4,6 @@
  */
 package tv.player;
 
-import com.sun.jndi.toolkit.url.Uri;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
