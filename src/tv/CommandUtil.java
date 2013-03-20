@@ -5,6 +5,7 @@
 package tv;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -36,6 +37,22 @@ public class CommandUtil {
             return path.concat(".exe");
         }
         return path;
+    }
+    
+    /**
+     * Returns the canonical pathname string of this abstract pathname of f.
+     * If there is an error due to filesystem queries, the absolute path will
+     * be returned instead
+     * @param f File
+     * @return canonical path of f, or absolute path if error
+     */
+    public static String getCanonicalPath(File f) {
+        try {
+            return f.getCanonicalPath();
+        } catch(IOException e) {
+            
+        }
+        return f.getAbsolutePath();
     }
     
     /**

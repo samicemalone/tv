@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import tv.CommandUtil;
 import tv.MediaInfo;
 import tv.MediaUtil;
 import tv.filter.ExtensionFilter;
@@ -108,7 +109,7 @@ public class ActionHandler {
                 list(list[i].listFiles(filter));
             } else {
                 if(isListPath) {
-                    System.out.println(list[i].getAbsolutePath());
+                    System.out.println(CommandUtil.getCanonicalPath(list[i]));
                 } else {
                     System.out.println(list[i].getName());
                 }

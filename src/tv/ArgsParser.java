@@ -172,6 +172,9 @@ public class ArgsParser {
             }
         }
         ConfigManager.mergeArguments(config, arg);
+        if(arg.isListPathSet()) {
+            arg.setMediaActionFlag(Action.LISTPATH);
+        }
         if(arg.isFileSet()) {
             return arg;
         }
@@ -192,9 +195,6 @@ public class ArgsParser {
         if(arg.isRandomSet()) {
             arg.setMediaActionFlag(Action.RANDOM);
             ActionHandler.RANDOM_COUNT = arg.getRandomCount();
-        }
-        if(arg.isListPathSet()) {
-            arg.setMediaActionFlag(Action.LISTPATH);
         }
         return arg;
     }
