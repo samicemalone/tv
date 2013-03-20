@@ -14,10 +14,9 @@ import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
+import tv.CommandUtil;
 import tv.io.TVDBManager;
 import tv.model.Episode;
 
@@ -25,7 +24,7 @@ import tv.model.Episode;
  *
  * @author Ice
  */
-public class VLCServer {
+public class TVServer {
     
     private final static int SERVER_PORT = 5768;
     private boolean isRunning = true;
@@ -33,7 +32,7 @@ public class VLCServer {
     private TVDBManager io;
     private ServerSocket serverSocket;
     
-    public VLCServer() {
+    public TVServer() {
         io = new TVDBManager();
     }
     
@@ -74,20 +73,38 @@ public class VLCServer {
             this.client = client;
         }
         
-        public void csvStringToArray(ArrayList<String> matchList, String command) {
-            Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-            Matcher regexMatcher = regex.matcher(command);
-            while (regexMatcher.find()) {
-                if (regexMatcher.group(1) != null) {
-                    // Add double-quoted string without the quotes
-                    matchList.add(regexMatcher.group(1));
-                } else if (regexMatcher.group(2) != null) {
-                    // Add single-quoted string without the quotes
-                    matchList.add(regexMatcher.group(2));
-                } else {
-                    // Add unquoted word
-                    matchList.add(regexMatcher.group());
+        /**
+         * Spawns a new process to execute the tv commands in cmdArray.
+         * The new process has its input stream redirected into the given
+         * PrintWriter (stdout).
+         * @param cmdArray Command Array containing path to java, jar, tv args
+         * @param stdout PrintWriter to output the redirected input from the
+         * new process
+         */
+        private void spawn(String[] cmdArray, PrintWriter stdout) {
+            try {
+                BufferedReader br = null;
+                ProcessBuilder pb = new ProcessBuilder(cmdArray);
+                pb.redirectErrorStream(true);
+                Process p = pb.start();
+                try {
+                    br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String line;
+                    boolean hasOutput = false;
+                    while((line = br.readLine()) != null) {
+                        hasOutput = true;
+                        stdout.println(line);
+                    }
+                    if(p.waitFor() == 0 && !hasOutput) {
+                        stdout.println("OK");
+                    }
+                } catch (InterruptedException ex) {
+
+                } finally {
+                    br.close();
                 }
+            } catch (IOException e) {
+                
             }
         }
 
@@ -101,35 +118,12 @@ public class VLCServer {
                     isRunning = false;
                     serverSocket.close();
                 }
-                if(command.startsWith("vlc")) {
-                    ArrayList<String> matchList = new ArrayList<String>();
-                    csvStringToArray(matchList, command);
-                    String[] args = new String[matchList.size() + 2]; //size - 1 + 3
-                    args[0] = "C:\\Program Files (x86)\\Java\\jdk1.6.0_16\\bin\\java.exe";
-                    args[1] = "-jar";
-                    args[2] = "J:\\Downloads\\Dev\\Java\\tv\\dist\\tv.jar";
-                    for(int i = 1; i < matchList.size(); i++) {
-                        args[i+2] = matchList.get(i);
-                    }
-                    BufferedReader br = null;
-                    ProcessBuilder pb = new ProcessBuilder(args);
-                    pb.redirectErrorStream(true);
-                    Process p = pb.start();
-                    try {
-                        br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                        String line;
-                        boolean hasOutput = false;
-                        while((line = br.readLine()) != null) {
-                            hasOutput = true;
-                            out.println(line);
-                        }
-                        if(p.waitFor() == 0 && !hasOutput) {
-                            out.println("OK");
-                        }
-                    } catch (InterruptedException ex) {
-
-                    } finally {
-                        br.close();
+                if(command.startsWith("tv")) {
+                    String[] cmdArray = CommandUtil.buildJavaCommandString(CommandUtil.dequoteArgsToList(command));
+                    if(cmdArray == null) {
+                        out.println("Unable to determine location of Jar file");
+                    } else {
+                        spawn(cmdArray, out);
                     }
                 }
                 if(command.startsWith("get_show_name")) {
@@ -153,7 +147,7 @@ public class VLCServer {
                 out.close();
                 client.close();
             } catch (IOException ex) {
-                
+
             }
         }
         

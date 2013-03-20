@@ -15,7 +15,7 @@ import tv.model.Arguments;
 import tv.model.Episode;
 import tv.model.Season;
 import tv.player.MediaPlayerFactory;
-import tv.server.VLCServer;
+import tv.server.TVServer;
 
 /**
  *
@@ -47,11 +47,11 @@ public class Main {
             System.exit(ex.getExitCode());
         }
         if(ARGS.isServerSet()) {
-            new VLCServer().start();
+            new TVServer().start();
             return;
         }
         if(ARGS.isShutDownSet()) {
-            new VLCServer().shutdown();
+            new TVServer().shutdown();
             return;
         }
         ActionHandler.MEDIA_PLAYER = MediaPlayerFactory.parsePlayer(ARGS.getPlayerInfo());
