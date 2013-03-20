@@ -6,7 +6,7 @@ SYNOPSIS
    tv TVSHOW EPISODES [ACTION] [-hsi] [--source DIR]... [--library NAME]
       [-r [NO]] [-p PLAYER] [-u USER] [--config CONFIG]
    tv -f FILE [ACTION] [-p PLAYER] [--config CONFIG]
-   tv -d [-p PLAYER] [--config CONFIG]
+   tv -d [--source DIR]... [--library NAME] [-p PLAYER] [--config CONFIG]
    tv -k 
 
 DESCRIPTION
