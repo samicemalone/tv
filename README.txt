@@ -3,9 +3,11 @@ NAME
         ranges of episodes/seasons in a media player.
 
 SYNOPSIS
-   tv TVSHOW EPISODES [--source DIR]... [--library NAME] [-hlqsic] [--list-path]
-      [--size] [--length] [-r [NO]] [-p PLAYER] [-u USER] [--config CONFIG]
-   tv -f FILE
+   tv TVSHOW EPISODES [ACTION] [-hsi] [--source DIR]... [--library NAME]
+      [-r [NO]] [-p PLAYER] [-u USER] [--config CONFIG]
+   tv -f FILE [ACTION] [-p PLAYER] [--config CONFIG]
+   tv -d [-p PLAYER] [--config CONFIG]
+   tv -k 
 
 DESCRIPTION
    "tv" is a utility that allows you keep track of the position that you are
@@ -42,6 +44,25 @@ OPTIONS
       *  latest              Latest episode
       *  prev, cur, next     Episode based on pointer
          prev-, cur-, next-  Remaining episodes in the season from given pointer
+   ACTION
+      The default action is to play immediately. The following actions are also
+      also available:
+         -q, --enqueue
+            Enqueues file(s) in the media player instead of playing immediately.
+         -l, --list
+            Lists the file name of the episode(s) matched by EPISODES or FILE.
+         --list-path
+            List the full file path(s) of the episode(s) matched by EPISODES or 
+            FILE.
+         -c, --count
+            Counts the number of episodes from the EPISODES range given.
+         --length
+            This option requires the mediainfo program to be installed. It adds
+            up the length of each episode matched in EPISODES or FILE and 
+            outputs the total in the format hh:mm:ss
+         --size
+            Prints the total size of the episodes matched from the EPISODES
+            string or FILE.
    PLAYER
       The following media players are currently supported:
          vlc (default)
@@ -51,12 +72,9 @@ OPTIONS
       Sets CONFIG as the configuration file to use. For the default 
       configuration file see the FILES section.
 
-   -c, --count
-      Counts the number of episodes from the EPISODES range given.
-
    -d, --daemon
-      This is a very experimental feature. Starts in daemon mode and listens on
-      port 5678 for commands.
+      This is an experimental feature. Starts in daemon mode and listens on
+      port 5768 for commands.
 
    -f FILE, --file FILE
       Plays FILE from the filesystem. Can be used with -q to enqueue instead of
@@ -72,12 +90,8 @@ OPTIONS
       stay the same.
 
    -k, --kill
-      This is a very experimental feature. When a tv daemon is already running,
+      This is an experimental feature. When a tv daemon is already running,
       this flag will shut the daemon down.
-
-   --length
-      This option requires the mediainfo program to be installed. It adds up the
-      length of each episode and outputs the total in the format hh:mm:ss
 
    --library NAME
       This option only works on Windows 7. It adds each directory that library
@@ -85,18 +99,9 @@ OPTIONS
       this option, then the --source argument doesn't need to be set although it
       can still be used in conjunction.
 
-   -l, --list
-      Lists the file name of the episodes matched by EPISODES.
-
-   --list-path
-      List the full file paths of the episodes matched by EPISODES.
-
    -p PLAYER, --player PLAYER
       Sets the media player to use. The default is "vlc". The list of available
       media players is towards the start of the DESCRIPTION section.
-
-   -q, --enqueue
-      Enqueues files in the media player instead of playing immediately.
 
    -r [NO], --random [NO]
       Selects random episode(s) from the EPISODES range given. If NO is omitted,
