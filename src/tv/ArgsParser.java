@@ -49,7 +49,7 @@ public class ArgsParser {
             }
             if(args[i].equals("-d") || args[i].equals("--daemon")) {
                 arg.setServer(true);
-                return arg;
+                continue;
             }
             if(args[i].equals("-k") || args[i].equals("--kill")) {
                 arg.setShutDown(true);
@@ -181,6 +181,9 @@ public class ArgsParser {
         if(arg.getSourceFolders().isEmpty()) {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
+        if(arg.isServerSet()) {
+            return arg;
+        }
         if(TVSHOW_INDEX < 0) {
             throw new MissingArgumentException("The SHOW input is required", ExitCode.SHOW_INPUT_REQUIRED);
         }
@@ -207,7 +210,7 @@ public class ArgsParser {
      * cannot be found. if length is set, and mediainfo binary cannot be found
      */
     public static void validate(Arguments arg) throws FileNotFoundException {
-        if(arg.isServerSet() || arg.isShutDownSet()) {
+        if(arg.isShutDownSet()) {
             return;
         }
         if(arg.getMediaAction() == Action.LENGTH) {
@@ -227,6 +230,9 @@ public class ArgsParser {
                 throw new FileNotFoundException("The source you have entered does not exist", ExitCode.SOURCE_DIR_NOT_FOUND);
             }
         }
+        if(arg.isServerSet()) {
+            return;
+        }
         if(!TVScan.showExists(arg.getShow())) {
             throw new FileNotFoundException("Unable to find show: " + arg.getShow(), ExitCode.SHOW_NOT_FOUND);
         }
@@ -236,13 +242,12 @@ public class ArgsParser {
      * Prints the help message to stdout
      */
     public static void printHelp() {
-        System.out.println("Usage: tv TVSHOW EPISODES (--source DIR)... [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
-        System.out.println("       tv TVSHOW EPISODES --library NAME [-hlqsic] [-r [NO]] [-p MP] [-u USER]");
-        System.out.println("       tv -f FILE");
+        System.out.println("Usage: tv TVSHOW EPISODES [ACTION] [-hsi] [--source DIR]... [--library NAME]");
+        System.out.println("          [-r [NO]] [-p MP] [-u USER] [--config CONFIG]");
+        System.out.println("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]");
+        System.out.println("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]");
+        System.out.println("       tv -k");
         System.out.println();
-        System.out.println("    -q, --enqueue     Enqueue files. Default is to play immediately.");
-        System.out.println("    -l, --list        List episodes matched.");
-        System.out.println("    --list-path       Lists the full paths of the episodes matched.");
         System.out.println("    -u, --user USER   To be used when EPISODES is either prev, cur, next.");
         System.out.println("                      To set your episode pointer you have to play a single");
         System.out.println("                      episode first.");
@@ -255,17 +260,25 @@ public class ArgsParser {
         System.out.println("                      If NO is \"all\" then all EPISODES will be randomized.");
         System.out.println("                      Otherwise NO EPISODES will be returned randomized.");
         System.out.println("                      EPISODES can be any format that isn't pointer syntax");
-        System.out.println("    -c, --count       Counts the episodes from the EPISODES range given.");
-        System.out.println("                      EPISODES can be any format that isn't pointer syntax");
         System.out.println("    -p, --player MP   Sets the media player to use. Default is \"vlc\"");
         System.out.println("    --config CONFIG   Sets the config file to use");
         System.out.println("    --source DIR      TV source folder. You can use this option multiple times");
         System.out.println("    --library NAME    Windows 7 Library NAME will be used to determine sources");
-        System.out.println("    --size            Prints the total size of the EPISODES given");
         System.out.println("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue");
         System.out.println("    -d, --daemon      Listens for requests on port 5768");
         System.out.println("    -k, --kill        Kills the listening daemon");
         System.out.println("    -h, --help        This help message will be outputted.");
+        System.out.println();
+        System.out.println("ACTION can be one of the following options:");
+        System.out.println("    -q, --enqueue     Enqueue files. Default is to play immediately.");
+        System.out.println("    -l, --list        List episodes matched.");
+        System.out.println("    --list-path       Lists the full paths of the episodes matched.");
+        System.out.println("    -c, --count       Counts the episodes from the EPISODES range given.");
+        System.out.println("                      EPISODES can be any format that isn't pointer syntax");
+        System.out.println("    --size            Prints the total size of the EPISODES/FILE given");
+        System.out.println("    --length          This option requires mediainfo to be installed. It");
+        System.out.println("                      adds up the length of each episode matched in EPISODES");
+        System.out.println("                      or FILE and outputs the total in the format hh:mm:ss");
         System.out.println();
         System.out.println("MP can be one of the following supported media players:");
         System.out.println("  vlc");
@@ -286,20 +299,20 @@ public class ArgsParser {
         System.out.println();
         System.out.println("The pointer will be set whenever single epsisode format is used to play or");
         System.out.println("enqueue. You can use the ignore flag (-i) to stop the pointer being set.");
-        System.out.println("Options such as --list, --count etc.. do not modify the pointer. It is ");
-        System.out.println("recommended to create an alias to run the program to avoid entering the");
-        System.out.println("media sources every time its run. Formats above marked with an asterisk (*)");
-        System.out.println("will modify the pointer.");
+        System.out.println("Options such as --list, --count etc.. do not modify the pointer. It is");
+        System.out.println("recommended to create an alias to run the program or use a config file to");
+        System.out.println("avoid entering the media sources every time its run. Formats above marked");
+        System.out.println("with an asterisk (*) will modify the pointer.");
         System.out.println();
-        System.out.println("Examples:    tv Scrubs s01 --source 'D:\\TV'");
-        System.out.println("             tv Scrubs s01e01 --library TV");
-        System.out.println("             tv Scrubs next --source 'D:\\TV'");
-        System.out.println("             tv Scrubs prev -u USER --library Television");
-        System.out.println("             tv Scrubs s02e05- --library TV");
-        System.out.println("             tv Scrubs s02e05-s02e13 --library TV");
-        System.out.println("             tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'");
-        System.out.println("             tv Scrubs s06 -c --library TV");
-        System.out.println("             tv -f scrubs.s01e02.avi");
+        System.out.println("Examples:      tv Scrubs pilot --source 'D:\\TV'");
+        System.out.println("               tv Scrubs s01 --library TV");
+        System.out.println("               tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'");
+        System.out.println("               tv Scrubs s02e05- --config ~/.tv/tv.conf");
+        System.out.println("               tv Scrubs next --source 'D:\\TV'");
+        System.out.println("using config:  tv Scrubs prev -u testuser");
+        System.out.println("               tv Scrubs s02e05-s02e13");
+        System.out.println("               tv Scrubs s06 --count");
+        System.out.println("               tv -f scrubs.s01e02.avi");
         System.out.println();
     }
     
