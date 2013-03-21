@@ -82,8 +82,7 @@ public class TVDBManager extends CSV_IO {
         for(int i = 0; i < Main.sourceFolders.size(); i++) {
             String[] epList = new File(Main.sourceFolders.get(i)).list();
             for(int j = 0; j < epList.length; j++) {
-                wrapQuotes(sb, epList[j]);
-                sb.append(',');
+                appendCSVLine(sb, epList[j]);
             }
         }
         return sb.substring(0, sb.length()-1);

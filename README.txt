@@ -125,6 +125,16 @@ OPTIONS
       multiple users can share the same configuration and database. If omitted,
       the default user will be used (an empty string).
 
+DAEMON COMMANDS
+   The listening daemon can accept the following commands:
+      list_shows           Gets the list of shows. Double quoted, one show per
+                           line.
+      list_stored_eps      Gets the stored episodes (tvdb) in csv format. New
+                           line if none. Fields terminated by , enclosed by "
+      get_show_name FILE   Get show name of FILE. Assumes /showname/parent/FILE
+      shutdown             Shuts down the daemon
+      tv TVARGS            Run tv command with same usage as in the SYNOPSIS.
+			
 FILES
    The directory structure required for the episodes to be found is as follows:
       SOURCE/TVSHOW/Season x/

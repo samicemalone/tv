@@ -118,7 +118,7 @@ public class TVServer {
                     isRunning = false;
                     serverSocket.close();
                 }
-                if(command.startsWith("tv")) {
+                if(command.startsWith("tv ")) {
                     String[] cmdArray = CommandUtil.buildJavaCommandString(CommandUtil.dequoteArgsToList(command));
                     if(cmdArray == null) {
                         out.println("Unable to determine location of Jar file");
@@ -126,8 +126,8 @@ public class TVServer {
                         spawn(cmdArray, out);
                     }
                 }
-                if(command.startsWith("get_show_name")) {
-                    File f = new File(command.substring("get_show_name".length()+1));
+                if(command.startsWith("get_show_name ")) {
+                    File f = new File(command.substring("get_show_name ".length()));
                     if(f.getParent() != null) {
                         f = new File(f.getParent()).getParentFile();
                     }
