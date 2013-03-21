@@ -182,5 +182,12 @@ BUGS
    feels very slow. I have the hostname in my hosts file so I'm not too sure of
    the cause. This can be avoided by using the IP address instead of a hostname.
 
+COPYRIGHT
+   Copyright (c) 2013, Sam Malone. All rights reserved.
+
+LICENSING
+   The tv source code, binaries and man page are licensed under a BSD License.
+   See LICENSE for details.
+
 AUTHOR
    Sam Malone
