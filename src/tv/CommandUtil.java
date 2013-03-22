@@ -107,7 +107,7 @@ public class CommandUtil {
      * @return List of dequotes arguments from command or empty list
      */
     public static List<String> dequoteArgsToList(String command) {
-        List<String> matchList = new ArrayList();
+        List<String> matchList = new ArrayList<String>();
         Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
         Matcher regexMatcher = regex.matcher(command);
         while (regexMatcher.find()) {
