@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import tv.URI;
 import tv.io.LibraryManager;
 
 /**
@@ -82,7 +83,7 @@ public class VLC extends MediaPlayer {
 
     @Override
     protected String getFormattedPath(String fullPath) {
-        return "file:///" + fullPath.replaceAll("#", "%23").replaceAll("\\?", "%3F");
+        return "file:///" + URI.encode(fullPath);
     }
     
 }
