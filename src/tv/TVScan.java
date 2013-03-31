@@ -397,11 +397,14 @@ public class TVScan {
      * @return Season directory file or null if not found
      */
     public static File getSeasonDirectory(String show, int season) {
+        File f;
         for(int i = 0; i < Main.sourceFolders.size(); i++) {
             if(directoryExists(Main.sourceFolders.get(i), show)) {
-                File f = new File(Main.sourceFolders.get(i) + File.separator + show + File.separator + "Season " + season);
-                if(f.exists()) {
-                    return f;
+                for(String seasonPrefix : SeasonDirectoryFilter.SEASON_DIRECTORY_PREFIX) {
+                    f = new File(Main.sourceFolders.get(i) + File.separator + show + File.separator + seasonPrefix + " " + season);
+                    if(f.exists()) {
+                        return f;
+                    }
                 }
             }
         }

@@ -101,7 +101,7 @@ OPTIONS
 
    -p PLAYER, --player PLAYER
       Sets the media player to use. The default is "vlc". The list of available
-      media players is towards the start of the DESCRIPTION section.
+      media players is available under the OPTIONS section.
 
    -r [NO], --random [NO]
       Selects random episode(s) from the EPISODES range given. If NO is omitted,
@@ -137,15 +137,21 @@ DAEMON COMMANDS
 			
 FILES
    The directory structure required for the episodes to be found is as follows:
-      SOURCE/TVSHOW/Season x/
+         SOURCE/TVSHOW/Season x/
+      OR SOURCE/TVSHOW/Series x/
 
    The following files are used by tv:
       tvdb.csv
          This file stores the pointers for the TV shows. It is created as needed
          by the application.
       tv.conf
-         This is the default location of the configuration file. No config file
-         exists by default.
+         This is the default file name of the configuration file. This file does
+         not exist by default. See sample.tv.conf for usage.
+      sample.tv.conf
+         This is a sample tv configuration file. This should be renamed/copied
+         to tv.conf and edited to match your specifications. This file contains
+         comments describing each variable. You can specify the path to the
+         config file with the --config command.
 
    Default Directories
       Windows C:\ProgramData\$USER\tv\
@@ -174,13 +180,7 @@ EXAMPLES
       tv Scrubs latest --length         #Gets the length of the latest episode
       tv Scrubs s04e06 -s               #Set pointer only. Does not get played.
       tv Scrubs next- -u some_user      #Play remaining episodes in season for 
-                                        #some user
-
-BUGS
-   (Tested on windows) When using a network hostname to reference a source e.g.
-   \\server\share\TV, name resolution seems to take ~6 seconds so the program
-   feels very slow. I have the hostname in my hosts file so I'm not too sure of
-   the cause. This can be avoided by using the IP address instead of a hostname.
+                                        # some user
 
 COPYRIGHT
    Copyright (c) 2013, Sam Malone. All rights reserved.
