@@ -37,9 +37,9 @@ import java.io.FilenameFilter;
  */
 public class SeasonDirectoryFilter implements FilenameFilter {
     
-    public static final String REGEX = "Season|Series ([0-9]+)";
+    public static final String REGEX = "(?:Season|Series) ([0-9]+)";
     
-    public static final String[] SEASON_DIRECTORY_PREFIX= new String[] { "Season", "Series"};
+    public static final String[] SEASON_DIRECTORY_PREFIX = new String[] { "Season", "Series" };
     
     @Override
     public boolean accept(File dir, String name) {
