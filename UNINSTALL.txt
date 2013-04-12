@@ -1,0 +1,25 @@
+===============================================================================
+ "tv" UTILITY UNINSTALL NOTES
+===============================================================================
+
+This file describes how to uninstall "tv" from your machine.
+
+===============================================================================
+ Files
+===============================================================================
+
+The tv.jar file needs to be removed from the directory it was installed to.
+
+The program may have created a database containing the pointer to where a user
+is upto with their shows. The default location for the tvdb.csv file can be
+found in the FILES section in README.txt. This file can be removed if you do
+not wish to store it. If you have changed the path to the TV database file,
+then this file can be removed.
+
+By default, no configuration file exists. If you are using a tv.conf file
+either in its default location or in the path specified via an argument to the
+program then this file may be deleted.
+
+If you still have the original downloaded archive file, or its contents, then
+these can safely be deleted too.
+

@@ -1,0 +1,97 @@
+===============================================================================
+ "tv" UTILITY INSTALLATION NOTES
+===============================================================================
+
+This file describes the installation of "tv" on your machine.
+
+The downloaded archive should contain the following files:
+
+    dist/
+      tv.jar                      The application jar file
+    etc/
+      bash_completion.d/
+        tv                        Example BASH completion file
+    INSTALL.txt                   This file
+    LICENSE                       Licences the application is released under
+    NOTICE                        Notices about copyright and licensing
+    README.txt                    Information about how to use the program
+    sample.tv.conf                Sample configuration file
+
+If you have downloaded the archive containing the source, there will also be an
+"src" directory.
+
+===============================================================================
+ 1. Requirements
+===============================================================================
+
+This application was written in Java. To run the application, a Java virtual
+machine has to be installed. This can be provided via Oracle's Java Runtime 
+Environment (JRE). The minimum JRE version that this application supports is
+1.6. See: http://java.com/en/download/index.jsp
+
+===============================================================================
+ 2. Installation
+===============================================================================
+
+You can move the dist/tv.jar file to any directory you wish to store and run 
+the program.
+
+OPTIONAL STEPS
+---------------
+
+[ Configuration ]
+
+There is a sample configuration file (sample.tv.conf) that should also be
+copied if you wish to use the program with alternative defaults. You will have
+to edit the configuration file before use. The program, by default, looks for 
+the configuration file in the following place:
+
+      Linux default:     $HOME/.tv/tv.conf
+    Windows default:     C:\ProgramData\$USER\tv\tv.conf
+
+You can change the path to the config file via arguments given to the program.
+For more information see the --config argument in README.txt
+
+[ BASH Completion ]
+
+If you are using BASH shell and the bash-completion package, it may be helpful
+to use the /etc/bash_completion.d/tv file as a base for completion. By
+default, the _gen_show() function loads show names from a flat file, one show
+per line. If you want to use this method to get show names then just change
+the path to the file. Alternatively, you may wish to populate the list of shows
+dynamically via an array of directory names from some filesystems.
+
+===============================================================================
+ 3. Running the program
+===============================================================================
+
+Assuming the java executable is in your $PATH variable, you run the program as
+follows:
+
+    java -jar /path/to/tv.jar TVARGS
+
+Where TVARGS are the arguments to be given to the program. For more 
+information about the arguments, program usage, and examples, see README.txt.
+
+It is recommended to create an alias to the program to avoid having to type
+repeated arguments. For example, when using BASH, add a line similar to one of
+the following examples, to ~/.bash_aliases
+
+    alias tv='java -jar /path/to/tv.jar'
+    alias tv='java -jar /path/to/tv.jar --source /path/to/tv/folder/'
+
+This allows you to run the program by its alias e.g.
+
+    tv Scrubs pilot
+
+===============================================================================
+ 4. Cleanup
+===============================================================================
+
+Since the only file required for running the program is tv.jar, the original
+downloaded archive and the remaining contents may be deleted if no longer
+desired.
+
+For information on uninstalling the program, see UNINSTALL.txt.
+
+Enjoy!
