@@ -79,6 +79,10 @@ public class ArgsParser {
                 arg.setShutDown(true);
                 return arg;
             }
+            if(args[i].equals("-v") || args[i].equals("--version")) {
+                arg.setVersion(true);
+                return arg;
+            }
             if(args[i].equals("-r") || args[i].equals("--random")) {
                 if(i + 1 < args.length) {
                     // -r is optional. check if next argument is a value or another arg
@@ -234,7 +238,7 @@ public class ArgsParser {
      * cannot be found. if length is set, and mediainfo binary cannot be found
      */
     public static void validate(Arguments arg) throws FileNotFoundException {
-        if(arg.isShutDownSet()) {
+        if(arg.isShutDownSet() || arg.isVersionSet()) {
             return;
         }
         if(arg.getMediaAction() == Action.LENGTH) {
@@ -263,81 +267,83 @@ public class ArgsParser {
     }
     
     /**
-     * Prints the help message to stdout
+     * Gets the help message
      */
-    public static void printHelp() {
-        System.out.println("Usage: tv TVSHOW EPISODES [ACTION] [-hsi] [--source DIR]... [--library NAME]");
-        System.out.println("          [-r [NO]] [-p MP] [-u USER] [--config CONFIG]");
-        System.out.println("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]");
-        System.out.println("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]");
-        System.out.println("       tv -k");
-        System.out.println();
-        System.out.println("    -u, --user USER   To be used when EPISODES is either prev, cur, next.");
-        System.out.println("                      To set your episode pointer you have to play a single");
-        System.out.println("                      episode first.");
-        System.out.println("    -s, --set         Set the current episode. EPISODES can be prev, cur, next");
-        System.out.println("                      or single episode format.");
-        System.out.println("    -i, --ignore      Do not remember the episode. EPISODES can be prev, cur,");
-        System.out.println("                      next, pilot, latest or single episode format.");
-        System.out.println("    -r, --random [NO] Selects random episode(s) from the EPISODES range given.");
-        System.out.println("                      If NO is omitted, 1 random episode will be returned.");
-        System.out.println("                      If NO is \"all\" then all EPISODES will be randomized.");
-        System.out.println("                      Otherwise NO EPISODES will be returned randomized.");
-        System.out.println("                      EPISODES can be any format that isn't pointer syntax");
-        System.out.println("    -p, --player MP   Sets the media player to use. Default is \"vlc\"");
-        System.out.println("    --config CONFIG   Sets the config file to use");
-        System.out.println("    --source DIR      TV source folder. You can use this option multiple times");
-        System.out.println("    --library NAME    Windows 7 Library NAME will be used to determine sources");
-        System.out.println("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue");
-        System.out.println("    -d, --daemon      Listens for requests on port 5768");
-        System.out.println("    -k, --kill        Kills the listening daemon");
-        System.out.println("    -h, --help        This help message will be outputted.");
-        System.out.println();
-        System.out.println("ACTION can be one of the following options:");
-        System.out.println("    -q, --enqueue     Enqueue files. Default is to play immediately.");
-        System.out.println("    -l, --list        List episodes matched.");
-        System.out.println("    --list-path       Lists the full paths of the episodes matched.");
-        System.out.println("    -c, --count       Counts the episodes from the EPISODES range given.");
-        System.out.println("                      EPISODES can be any format that isn't pointer syntax");
-        System.out.println("    --size            Prints the total size of the EPISODES/FILE given");
-        System.out.println("    --length          This option requires mediainfo to be installed. It");
-        System.out.println("                      adds up the length of each episode matched in EPISODES");
-        System.out.println("                      or FILE and outputs the total in the format hh:mm:ss");
-        System.out.println();
-        System.out.println("MP can be one of the following supported media players:");
-        System.out.println("  vlc");
-        System.out.println("  omxplayer");
-        System.out.println();
-        System.out.println("EPISODES can use the following formats:");
-        System.out.println(" *  s01e02              Single episode");
-        System.out.println("    s02e12-s03e03       Episode range");
-        System.out.println("    s01e04-             Remaining episodes in the season from given episode");
-        System.out.println("    s01                 Whole season");
-        System.out.println("    s02-s04             Season range");
-        System.out.println("    s02-                All seasons from the given season");
-        System.out.println("    all                 Every episode");
-        System.out.println(" *  pilot               Pilot episode. Alias for s01e01");
-        System.out.println(" *  latest              Latest episode");
-        System.out.println(" *  prev, cur, next     Episode based on pointer");
-        System.out.println("    prev-, cur-, next-  Remaining episodes in the season from given pointer");
-        System.out.println();
-        System.out.println("The pointer will be set whenever single epsisode format is used to play or");
-        System.out.println("enqueue. You can use the ignore flag (-i) to stop the pointer being set.");
-        System.out.println("Options such as --list, --count etc.. do not modify the pointer. It is");
-        System.out.println("recommended to create an alias to run the program or use a config file to");
-        System.out.println("avoid entering the media sources every time its run. Formats above marked");
-        System.out.println("with an asterisk (*) will modify the pointer.");
-        System.out.println();
-        System.out.println("Examples:      tv Scrubs pilot --source 'D:\\TV'");
-        System.out.println("               tv Scrubs s01 --library TV");
-        System.out.println("               tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'");
-        System.out.println("               tv Scrubs s02e05- --config ~/.tv/tv.conf");
-        System.out.println("               tv Scrubs next --source 'D:\\TV'");
-        System.out.println("using config:  tv Scrubs prev -u testuser");
-        System.out.println("               tv Scrubs s02e05-s02e13");
-        System.out.println("               tv Scrubs s06 --count");
-        System.out.println("               tv -f scrubs.s01e02.avi");
-        System.out.println();
+    public static String getHelpMessage() {
+        StringBuilder sb = new StringBuilder(4000);
+        sb.append("Usage: tv TVSHOW EPISODES [ACTION] [-hvsi] [--source DIR]... [--library NAME]\n");
+        sb.append("          [-r [NO]] [-p MP] [-u USER] [--config CONFIG]\n");
+        sb.append("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]\n");
+        sb.append("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]\n");
+        sb.append("       tv -k\n");
+        sb.append('\n');
+        sb.append("    -u, --user USER   To be used when EPISODES is either prev, cur, next.\n");
+        sb.append("                      To set your episode pointer you have to play a single\n");
+        sb.append("                      episode first.\n");
+        sb.append("    -s, --set         Set the current episode. EPISODES can be prev, cur, next\n");
+        sb.append("                      or single episode format.\n");
+        sb.append("    -i, --ignore      Do not remember the episode. EPISODES can be prev, cur,\n");
+        sb.append("                      next, pilot, latest or single episode format.\n");
+        sb.append("    -r, --random [NO] Selects random episode(s) from the EPISODES range given.\n");
+        sb.append("                      If NO is omitted, 1 random episode will be returned.\n");
+        sb.append("                      If NO is \"all\" then all EPISODES will be randomized.\n");
+        sb.append("                      Otherwise NO EPISODES will be returned randomized.\n");
+        sb.append("                      EPISODES can be any format that isn't pointer syntax\n");
+        sb.append("    -p, --player MP   Sets the media player to use. Default is \"vlc\"\n");
+        sb.append("    --config CONFIG   Sets the config file to use\n");
+        sb.append("    --source DIR      TV source folder. You can use this option multiple times\n");
+        sb.append("    --library NAME    Windows 7 Library NAME will be used to determine sources\n");
+        sb.append("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue\n");
+        sb.append("    -d, --daemon      Listens for requests on port 5768\n");
+        sb.append("    -k, --kill        Kills the listening daemon\n");
+        sb.append("    -h, --help        This help message will be printed then exit.\n");
+        sb.append("    -v, --version     This version will be printed then exit.\n");
+        sb.append('\n');
+        sb.append("ACTION can be one of the following options:\n");
+        sb.append("    -q, --enqueue     Enqueue files. Default is to play immediately.\n");
+        sb.append("    -l, --list        List episodes matched.\n");
+        sb.append("    --list-path       Lists the full paths of the episodes matched.\n");
+        sb.append("    -c, --count       Counts the episodes from the EPISODES range given.\n");
+        sb.append("                      EPISODES can be any format that isn't pointer syntax\n");
+        sb.append("    --size            Prints the total size of the EPISODES/FILE given\n");
+        sb.append("    --length          This option requires mediainfo to be installed. It\n");
+        sb.append("                      adds up the length of each episode matched in EPISODES\n");
+        sb.append("                      or FILE and outputs the total in the format hh:mm:ss\n");
+        sb.append('\n');
+        sb.append("MP can be one of the following supported media players:\n");
+        sb.append("  vlc\n");
+        sb.append("  omxplayer\n");
+        sb.append('\n');
+        sb.append("EPISODES can use the following formats:\n");
+        sb.append(" *  s01e02              Single episode\n");
+        sb.append("    s02e12-s03e03       Episode range\n");
+        sb.append("    s01e04-             Remaining episodes in the season from given episode\n");
+        sb.append("    s01                 Whole season\n");
+        sb.append("    s02-s04             Season range\n");
+        sb.append("    s02-                All seasons from the given season\n");
+        sb.append("    all                 Every episode\n");
+        sb.append(" *  pilot               Pilot episode. Alias for s01e01\n");
+        sb.append(" *  latest              Latest episode\n");
+        sb.append(" *  prev, cur, next     Episode based on pointer\n");
+        sb.append("    prev-, cur-, next-  Remaining episodes in the season from given pointer\n");
+        sb.append('\n');
+        sb.append("The pointer will be set whenever single epsisode format is used to play or\n");
+        sb.append("enqueue. You can use the ignore flag (-i) to stop the pointer being set.\n");
+        sb.append("Options such as --list, --count etc.. do not modify the pointer. It is\n");
+        sb.append("recommended to create an alias to run the program or use a config file to\n");
+        sb.append("avoid entering the media sources every time its run. Formats above marked\n");
+        sb.append("with an asterisk (*) will modify the pointer.\n");
+        sb.append('\n');
+        sb.append("Examples:      tv Scrubs pilot --source 'D:\\TV'\n");
+        sb.append("               tv Scrubs s01 --library TV\n");
+        sb.append("               tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'\n");
+        sb.append("               tv Scrubs s02e05- --config ~/.tv/tv.conf\n");
+        sb.append("               tv Scrubs next --source 'D:\\TV'\n");
+        sb.append("using config:  tv Scrubs prev -u testuser\n");
+        sb.append("               tv Scrubs s02e05-s02e13\n");
+        sb.append("               tv Scrubs s06 --count\n");
+        sb.append("               tv -f scrubs.s01e02.avi\n");
+        return sb.toString();
     }
     
 }

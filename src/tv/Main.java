@@ -61,7 +61,7 @@ public class Main {
         try {
             ARGS = ArgsParser.parse(args);
             if(ARGS == null) {
-                ArgsParser.printHelp();
+                System.out.println(ArgsParser.getHelpMessage());
                 System.exit(ExitCode.SUCCESS);
             }
             sourceFolders = ARGS.getSourceFolders();
@@ -69,6 +69,10 @@ public class Main {
         } catch (ExitException ex) {
             System.err.println(ex.getMessage());
             System.exit(ex.getExitCode());
+        }
+        if(ARGS.isVersionSet()) {
+            System.out.println(Version.VERSION);
+            return;
         }
         if(ARGS.isServerSet()) {
             new TVServer().start();

@@ -53,6 +53,7 @@ public class Arguments {
     private boolean isServerSet = false;
     private boolean isShutDownSet = false;
     private boolean isListPathSet = false;
+    private boolean isVersionSet = false;
     
     /**
      * Creates a new instance of the class
@@ -317,5 +318,21 @@ public class Arguments {
      */
     public boolean isListPathSet() {
         return isListPathSet;
+    }
+
+    /**
+     * Sets the display version flag
+     * @param b 
+     */
+    public void setVersion(boolean b) {
+        isVersionSet = b;
+    }
+    
+    /**
+     * Checks if the flag is set to display the version
+     * @return true if flag is set, false otherwise
+     */
+    public boolean isVersionSet() {
+        return isVersionSet;
     }
 }

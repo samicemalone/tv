@@ -1,7 +1,7 @@
 _gen_opts() {
 	COMPREPLY=( $( compgen -W '--config --enqueue --user --list --list-path --set --ignore \
                                 --random --count --player --source --library --size --length --file    \
-                                --help -q -l -u -s -i -r -c -p -f -h' -- "$cur" ) )
+                                --help --version -q -l -u -s -i -r -c -p -f -h -v' -- "$cur" ) )
 }
 
 _gen_episodes() {

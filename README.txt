@@ -3,7 +3,7 @@ NAME
         ranges of episodes/seasons in a media player.
 
 SYNOPSIS
-   tv TVSHOW EPISODES [ACTION] [-hsi] [--source DIR]... [--library NAME]
+   tv TVSHOW EPISODES [ACTION] [-hvsi] [--source DIR]... [--library NAME]
       [-r [NO]] [-p PLAYER] [-u USER] [--config CONFIG]
    tv -f FILE [ACTION] [-p PLAYER] [--config CONFIG]
    tv -d [--source DIR]... [--library NAME] [-p PLAYER] [--config CONFIG]
@@ -124,6 +124,9 @@ OPTIONS
       Sets the USER to avoid overwriting the default episode pointer so that 
       multiple users can share the same configuration and database. If omitted,
       the default user will be used (an empty string).
+
+   -v, --version
+      The program version will be printed and the program will exit.
 
 DAEMON COMMANDS
    The listening daemon can accept the following commands:
