@@ -1,0 +1,71 @@
+_gen_opts() {
+	COMPREPLY=( $( compgen -W '--config --enqueue --user --list --list-path --set --ignore \
+                                --random --count --player --source --library --size --length --file    \
+                                --help -q -l -u -s -i -r -c -p -f -h' -- "$cur" ) )
+}
+
+_gen_episodes() {
+	COMPREPLY=( $( compgen -W 'all cur prev next pilot latest' -- "$cur") )	
+}
+
+_gen_player() {
+	COMPREPLY=( $( compgen -W 'vlc omxplayer' -- "$cur") )	
+}
+
+_gen_show() {
+	local IFS=$'\n'
+	COMPREPLY=( $(grep "^$pattern" /cygdrive/d/Backups/show_names.txt) )
+}
+
+_tv() {
+	local prev cmds cur
+	COMPREPLY=()
+	cur=${COMP_WORDS[COMP_CWORD]}
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+	prevprev=""
+	[[ ${#COMP_WORDS[@]} -gt 2 ]] && prevprev="${COMP_WORDS[COMP_CWORD-2]}"
+	case "${cur:0:1}" in
+		\") pattern="${cur:1}" ;;
+		*) pattern="$cur" ;;
+	esac
+	if [[ "$cur" == -* ]]; then
+		_gen_opts
+		return 0
+	fi
+	case "${prev}" in
+		[0-9]*)
+			_gen_show
+			return 0 ;;
+		-f|--file|--config|--source)
+			_filedir
+			return 0 ;;
+		-r|--random)
+			COMPREPLY=( $( compgen -W 'all' -- "$cur") )	;;
+		-p|--player)
+			_gen_player
+			return 0 ;;
+		-*) return 0 ;;
+		all)
+			case "${prevprev}" in
+				-r|--random) _gen_show ;;
+				*) _gen_episodes ;;
+			esac
+			return 0 ;;
+		s[0-9][0-9]*|cur|prev|next|pilot|latest)
+			_gen_opts
+			return 0 ;;
+		*)
+			case "${prevprev}" in
+				-r|--random) _gen_episodes
+					return 0 ;;
+				""|-u|-p|--user|--player|--config|--source|--library) 
+					_gen_show
+					return 0 ;;
+				*) _gen_episodes	
+					return 0 ;;
+			esac
+			_gen_show
+			return 0 ;;
+	esac
+} &&
+complete -F _tv tv
