@@ -18,7 +18,7 @@ DESCRIPTION
    in a season, whole seasons, a range of seasons and all episodes to be played
    or enqueued in a media player.
 
-   It also allows you randomise the episode(s) selected, list the episode(s)
+   It also allows you to randomise the episode(s) selected, list the episode(s)
    selected, count the number of episodes selected and get a total size for the
    episode(s) selected.
 
@@ -171,16 +171,16 @@ EXAMPLES
          tv Scrubs all -r --source 'D:\TV' --source 'E:\Path\TV'
 
    With Configuration File Sources Set
-      tv Scrubs s01                     #Play Season 1
-      tv "Modern Family" s02 -r all     #Play Season 2 in random order
-      tv Scrubs s02-s03 -l              #List Episodes From Season 2 to 3
-      tv Scrubs s03e01                  #Play episode s03e01 and set pointer
-      tv Scrubs next -q                 #Queue next ep (s03e02) and move pointer
-      tv Scrubs s03e15-s04e05           #Play Episode Range
-      tv Scrubs latest --length         #Gets the length of the latest episode
-      tv Scrubs s04e06 -s               #Set pointer only. Does not get played.
-      tv Scrubs next- -u some_user      #Play remaining episodes in season for 
-                                        # some user
+      tv Scrubs s01                    # Play Season 1
+      tv "Modern Family" s02 -r all    # Play Season 2 in random order
+      tv Scrubs s02-s03 -l             # List Episodes From Season 2 to 3
+      tv Scrubs s03e01                 # Play episode s03e01 and set pointer
+      tv Scrubs next -q                # Queue next ep (s03e02) and move pointer
+      tv Scrubs s03e15-s04e05          # Play Episode Range
+      tv Scrubs latest --length        # Gets the length of the latest episode
+      tv Scrubs s04e06 -s              # Set pointer only. Does not get played.
+      tv Scrubs next- -u some_user     # Play remaining episodes in season for 
+                                       #  some user
 
 COPYRIGHT
    Copyright (c) 2013, Sam Malone. All rights reserved.
