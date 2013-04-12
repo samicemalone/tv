@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class RangeFilter implements FilenameFilter {
     

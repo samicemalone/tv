@@ -41,7 +41,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class LibraryManager {
     

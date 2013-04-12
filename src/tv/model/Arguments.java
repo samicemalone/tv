@@ -35,7 +35,7 @@ import tv.action.Action;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Arguments {
     

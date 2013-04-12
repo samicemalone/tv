@@ -30,7 +30,7 @@ package tv.action;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Action {
         

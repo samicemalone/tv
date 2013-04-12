@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Config {
         

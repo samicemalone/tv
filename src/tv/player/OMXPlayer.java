@@ -33,7 +33,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class OMXPlayer extends MediaPlayer {
         

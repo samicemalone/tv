@@ -32,7 +32,7 @@ import java.text.DecimalFormat;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class MediaUtil {
     

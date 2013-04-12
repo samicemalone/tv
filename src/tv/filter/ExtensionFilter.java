@@ -33,7 +33,7 @@ import java.io.FilenameFilter;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ExtensionFilter implements FilenameFilter {
     

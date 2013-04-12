@@ -43,7 +43,7 @@ import tv.model.Season;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class TVScan {
     

@@ -33,7 +33,7 @@ import java.util.Arrays;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public abstract class MediaPlayer {
     

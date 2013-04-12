@@ -46,7 +46,7 @@ import tv.model.Episode;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class TVServer {
     

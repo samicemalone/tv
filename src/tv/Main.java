@@ -43,7 +43,7 @@ import tv.server.TVServer;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Main {
     

@@ -23,10 +23,6 @@ package tv;
 
 import java.io.UnsupportedEncodingException;
 
-/**
- *
- * @author Sam Malone
- */
 public class URI {
     
     /** Default encoding. */

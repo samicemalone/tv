@@ -30,7 +30,7 @@ package tv;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ExitCode {
     public final static int SUCCESS = 0;

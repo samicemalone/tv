@@ -43,7 +43,7 @@ import tv.model.Config;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ArgsParser {
     

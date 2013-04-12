@@ -33,7 +33,7 @@ import tv.TVScan;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Season {
     

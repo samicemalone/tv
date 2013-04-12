@@ -42,7 +42,7 @@ import tv.player.MediaPlayer;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ActionHandler {
     

@@ -32,7 +32,7 @@ import java.io.File;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class DummyPlayer extends MediaPlayer {
 

@@ -37,7 +37,7 @@ import tv.io.LibraryManager;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class VLC extends MediaPlayer {
     

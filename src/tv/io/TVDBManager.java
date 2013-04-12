@@ -39,7 +39,7 @@ import tv.model.Episode;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class TVDBManager extends CSV_IO {
     

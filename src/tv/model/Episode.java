@@ -30,7 +30,7 @@ package tv.model;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class Episode {
 

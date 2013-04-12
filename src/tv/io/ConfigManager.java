@@ -43,7 +43,7 @@ import tv.model.PlayerInfo;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ConfigManager {
     

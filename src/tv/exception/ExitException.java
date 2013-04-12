@@ -30,7 +30,7 @@ package tv.exception;
 
 /**
  *
- * @author Ice
+ * @author Sam Malone
  */
 public class ExitException extends Exception {
     
