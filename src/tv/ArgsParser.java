@@ -253,10 +253,12 @@ public class ArgsParser {
             }
             return;
         }
+        boolean hasValidSource = false;
         for(String source : arg.getSourceFolders()) {
-            if(!new File(source).exists()) {
-                throw new FileNotFoundException("The source you have entered does not exist", ExitCode.SOURCE_DIR_NOT_FOUND);
-            }
+            hasValidSource |= new File(source).exists();
+        }
+        if(!hasValidSource) {
+            throw new FileNotFoundException("The source you have entered does not exist", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
         if(arg.isServerSet()) {
             return;
