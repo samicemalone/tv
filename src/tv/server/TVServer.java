@@ -38,9 +38,11 @@ import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import tv.CommandUtil;
+import tv.Main;
 import tv.io.TVDBManager;
 import tv.model.Episode;
 
@@ -143,7 +145,12 @@ public class TVServer {
                     serverSocket.close();
                 }
                 if(command.startsWith("tv ")) {
-                    String[] cmdArray = CommandUtil.buildJavaCommandString(CommandUtil.dequoteArgsToList(command));
+                    List<String> cmdList = CommandUtil.dequoteArgsToList(command);
+                    for(String source : Main.sourceFolders) {
+                        cmdList.add("--source");
+                        cmdList.add(source);
+                    }
+                    String[] cmdArray = CommandUtil.buildJavaCommandString(cmdList);
                     if(cmdArray == null) {
                         out.println("Unable to determine location of Jar file");
                     } else {
