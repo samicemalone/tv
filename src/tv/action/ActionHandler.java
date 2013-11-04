@@ -37,6 +37,7 @@ import java.util.Random;
 import tv.CommandUtil;
 import tv.MediaInfo;
 import tv.MediaUtil;
+import tv.TV;
 import tv.filter.ExtensionFilter;
 import tv.player.MediaPlayer;
 
@@ -49,10 +50,8 @@ public class ActionHandler {
     private static int EP_COUNT = 0;
     private static long SIZE_COUNT = 0;
     private static boolean isListPath = false;
-    private static ExtensionFilter filter = new ExtensionFilter();
-    private static MediaInfo mediaInfo = new MediaInfo();
+    private static final ExtensionFilter filter = new ExtensionFilter();
     
-    public static int RANDOM_COUNT = 1;
     public static MediaPlayer MEDIA_PLAYER;
     
     /**
@@ -163,16 +162,17 @@ public class ActionHandler {
      * @return Length in seconds. 0 if list is empty.
      */
     private static long length(File[] list) {
-        prepareLength(list);
+        MediaInfo mediaInfo = new MediaInfo(TV.ENV.getMediaInfoBinary());
+        prepareLength(mediaInfo, list);
         return mediaInfo.getLength();
     }
     
-    private static void prepareLength(File[] list) {
-        for(int i = 0; i < list.length; i++) {
-            if(list[i].isDirectory()) {
-                prepareLength(list[i].listFiles(filter));
+    private static void prepareLength(MediaInfo mediaInfo, File[] list) {
+        for(File item : list) {
+            if(item.isDirectory()) {
+                prepareLength(mediaInfo, item.listFiles(filter));
             } else {
-                mediaInfo.addFile(list[i].getAbsolutePath());
+                mediaInfo.addFile(item.getAbsolutePath());
             }
         }
     }
@@ -181,11 +181,11 @@ public class ActionHandler {
      * Randomizes the File list given. If any File in list is a directory,
      * the contents of each directory will be added to the shuffled list.
      * No directories will be present in the shuffled list. Only regular files.
-     * The amount of files returned is based on RANDOM_COUNT. If RANDOM_COUNT
-     * is larger than the amount of media files, all the media files will be 
-     * returned randomized. If list is empty, an empty array will be returned.
-     * If RANDOM_COUNT is less than 1, it will be clamped to 1. Otherwise
-     * the size of list returned will be equal to RANDOM_COUNT
+     * The amount of files returned is determined from the -r argument. If the
+     * random count is larger than the amount of media files, all the media files
+     * will be returned randomized. If list is empty, an empty array will be returned.
+     * If the random count is less than 1, it will be clamped to 1. Otherwise the size
+     * of list returned will be equal to RANDOM_COUNT
      * @param list List of files and/or directories to be shuffled
      * @return Shuffled file list
      */
@@ -204,9 +204,9 @@ public class ActionHandler {
         for(int i = 0; i < 5; i++) {
             Collections.shuffle(tmp, new Random(System.currentTimeMillis()));
         }
-        RANDOM_COUNT = Math.max(1, RANDOM_COUNT);
-        if(RANDOM_COUNT < tmp.size()) {
-            return tmp.subList(0, RANDOM_COUNT).toArray(new File[0]);
+        int randomCount = Math.max(1, TV.ENV.getArguments().getRandomCount());
+        if(randomCount < tmp.size()) {
+            return tmp.subList(0, randomCount).toArray(new File[0]);
         } else {
             return tmp.toArray(new File[0]);
         }

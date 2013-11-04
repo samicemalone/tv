@@ -26,20 +26,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package tv;
+package tv.options;
 
 import java.io.File;
+import tv.ExitCode;
+import tv.TVScan;
 import tv.action.Action;
-import tv.action.ActionHandler;
-import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
 import tv.exception.InvalidArgumentException;
 import tv.exception.MissingArgumentException;
-import tv.exception.ParseException;
-import tv.io.ConfigManager;
 import tv.io.LibraryManager;
 import tv.model.Arguments;
-import tv.model.Config;
 
 /**
  *
@@ -48,203 +45,162 @@ import tv.model.Config;
 public class ArgsParser {
     
     /**
-     * Attempts to parse the given arguments. 
-     * @param args Arguments
-     * @return Parsed Arguments instance or null if the help message is to be
-     * displayed only
+     * Attempts to parse the given program arguments.
+     * See {@link #validate(tv.model.Arguments) for validation.
+     * @param args program arguments
+     * @return Parsed Arguments instance or null if the help flag is set
      * @throws MissingArgumentException if there is an argument missing
-     * @throws InvalidArgumentException if windows 7, and library name is invalid
-     * @throws ParseException if the episode string is not valid
-     * @throws FileNotFoundException if the config file is not found when used with
-     * the --config option.
+     * @throws InvalidArgumentException if an unexpected argument is given
      */
-    public static Arguments parse(String[] args) throws ExitException {
+    public static Arguments parse(String[] args) throws MissingArgumentException, InvalidArgumentException {
         Arguments arg = new Arguments();
-        Config config = null;
-        int TVSHOW_INDEX = -1; // TVSHOW required arg
         boolean isArg = false;
+        for(String curArg : args) {
+            if(curArg.equals("-h") || curArg.equals("--help")) {
+                return null;
+            }
+            if(curArg.equals("-k") || curArg.equals("--kill")) {
+                arg.setShutDown(true);
+                return arg;
+            }
+            if(curArg.equals("-v") || curArg.equals("--version")) {
+                arg.setVersion(true);
+                return arg;
+            }
+        }
         for(int i = 0; i < args.length; i++) {
             if(isArg) {
                 isArg = false;
                 continue;
             }
-            if(args[i].equals("-h") || args[i].equals("--help")) {
-                return null;
-            }
-            if(args[i].equals("-d") || args[i].equals("--daemon")) {
-                arg.setServer(true);
-                continue;
-            }
-            if(args[i].equals("-k") || args[i].equals("--kill")) {
-                arg.setShutDown(true);
-                return arg;
-            }
-            if(args[i].equals("-v") || args[i].equals("--version")) {
-                arg.setVersion(true);
-                return arg;
-            }
-            if(args[i].equals("-r") || args[i].equals("--random")) {
-                if(i + 1 < args.length) {
-                    // -r is optional. check if next argument is a value or another arg
-                    if(!args[i+1].startsWith("-")) {
-                        try {
-                            if(args[i+1].equalsIgnoreCase("all")) {
-                                arg.setRandom(Integer.MAX_VALUE);
-                            } else {
-                                arg.setRandom(Integer.parseInt(args[i+1]));
-                            }
-                            isArg = true;
-                            continue;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                }
-                arg.setRandom(true);
-                continue;
-            }
-            if(args[i].equals("--config")) {
-                if(i + 1 < args.length) {
-                    if(!new File(args[i+1]).exists()) {
-                        throw new FileNotFoundException("The config file given does not exist", ExitCode.CONFIG_FILE_NOT_FOUND);
-                    }
-                    config = ConfigManager.parseConfig(new File(args[i+1]));
-                    isArg = true;
-                    continue;
-                } else {
-                    throw new MissingArgumentException("You need to give an argument with the --config option", ExitCode.MISSING_CONFIG);
-                }
-            }
-            if(args[i].equals("--source")) {
-                if(i + 1 < args.length) {
-                    arg.addSourceFolder(args[i+1]);
-                    isArg = true;
-                    continue;
-                } else {
-                    throw new MissingArgumentException("You need to give an argument with the --source option", ExitCode.MISSING_SOURCE);
-                }
-            }
-            if(args[i].equals("--library")) {
-                if(i + 1 < args.length) {
-                    if(LibraryManager.isWindows7()) {
-                        if(LibraryManager.isValidLibraryName(args[i+1])) {
-                            arg.getSourceFolders().addAll(LibraryManager.parseLibraryFolders(args[i+1]));
-                        } else {
-                            throw new InvalidArgumentException("Windows 7 Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
-                        }
-                    }
-                    isArg = true;
-                    continue;
-                } else {
-                    throw new MissingArgumentException("You need to give an argument with the --library option", ExitCode.MISSING_LIBRARY);
-                }
-            }
-            if(args[i].equals("--enqueue") || args[i].equals("-q")) {
-                arg.setMediaAction(Action.ENQUEUE);
-                continue;
-            }
-            if(args[i].equals("--count") || args[i].equals("-c")) {
-                arg.setMediaAction(Action.COUNT);
-                continue;
-            }
-            if(args[i].equals("--set") || args[i].equals("-s")) {
-                arg.setIsSetOnly(true);
-                continue;
-            }
-            if(args[i].equals("--ignore") || args[i].equals("-i")) {
-                arg.setIgnore(true);
-                continue;
-            }
-            if(args[i].equals("--list") || args[i].equals("-l")) {
-                arg.setMediaAction(Action.LIST);
-                continue;
-            }
-            if(args[i].equals("--list-path")) {
-                arg.setMediaAction(Action.LIST);
-                arg.setListPath(true);
-                continue;
-            }
-            if(args[i].equals("--size")) {
-                arg.setMediaAction(Action.SIZE);
-                continue;
-            }
-            if(args[i].equals("--player") || args[i].equals("-p")) {
-                arg.getPlayerInfo().setPlayer(args[i+1]);
-                isArg = true;
-                continue;
-            }
-            if(args[i].equals("--length")) {
-                arg.setMediaAction(Action.LENGTH);
-                continue;
-            }
-            if(args[i].equals("--user") || args[i].equals("-u")) {
-                if(i + 1 < args.length) {
-                    arg.setUser(args[i+1]);
-                    isArg = true;
-                    continue;
-                } else {
-                    throw new MissingArgumentException("You need give a username with the -u or --user flag", ExitCode.MISSING_USERNAME);
-                }
-            }
-            if(args[i].equals("--file") || args[i].equals("-f")) {
-                if(i + 1 < args.length) {
-                    arg.setFile(args[i+1]);
-                    isArg = true;
-                    continue;
-                } else {
-                    throw new MissingArgumentException("You need specify a file with the -f or --file flag", ExitCode.MISSING_FILE);
-                }
-            }
-            if(TVSHOW_INDEX == -1 && !isArg) {
-                TVSHOW_INDEX = i;
+            try {
+                isArg = parseOption(arg, args, i);
+            } catch (IndexOutOfBoundsException ex) {
+                throw new MissingArgumentException(args[i]);
             }
         }
-        ConfigManager.mergeArguments(config, arg);
-        if(arg.isListPathSet()) {
-            arg.setMediaActionFlag(Action.LISTPATH);
-        }
-        if(arg.isFileSet()) {
-            return arg;
-        }
-        if(arg.getSourceFolders().isEmpty()) {
-            throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
-        }
-        if(arg.isServerSet()) {
-            return arg;
-        }
-        if(TVSHOW_INDEX < 0) {
-            throw new MissingArgumentException("The SHOW input is required", ExitCode.SHOW_INPUT_REQUIRED);
-        }
-        if(TVSHOW_INDEX + 1 >= args.length) {
-            throw new MissingArgumentException("The EPISODES input is required", ExitCode.EPISODE_INPUT_REQUIRED);
-        }
-        arg.setShow(args[TVSHOW_INDEX]);
-        arg.setEpisode(args[TVSHOW_INDEX+1]);
-        if(!TVScan.episodesValid(arg.getEpisodes())) {
-            throw new ParseException("Unable to parse the episodes given", ExitCode.PARSE_EPISODES_FAILED);
-        }
-        if(arg.isRandomSet()) {
-            arg.setMediaActionFlag(Action.RANDOM);
-            ActionHandler.RANDOM_COUNT = arg.getRandomCount();
+        if(!arg.isServerSet() && !arg.isFileSet()) {
+            if(arg.getShow() == null) {
+                throw new MissingArgumentException("The SHOW input is required", ExitCode.SHOW_INPUT_REQUIRED);
+            }
+            if(arg.getEpisodes() == null) {
+                throw new MissingArgumentException("The EPISODES input is required", ExitCode.EPISODE_INPUT_REQUIRED);
+            }
         }
         return arg;
     }
     
     /**
-     * Validates the given Arguments. Validation is successful
-     * if no exceptions were thrown.
-     * @param arg Parsed Arguments
-     * @throws FileNotFoundException if show, source directories, input files
-     * cannot be found. if length is set, and mediainfo binary cannot be found
+     * Parse an option from the current argument.
+     * @param args arguments
+     * @param programArgs program arguments
+     * @param curIndex index of the current argument
+     * @return true if the next argument index to be parsed is an argument value,
+     * false otherwise
+     * @throws InvalidArgumentException if an unexpected argument is given
      */
-    public static void validate(Arguments arg) throws FileNotFoundException {
+    private static boolean parseOption(Arguments args, String[] programArgs, int curIndex) throws InvalidArgumentException {
+        if(programArgs[curIndex].equals("-d") || programArgs[curIndex].equals("--daemon")) {
+            args.setServer(true);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--enqueue") || programArgs[curIndex].equals("-q")) {
+            args.setMediaAction(Action.ENQUEUE);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--count") || programArgs[curIndex].equals("-c")) {
+            args.setMediaAction(Action.COUNT);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--set") || programArgs[curIndex].equals("-s")) {
+            args.setIsSetOnly(true);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--ignore") || programArgs[curIndex].equals("-i")) {
+            args.setIgnore(true);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--list") || programArgs[curIndex].equals("-l")) {
+            args.setMediaAction(Action.LIST);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--list-path")) {
+            args.setMediaAction(Action.LIST);
+            args.setMediaActionFlag(Action.LISTPATH);
+            args.setListPath(true);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--size")) {
+            args.setMediaAction(Action.SIZE);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--player") || programArgs[curIndex].equals("-p")) {
+            args.getPlayerInfo().setPlayer(programArgs[curIndex+1]);
+            return true;
+        }
+        if(programArgs[curIndex].equals("--length")) {
+            args.setMediaAction(Action.LENGTH);
+            return false;
+        }
+        if(programArgs[curIndex].equals("-r") || programArgs[curIndex].equals("--random")) {
+            args.setMediaActionFlag(Action.RANDOM);
+            // -r is optional. check if next argument is a value or another arg
+            if(!programArgs[curIndex+1].startsWith("-")) {
+                try {
+                    args.setRandom(
+                        "all".equalsIgnoreCase(programArgs[curIndex+1])
+                            ? Integer.MAX_VALUE 
+                            : Integer.parseInt(programArgs[curIndex+1])
+                    );
+                    return true;
+                } catch (NumberFormatException e) {}
+            }
+            args.setRandom(true);
+            return false;
+        }
+        if(programArgs[curIndex].equals("--config")) {
+            args.setConfigPath(programArgs[curIndex+1]);
+            return true;
+        }
+        if(programArgs[curIndex].equals("--source")) {
+            args.addSourceFolder(programArgs[curIndex+1]);
+            return true;
+        }
+        if(programArgs[curIndex].equals("--library")) {
+            args.setLibraryName(programArgs[curIndex+1]);
+            return true;
+        }
+        if(programArgs[curIndex].equals("--user") || programArgs[curIndex].equals("-u")) {
+            args.setUser(programArgs[curIndex+1]);
+            return true;
+        }
+        if(programArgs[curIndex].equals("--file") || programArgs[curIndex].equals("-f")) {
+            args.setFile(programArgs[curIndex+1]);
+            return true;
+        }
+        if(args.getShow() == null) {
+            args.setShow(programArgs[curIndex]);
+            args.setEpisode(programArgs[curIndex+1]);
+            return true;
+        }
+        throw new InvalidArgumentException("Unexpected argument " + programArgs[curIndex], ExitCode.UNEXPECTED_ARGUMENT);
+    }
+    
+    /**
+     * Validates the given Arguments. Validation is successful if no exceptions 
+     * were thrown.
+     * @param arg parsed Arguments
+     * @throws FileNotFoundException if the --config or --file option is set but
+     * the given file(s) do not exist
+     * @throws InvalidArgumentException if unable to parse the episode string or
+     * library name
+     */
+    public static void validate(Arguments arg) throws FileNotFoundException, InvalidArgumentException {
         if(arg.isShutDownSet() || arg.isVersionSet()) {
             return;
         }
-        if(arg.getMediaAction() == Action.LENGTH) {
-            if(!MediaInfo.getExecutableFile().exists()) {
-                throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
-            }
+        if(arg.getConfigPath() != null && !new File(arg.getConfigPath()).exists()) {
+            throw new FileNotFoundException("The config file given does not exist", ExitCode.CONFIG_FILE_NOT_FOUND);
         }
         if(arg.isFileSet()) {
             File f = arg.getFile();
@@ -253,23 +209,20 @@ public class ArgsParser {
             }
             return;
         }
-        boolean hasValidSource = false;
-        for(String source : arg.getSourceFolders()) {
-            hasValidSource |= new File(source).exists();
-        }
-        if(!hasValidSource) {
-            throw new FileNotFoundException("The source you have entered does not exist", ExitCode.SOURCE_DIR_NOT_FOUND);
+        if(arg.getLibraryName() != null && !LibraryManager.isValidLibraryName(arg.getLibraryName())) {
+            throw new InvalidArgumentException("Windows 7 Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
         }
         if(arg.isServerSet()) {
             return;
         }
-        if(!TVScan.showExists(arg.getShow())) {
-            throw new FileNotFoundException("Unable to find show: " + arg.getShow(), ExitCode.SHOW_NOT_FOUND);
+        if(!TVScan.episodesValid(arg.getEpisodes())) {
+            throw new InvalidArgumentException("Unable to parse the episodes given: " + arg.getEpisodes(), ExitCode.PARSE_EPISODES_FAILED);
         }
     }
     
     /**
      * Gets the help message
+     * @return help message
      */
     public static String getHelpMessage() {
         StringBuilder sb = new StringBuilder(4000);

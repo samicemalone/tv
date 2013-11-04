@@ -42,7 +42,7 @@ import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import tv.CommandUtil;
-import tv.Main;
+import tv.TV;
 import tv.io.TVDBManager;
 import tv.model.Episode;
 
@@ -55,11 +55,11 @@ public class TVServer {
     private final static int SERVER_PORT = 5768;
     private boolean isRunning = true;
     private ArrayList<Episode> episodeList;
-    private TVDBManager io;
+    private final TVDBManager io;
     private ServerSocket serverSocket;
     
     public TVServer() {
-        io = new TVDBManager();
+        io = new TVDBManager(TV.ENV.getTVDB());
     }
     
     public void start(){
@@ -93,7 +93,7 @@ public class TVServer {
     
     private class WorkerThread implements Runnable {
         
-        private Socket client;
+        private final Socket client;
         
         public WorkerThread(Socket client) {
             this.client = client;
@@ -146,7 +146,7 @@ public class TVServer {
                 }
                 if(command.startsWith("tv ")) {
                     List<String> cmdList = CommandUtil.dequoteArgsToList(command);
-                    for(String source : Main.sourceFolders) {
+                    for(String source : TV.ENV.getArguments().getSourceFolders()) {
                         cmdList.add("--source");
                         cmdList.add(source);
                     }

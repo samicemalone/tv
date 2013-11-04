@@ -28,14 +28,19 @@
  */
 package tv;
 
+import tv.options.Environment;
+import tv.options.WindowsEnvironment;
+import tv.options.UnixEnvironment;
+import tv.options.ArgsParser;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
 import tv.action.Action;
 import tv.action.ActionHandler;
 import tv.exception.ExitException;
+import tv.io.ConfigParser;
+import tv.io.LibraryManager;
 import tv.io.TVDBManager;
-import tv.model.Arguments;
+import tv.model.Config;
 import tv.model.Episode;
 import tv.model.Season;
 import tv.player.MediaPlayerFactory;
@@ -45,50 +50,50 @@ import tv.server.TVServer;
  *
  * @author Sam Malone
  */
-public class Main {
-    
-    public static List<String> sourceFolders;
-    
+public class TV {
+      
     public static Episode pointerEpisode;
-    public static Arguments ARGS;
+    public static Environment ENV;
     public static int MEDIA_ACTION;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ARGS = null;
+        ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         try {
-            ARGS = ArgsParser.parse(args);
-            if(ARGS == null) {
+            ENV.setArguments(ArgsParser.parse(args));
+            if(ENV.getArguments() == null) {
                 System.out.println(ArgsParser.getHelpMessage());
                 System.exit(ExitCode.SUCCESS);
             }
-            sourceFolders = ARGS.getSourceFolders();
-            ArgsParser.validate(ARGS);
+            ArgsParser.validate(ENV.getArguments());
+            Config config = ConfigParser.parse(ENV.getConfig());
+            ENV.fromConfig(config);
+            ENV.validate();
         } catch (ExitException ex) {
             System.err.println(ex.getMessage());
             System.exit(ex.getExitCode());
         }
-        if(ARGS.isVersionSet()) {
+        if(ENV.getArguments().isVersionSet()) {
             System.out.println(Version.VERSION);
             return;
         }
-        if(ARGS.isServerSet()) {
+        if(ENV.getArguments().isServerSet()) {
             new TVServer().start();
             return;
         }
-        if(ARGS.isShutDownSet()) {
+        if(ENV.getArguments().isShutDownSet()) {
             new TVServer().shutdown();
             return;
         }
-        ActionHandler.MEDIA_PLAYER = MediaPlayerFactory.parsePlayer(ARGS.getPlayerInfo());
-        MEDIA_ACTION = ARGS.getMediaAction();
-        if(ARGS.isFileSet()) {
-            ActionHandler.performAction(ARGS.getFile(), MEDIA_ACTION);
+        ActionHandler.MEDIA_PLAYER = MediaPlayerFactory.parsePlayer(ENV.getArguments().getPlayerInfo());
+        MEDIA_ACTION = ENV.getArguments().getMediaAction();
+        if(ENV.getArguments().isFileSet()) {
+            ActionHandler.performAction(ENV.getArguments().getFile(), MEDIA_ACTION);
             return;
         }
-        int mode = TVScan.getEpisodesMode(ARGS.getEpisodes());
+        int mode = TVScan.getEpisodesMode(ENV.getArguments().getEpisodes());
         pointerEpisode = null;
         Season season = getSeasonInfo(mode);
         if(season.getSeasonDir() == null || !season.getSeasonDir().exists()) {
@@ -108,16 +113,16 @@ public class Main {
                 seasonFromEpisode(season, pointerEpisode.getEpisodeNo());
                 break;
             case TVScan.SEASONFROMEP:
-                seasonFromEpisode(season, TVScan.getEpisodeNo(ARGS.getEpisodes()));
+                seasonFromEpisode(season, TVScan.getEpisodeNo(ENV.getArguments().getEpisodes()));
                 break;
             case TVScan.EPRANGE:
-                episodeRange(season, ARGS.getEpisodes().split("-"));
+                episodeRange(season, ENV.getArguments().getEpisodes().split("-"));
                 break;
             case TVScan.ALL:
                 allEpisodes(season);
                 break;
             case TVScan.SEASONRANGE:
-                seasonRange(season, ARGS.getEpisodes().split("-"));
+                seasonRange(season, ENV.getArguments().getEpisodes().split("-"));
                 break;
             case TVScan.ALLFROMSEASON:
                 allFromSeason(season);
@@ -151,12 +156,12 @@ public class Main {
             case TVScan.POINTER:
             case TVScan.SEASONFROMPOINTER:
                 try {
-                    TVDBManager io = new TVDBManager();
-                    io.readStorage(ARGS.getUser());
-                    if(io.containsEpisodeData(ARGS.getShow())) {
-                        pointerEpisode = io.getEpisode(ARGS.getShow());
-                        TVScan.getEpisode(pointerEpisode, ARGS.getEpisodes()); // modifies e
-                        return new Season(ARGS.getShow(), pointerEpisode.getSeasonNo());
+                    TVDBManager io = new TVDBManager(ENV.getTVDB());
+                    io.readStorage(ENV.getArguments().getUser());
+                    if(io.containsEpisodeData(ENV.getArguments().getShow())) {
+                        pointerEpisode = io.getEpisode(ENV.getArguments().getShow());
+                        TVScan.getEpisode(pointerEpisode, ENV.getArguments().getEpisodes()); // modifies e
+                        return new Season(ENV.getArguments().getShow(), pointerEpisode.getSeasonNo());
                     } else {
                         exitError(ExitCode.NO_STORED_EPISODE_DATA, "There is no episode data stored for this show");
                     }
@@ -166,11 +171,11 @@ public class Main {
                 break;
             case TVScan.ALL:
             case TVScan.PILOT:
-                return new Season(ARGS.getShow(), 1);
+                return new Season(ENV.getArguments().getShow(), 1);
             case TVScan.LATEST:
-                return new Season(ARGS.getShow(), TVScan.getLastSeasonNo(ARGS.getShow()));
+                return new Season(ENV.getArguments().getShow(), TVScan.getLastSeasonNo(ENV.getArguments().getShow()));
         }
-        return new Season(ARGS.getShow(), TVScan.getSeasonNo(ARGS.getEpisodes())); 
+        return new Season(ENV.getArguments().getShow(), TVScan.getSeasonNo(ENV.getArguments().getEpisodes())); 
     }
     
     /**
@@ -178,7 +183,7 @@ public class Main {
      * @param season Starting season (usually 1)
      */
     public static void allEpisodes(Season season) {
-        File[] eps = TVScan.getAllEpisodes(season, ARGS.getShow());
+        File[] eps = TVScan.getAllEpisodes(season, ENV.getArguments().getShow());
         if(eps == null || eps.length == 0) {
             exitError(ExitCode.EPISODES_NOT_FOUND, "Unable to find any episodes");
         }
@@ -196,11 +201,11 @@ public class Main {
             exitError(ExitCode.EPISODES_NOT_FOUND, "Unable to find the episode given");
         }
         if(MEDIA_ACTION == Action.PLAY || MEDIA_ACTION == Action.ENQUEUE) {
-            if(!ARGS.isIgnoreSet()) {
-                new TVDBManager().writeStorage(ARGS.getShow(), ARGS.getUser(), season.getSeasonString(), episodeNo);
+            if(!ENV.getArguments().isIgnoreSet()) {
+                new TVDBManager(ENV.getTVDB()).writeStorage(ENV.getArguments().getShow(), ENV.getArguments().getUser(), season.getSeasonString(), episodeNo);
             }
         }
-        if(!ARGS.isSetOnly()) {
+        if(!ENV.getArguments().isSetOnly()) {
             ActionHandler.performAction(ep, MEDIA_ACTION);
         }
     }
@@ -211,7 +216,7 @@ public class Main {
      * @param season Season
      */
     public static void singleEpisode(Season season) {
-        singleEpisode(season, TVScan.getEpisodeNo(ARGS.getEpisodes()));
+        singleEpisode(season, TVScan.getEpisodeNo(ENV.getArguments().getEpisodes()));
     }
     
     /**
@@ -224,11 +229,11 @@ public class Main {
             exitError(ExitCode.EPISODE_POINTER_INVALID, "Unable to find the episode offset given");
         }
         if(MEDIA_ACTION == Action.PLAY || MEDIA_ACTION == Action.ENQUEUE) {
-            if(!ARGS.isIgnoreSet()) {
-                new TVDBManager().writeStorage(pointerEpisode.getShow(), ARGS.getUser(), pointerEpisode.getSeasonNo(), pointerEpisode.getEpisodeNo());
+            if(!ENV.getArguments().isIgnoreSet()) {
+                new TVDBManager(ENV.getTVDB()).writeStorage(pointerEpisode.getShow(), ENV.getArguments().getUser(), pointerEpisode.getSeasonNo(), pointerEpisode.getEpisodeNo());
             }
         }
-        if(!ARGS.isSetOnly()) {
+        if(!ENV.getArguments().isSetOnly()) {
             ActionHandler.performAction(epp, MEDIA_ACTION);
         }
     }
@@ -239,7 +244,7 @@ public class Main {
      * @param rangeArray rangeArray[0]: start episode, rangeArray[1]: end episode
      */
     public static void episodeRange(Season season, String[] rangeArray) {
-        File[] eprange = TVScan.getEpisodeRange(season, ARGS.getShow(), rangeArray[0], rangeArray[1]);
+        File[] eprange = TVScan.getEpisodeRange(season, ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
         if(eprange == null || eprange.length == 0) {
             exitError(ExitCode.EPISODES_RANGE_NOT_FOUND, "Unable to find the episodes in the given range");
         }
@@ -266,7 +271,7 @@ public class Main {
      * @param rangeArray rangeArray[0]: start season, rangeArray[1]: end season e.g. s03
      */
     public static void seasonRange(Season season, String[] rangeArray) {
-        File[] range = TVScan.getSeasonRange(season, ARGS.getShow(), rangeArray[0], rangeArray[1]);
+        File[] range = TVScan.getSeasonRange(season, ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
         if(range == null || range.length == 0) {
             exitError(ExitCode.SEASON_RANGE_NOT_FOUND, "Unable to find the seasons in the given range");
         }
@@ -279,7 +284,7 @@ public class Main {
      * @param season Starting season
      */
     public static void allFromSeason(Season season) {
-        File[] eps = TVScan.getSeasonsFrom(season, ARGS.getShow());
+        File[] eps = TVScan.getSeasonsFrom(season, ENV.getArguments().getShow());
         if(eps == null || eps.length == 0) {
             exitError(ExitCode.SEASON_RANGE_NOT_FOUND, "Unable to find the episodes in the given range");
         }

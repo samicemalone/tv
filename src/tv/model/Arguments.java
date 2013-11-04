@@ -31,6 +31,7 @@ package tv.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import tv.CygwinUtil;
 import tv.action.Action;
 
 /**
@@ -45,6 +46,8 @@ public class Arguments {
     private String EPISODES;
     private String SHOW;
     private String FILE = "";
+    private String CONFIG;
+    private String LIBRARY;
     private PlayerInfo PLAYER = new PlayerInfo();
     private List<String> sourceFolders = null;
     private boolean isSetOnly = false;
@@ -76,6 +79,41 @@ public class Arguments {
      */
     public List<String> getSourceFolders() {
         return sourceFolders;
+    }
+
+    /**
+     * Get the path to the config file
+     * @return path to the config file or null if none set
+     */
+    public String getConfigPath() {
+        if(CONFIG != null && CONFIG.startsWith(CygwinUtil.CYGWIN_PATH)) {
+            return CygwinUtil.toWindowsPath(CONFIG);
+        }
+        return CONFIG;
+    }
+    
+    /**
+     * Set the path to the config file
+     * @param configPath config file path
+     */
+    public void setConfigPath(String configPath) {
+        this.CONFIG = configPath;
+    }
+
+    /**
+     * Get the name of the Windows library
+     * @return name of the Windows library or null if none set
+     */
+    public String getLibraryName() {
+        return LIBRARY;
+    }
+    
+    /**
+     * Set the name of the Windows library
+     * @param libraryName Windows library name
+     */
+    public void setLibraryName(String libraryName) {
+        LIBRARY = libraryName;
     }
     
     /**
@@ -165,12 +203,10 @@ public class Arguments {
      * @return Single File object from -f argument
      */
     public File getFile() {
-        if(getFileString().startsWith("/cygdrive/")) {
-            char drive = getFileString().charAt(10);
-            return new File(String.valueOf(drive).toUpperCase() + ":\\" + getFileString().substring(12));
-        } else {
-            return new File(getFileString());
+        if(getFileString().startsWith(CygwinUtil.CYGWIN_PATH)) {
+            return new File(CygwinUtil.toWindowsPath(FILE));
         }
+        return new File(FILE);
     }
     
     /**

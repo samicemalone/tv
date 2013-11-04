@@ -54,4 +54,6 @@ public class ExitCode {
     public final static int MISSING_CONFIG = 18; // config is required with --config flag
     public final static int CONFIG_FILE_NOT_FOUND = 19; // config file not found (with --config)
     public final static int CONFIG_PARSE_ERROR = 20; // config file could not be parsed
+    public final static int MISSING_ARGUMENT = 21; // argument is required with an option
+    public final static int UNEXPECTED_ARGUMENT = 22; // unexpected argument given
 }

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
-import tv.Main;
+import tv.TV;
 import tv.model.Episode;
 
 /**
@@ -49,34 +49,9 @@ public class TVDBManager extends CSV_IO {
     private boolean isReadOnlyUser;
     
     private final static int CSV_COLUMNS = 4;
-    private static File TVDB_FILE = null;
     
-    public TVDBManager() {
-        super(getTVDBFile());
-    }
-    
-    /**
-     * Gets the TVDB File. The default will be used and returned if
-     * no TVDB File is already set.
-     * @return 
-     */
-    public static File getTVDBFile() {
-        if(TVDB_FILE == null) {
-            if(LibraryManager.isWindows()) {
-                TVDB_FILE = new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.csv");
-            } else {
-                TVDB_FILE = new File(System.getProperty("user.home") + "/.tv/tvdb.csv");
-            }
-        }
-        return TVDB_FILE;
-    }
-    
-    /**
-     * Sets the File to be used for the TVDB
-     * @param TVDB 
-     */
-    public static void setTVDBFile(File TVDB) {
-        TVDB_FILE = TVDB;
+    public TVDBManager(File tvdb) {
+        super(tvdb);
     }
     
     /**
@@ -103,10 +78,10 @@ public class TVDBManager extends CSV_IO {
      */
     public String getCSVShows() {
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < Main.sourceFolders.size(); i++) {
-            String[] epList = new File(Main.sourceFolders.get(i)).list();
-            for(int j = 0; j < epList.length; j++) {
-                appendCSVLine(sb, epList[j]);
+        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
+            String[] epList = new File(TV.ENV.getArguments().getSourceFolders().get(i)).list();
+            for(String show : epList) {
+                appendCSVLine(sb, show);
             }
         }
         return sb.substring(0, sb.length()-1);

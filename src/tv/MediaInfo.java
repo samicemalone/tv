@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import tv.io.LibraryManager;
 
 /**
  *
@@ -43,28 +42,18 @@ import tv.io.LibraryManager;
  */
 public class MediaInfo {
     
-    private static File executable;
-    private List<String> filePaths;
+    private final File executable;
+    private final List<String> filePaths;
     
-    public MediaInfo() {
+    public MediaInfo(File binary) {
         filePaths = new ArrayList<String>();
-    }
-    
-    public static File getExecutableFile() {
-        if(executable == null) {
-            if(LibraryManager.isWindows()) {
-                executable = new File("C:/Program Files/MediaInfo/MediaInfo.exe");
-            } else {
-                executable = new File("/usr/bin/mediainfo");
-            }
-        }
-        return executable;
-    }
-    
-    public static void setExecutableFile(File binary) {
         executable = binary;
     }
     
+    /**
+     * Adds a file
+     * @param file file path
+     */
     public void addFile(String file) {
         filePaths.add(file);
     }
@@ -112,7 +101,7 @@ public class MediaInfo {
         long longVal = defaultVal;
         try {
             longVal = Long.valueOf(val);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             
         }
         return longVal;

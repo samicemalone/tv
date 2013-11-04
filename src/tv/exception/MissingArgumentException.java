@@ -28,6 +28,8 @@
  */
 package tv.exception;
 
+import tv.ExitCode;
+
 /**
  *
  * @author Sam Malone
@@ -36,6 +38,10 @@ public class MissingArgumentException extends ExitException {
 
     public MissingArgumentException(String string, int exitCode) {
         super(string, exitCode);
+    }
+    
+    public MissingArgumentException(String argument) {
+        super(String.format("You need to give an argument with the %s option", argument), ExitCode.MISSING_ARGUMENT);
     }
     
 }

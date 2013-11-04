@@ -247,9 +247,9 @@ public class TVScan {
      */
     public static String getLastSeasonNo(String show) {
         File showFolder = null;
-        for(int i = 0; i < Main.sourceFolders.size(); i++) {
-            if(directoryExists(Main.sourceFolders.get(i), show)) {
-                showFolder = new File(Main.sourceFolders.get(i) + File.separator + show);
+        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
+            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
+                showFolder = new File(TV.ENV.getArguments().getSourceFolders().get(i) + File.separator + show);
                 break;
             }
         }
@@ -398,10 +398,10 @@ public class TVScan {
      */
     public static File getSeasonDirectory(String show, int season) {
         File f;
-        for(int i = 0; i < Main.sourceFolders.size(); i++) {
-            if(directoryExists(Main.sourceFolders.get(i), show)) {
+        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
+            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
                 for(String seasonPrefix : SeasonDirectoryFilter.SEASON_DIRECTORY_PREFIX) {
-                    f = new File(Main.sourceFolders.get(i) + File.separator + show + File.separator + seasonPrefix + " " + season);
+                    f = new File(TV.ENV.getArguments().getSourceFolders().get(i) + File.separator + show + File.separator + seasonPrefix + " " + season);
                     if(f.exists()) {
                         return f;
                     }
@@ -430,8 +430,8 @@ public class TVScan {
         if(show.trim().equals("") || show.trim().equals("..")) {
             return false;
         }
-        for(int i = 0; i < Main.sourceFolders.size(); i++) {
-            if(directoryExists(Main.sourceFolders.get(i), show)) {
+        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
+            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
                 return true;
             }
         }
