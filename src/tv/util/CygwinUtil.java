@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tv;
+package tv.util;
 
 /**
  *

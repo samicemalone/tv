@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
-import tv.CommandUtil;
+import tv.util.CommandUtil;
 import tv.TV;
 import tv.io.TVDBManager;
 import tv.model.Episode;
