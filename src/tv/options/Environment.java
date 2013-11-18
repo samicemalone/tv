@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import tv.ExitCode;
 import tv.TVScan;
-import tv.action.Action;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
 import tv.exception.MissingArgumentException;
@@ -138,8 +137,8 @@ public abstract class Environment {
      * show name, can only be validated once all source and library folders are 
      * known, and are done so here.
      * @throws MissingArgumentException if no source folders are specified
-     * @throws FileNotFoundException if the directory for the given show or the
-     * MediaInfo binary file cannot be found.
+     * @throws FileNotFoundException if the directory for the given show cannot
+     * be found.
      */
     public void validate() throws ExitException {
         if(args.isShutDownSet() || args.isVersionSet() || args.isFileSet()) {
@@ -161,11 +160,6 @@ public abstract class Environment {
         }
         if(!TVScan.showExists(args.getShow())) {
             throw new FileNotFoundException("Unable to find show: " + args.getShow(), ExitCode.SHOW_NOT_FOUND);
-        }
-        if(args.getMediaAction() == Action.LENGTH) {
-            if(!getMediaInfoBinary().exists()) {
-                throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
-            }
         }
     }
     

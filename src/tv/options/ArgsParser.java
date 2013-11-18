@@ -30,12 +30,18 @@ package tv.options;
 
 import java.io.File;
 import tv.ExitCode;
-import tv.TVScan;
 import tv.action.Action;
+import tv.action.CountAction;
+import tv.action.LengthAction;
+import tv.action.ListAction;
+import tv.action.MediaPlayerAction;
+import tv.action.SizeAction;
 import tv.exception.FileNotFoundException;
 import tv.exception.InvalidArgumentException;
 import tv.exception.MissingArgumentException;
+import tv.filter.RandomFilter;
 import tv.io.LibraryManager;
+import tv.mode.EpisodeModes;
 import tv.model.Arguments;
 
 /**
@@ -105,11 +111,11 @@ public class ArgsParser {
             return false;
         }
         if(programArgs[curIndex].equals("--enqueue") || programArgs[curIndex].equals("-q")) {
-            args.setMediaAction(Action.ENQUEUE);
+            args.setMediaAction(new MediaPlayerAction(Action.ENQUEUE));
             return false;
         }
         if(programArgs[curIndex].equals("--count") || programArgs[curIndex].equals("-c")) {
-            args.setMediaAction(Action.COUNT);
+            args.setMediaAction(new CountAction());
             return false;
         }
         if(programArgs[curIndex].equals("--set") || programArgs[curIndex].equals("-s")) {
@@ -121,17 +127,15 @@ public class ArgsParser {
             return false;
         }
         if(programArgs[curIndex].equals("--list") || programArgs[curIndex].equals("-l")) {
-            args.setMediaAction(Action.LIST);
+            args.setMediaAction(new ListAction());
             return false;
         }
         if(programArgs[curIndex].equals("--list-path")) {
-            args.setMediaAction(Action.LIST);
-            args.setMediaActionFlag(Action.LISTPATH);
-            args.setListPath(true);
+            args.setMediaAction(new ListAction(true));
             return false;
         }
         if(programArgs[curIndex].equals("--size")) {
-            args.setMediaAction(Action.SIZE);
+            args.setMediaAction(new SizeAction());
             return false;
         }
         if(programArgs[curIndex].equals("--player") || programArgs[curIndex].equals("-p")) {
@@ -139,23 +143,22 @@ public class ArgsParser {
             return true;
         }
         if(programArgs[curIndex].equals("--length")) {
-            args.setMediaAction(Action.LENGTH);
+            args.setMediaAction(new LengthAction());
             return false;
         }
         if(programArgs[curIndex].equals("-r") || programArgs[curIndex].equals("--random")) {
-            args.setMediaActionFlag(Action.RANDOM);
             // -r is optional. check if next argument is a value or another arg
-            if(!programArgs[curIndex+1].startsWith("-")) {
+            if(curIndex + 1 < programArgs.length && !programArgs[curIndex+1].startsWith("-")) {
                 try {
-                    args.setRandom(
+                    args.setRandomCount(
                         "all".equalsIgnoreCase(programArgs[curIndex+1])
-                            ? Integer.MAX_VALUE 
+                            ? RandomFilter.ALL
                             : Integer.parseInt(programArgs[curIndex+1])
                     );
                     return true;
                 } catch (NumberFormatException e) {}
             }
-            args.setRandom(true);
+            args.setRandomCount(1);
             return false;
         }
         if(programArgs[curIndex].equals("--config")) {
@@ -215,7 +218,7 @@ public class ArgsParser {
         if(arg.isServerSet()) {
             return;
         }
-        if(!TVScan.episodesValid(arg.getEpisodes())) {
+        if(!EpisodeModes.episodesValid(arg.getEpisodes())) {
             throw new InvalidArgumentException("Unable to parse the episodes given: " + arg.getEpisodes(), ExitCode.PARSE_EPISODES_FAILED);
         }
     }

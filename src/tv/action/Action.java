@@ -28,11 +28,16 @@
  */
 package tv.action;
 
+import java.io.File;
+import tv.exception.ExitException;
+import tv.filter.ExtensionFilter;
+import tv.model.Episode;
+
 /**
  *
  * @author Sam Malone
  */
-public class Action {
+public interface Action {
         
     public final static int PLAY = 1;
     public final static int ENQUEUE = 2;
@@ -44,5 +49,26 @@ public class Action {
     // bit flags
     public final static int RANDOM = 16;
     public final static int LISTPATH = 32;
+    
+    /**
+     * Extension Filter to be used to accept files based on their extension.
+     */
+    public ExtensionFilter FILTER = new ExtensionFilter();
+    
+    /**
+     * Execute the Action on the given File list.
+     * @param list List of episiode Files
+     * @throws ExitException if an error occurs whilst executing the action.
+     */
+    public void execute(File[] list) throws ExitException;
+    
+    /**
+     * Execute the Action with the given File and store the episode pointer given
+     * @param list List of episode Files
+     * @param pointerEpisode New Episode pointer to be set. If null, the pointer
+     * will be ignored.
+     * @throws ExitException if an error occurs whilst executing the action.
+     */
+    public void execute(File list, Episode pointerEpisode) throws ExitException;
     
 }

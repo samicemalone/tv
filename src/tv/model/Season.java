@@ -37,9 +37,13 @@ import tv.TVScan;
  */
 public class Season {
     
-    private File seasonDir;
-    private String seasonNoString;
-    private int seasonNo;
+    private final File seasonDir;
+    private final String seasonNoString;
+    private final int seasonNo;
+    
+    public static Season fromEpisode(Episode pointerEpisode) {
+        return new Season(pointerEpisode.getShow(), pointerEpisode.getSeasonNo());
+    }
     
     public Season(String show, int season) {
         seasonNo = season;

@@ -31,8 +31,9 @@ package tv.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import tv.util.CygwinUtil;
 import tv.action.Action;
+import tv.action.MediaPlayerAction;
+import tv.util.CygwinUtil;
 
 /**
  *
@@ -40,8 +41,8 @@ import tv.action.Action;
  */
 public class Arguments {
     
-    private int MEDIA_ACTION = Action.PLAY;
-    private int RANDOM_COUNT = 1;
+    private Action mediaAction = new MediaPlayerAction(Action.PLAY);
+    private int randomCount = 0;
     private String USER = "";
     private String EPISODES;
     private String SHOW;
@@ -52,7 +53,6 @@ public class Arguments {
     private List<String> sourceFolders = null;
     private boolean isSetOnly = false;
     private boolean isIgnoreSet = false;
-    private boolean isRandomSet = false;
     private boolean isServerSet = false;
     private boolean isShutDownSet = false;
     private boolean isListPathSet = false;
@@ -149,28 +149,11 @@ public class Arguments {
     }
     
     /**
-     * Check if the random flag is set
-     * @return true if the random flag is set, false otherwise
-     */
-    public boolean isRandomSet() {
-        return isRandomSet;
-    }
-    
-    /**
-     * Sets the random flag
-     * @param random
-     */
-    public void setRandom(boolean random) {
-        isRandomSet = random;
-    }
-    
-    /**
      * Sets the number of random items to be used
      * @param randomCount 
      */
-    public void setRandom(int randomCount) {
-        isRandomSet = true;
-        RANDOM_COUNT = randomCount;   
+    public void setRandomCount(int randomCount) {
+        this.randomCount = randomCount;   
     }
     
     /**
@@ -178,7 +161,7 @@ public class Arguments {
      * @return 
      */
     public int getRandomCount() {
-        return RANDOM_COUNT;
+        return randomCount;
     }
     
     /**
@@ -275,11 +258,11 @@ public class Arguments {
 
     /**
      * Sets the media action
-     * @param ACTION media action
+     * @param action media action
      * @see Action
      */
-    public void setMediaAction(int ACTION) {
-        this.MEDIA_ACTION = ACTION;
+    public void setMediaAction(Action action) {
+        mediaAction = action;
     }
     
     /**
@@ -287,17 +270,8 @@ public class Arguments {
      * @return media action
      * @see Action
      */
-    public int getMediaAction() {
-        return MEDIA_ACTION;
-    }
-    
-    /**
-     * Applies the given ACTION_FLAG to the current media action.
-     * E.g. ACTION_FLAG = Action.RANDOM, Action.LISTPATH
-     * @param ACTION_FLAG Flag from Action class
-     */
-    public void setMediaActionFlag(int ACTION_FLAG) {
-        MEDIA_ACTION |= ACTION_FLAG;
+    public Action getMediaAction() {
+        return mediaAction;
     }
     
     /**

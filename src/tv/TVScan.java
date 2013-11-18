@@ -48,49 +48,11 @@ import tv.model.Season;
 public class TVScan {
     
     /*
-     * Episode Modes
-     */
-    public static final int SEASON = 0;
-    public static final int EPSINGLE = 1;
-    public static final int SEASONFROMEP = 2;
-    public static final int EPRANGE = 3;
-    public static final int POINTER = 4;
-    public static final int SEASONFROMPOINTER = 5;
-    public static final int ALL = 6;
-    public static final int SEASONRANGE = 7;
-    public static final int ALLFROMSEASON = 8;
-    public static final int PILOT = 9;
-    public static final int LATEST = 10;
-    
-    /*
      * Offset Values
      */
     public static final int PREV = -1;
     public static final int CUR = 0;
     public static final int NEXT = 1;
-        
-    /**
-     * Gets the string array of valid regex patterns.
-     * The indexes use the episode mode constants e.g. SEASON, EPSINGLE etc...
-     * @return valid array of regex patterns
-     */
-    private static String[] getValidRegex() {
-        String[] regex = new String[11];
-        String season = "s[0-9][0-9]"; 
-        String ep = season + "e[0-9][0-9]";
-        regex[SEASON] = season + "$";
-        regex[EPSINGLE] = ep + "$";
-        regex[SEASONFROMEP] = ep + "-$";
-        regex[EPRANGE] = ep + "-" + ep + "$";
-        regex[POINTER] = "prev|current|cur|next";
-        regex[SEASONFROMPOINTER] = "(" + regex[POINTER] + ")-$";
-        regex[ALL] = "all";
-        regex[SEASONRANGE] = season + '-' + season + '$';
-        regex[ALLFROMSEASON] = season + "-$";
-        regex[PILOT] = "pilot";
-        regex[LATEST] = "latest";
-        return regex;
-    }
     
     /**
      * Gets the integer season number for the given episode string
@@ -436,36 +398,6 @@ public class TVScan {
             }
         }
         return false;
-    }
-    
-    /**
-     * Checks whether the episode string is valid
-     * @param ep Episode string e.g. s01e03, next, s02
-     * @return true if valid, false otherwise
-     */
-    public static boolean episodesValid(String ep) {
-        String[] regex = getValidRegex();
-        for(int i = 0; i < regex.length; i++) {
-            if(ep.matches(regex[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Gets the episode mode for the given episode string
-     * @param ep Episode string e.g. s01e03, next, s02
-     * @return Episode mode or -1 if not valid
-     */
-    public static int getEpisodesMode(String ep) {
-        String[] regex = getValidRegex();
-        for(int i = 0; i < regex.length; i++) {
-            if(ep.matches(regex[i])) {
-                return i;
-            }
-        }
-        return -1;
     }
     
 }
