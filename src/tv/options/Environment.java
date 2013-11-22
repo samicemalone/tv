@@ -29,6 +29,7 @@ package tv.options;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import tv.DirectoryExistsThread;
 import tv.ExitCode;
 import tv.TVScan;
 import tv.exception.ExitException;
@@ -144,14 +145,8 @@ public abstract class Environment {
         if(args.isShutDownSet() || args.isVersionSet() || args.isFileSet()) {
             return;
         }
-        List<String> nonExistentSources = new ArrayList<String>();
-        for(String source : args.getSourceFolders()) {
-            if(!new File(source).exists()) {
-                nonExistentSources.add(source);
-                System.err.println(String.format("warning: skipping %s - directory does not exist", source));
-            }
-        }
-        args.getSourceFolders().removeAll(nonExistentSources);
+        List<String> existentSources = DirectoryExistsThread.getExistingDirs(args.getSourceFolders());
+        args.getSourceFolders().retainAll(existentSources);
         if(args.getSourceFolders().isEmpty()) {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
