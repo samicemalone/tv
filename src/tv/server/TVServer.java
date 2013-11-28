@@ -175,12 +175,12 @@ public class TVServer {
                     out.println(io.getCSVEpisodes(episodeList));
                 }
                 if(command.equals("list_extra_files")) {
-                    List<String> files = new ArrayList<String>();
+                    List<File> files = new ArrayList<File>();
                     for(String dir : TV.ENV.getArguments().getExtraFolders()) {
-                        files.addAll(Arrays.asList(new File(dir).list(new ExtensionFilter())));
+                        files.addAll(Arrays.asList(new File(dir).listFiles(new ExtensionFilter())));
                     }
-                    for(String file : files) {
-                        out.println(file);
+                    for(File file : files) {
+                        out.println(file.getAbsolutePath());
                     }
                 }
                 r.close();
