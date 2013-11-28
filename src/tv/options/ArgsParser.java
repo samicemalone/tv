@@ -169,6 +169,10 @@ public class ArgsParser {
             args.addSourceFolder(programArgs[curIndex+1]);
             return true;
         }
+        if(programArgs[curIndex].equals("--files-from")) {
+            args.addExtraFolder(programArgs[curIndex+1]);
+            return true;
+        }
         if(programArgs[curIndex].equals("--library")) {
             args.setLibraryName(programArgs[curIndex+1]);
             return true;
@@ -233,6 +237,7 @@ public class ArgsParser {
         sb.append("          [-r [NO]] [-p MP] [-u USER] [--config CONFIG]\n");
         sb.append("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]\n");
         sb.append("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]\n");
+        sb.append("             [--files-from DIR]...");
         sb.append("       tv -k\n");
         sb.append('\n');
         sb.append("    -u, --user USER   To be used when EPISODES is either prev, cur, next.\n");
@@ -249,6 +254,9 @@ public class ArgsParser {
         sb.append("                      EPISODES can be any format that isn't pointer syntax\n");
         sb.append("    -p, --player MP   Sets the media player to use. Default is \"vlc\"\n");
         sb.append("    --config CONFIG   Sets the config file to use\n");
+        sb.append("    --files-from DIR  When invoked in daemon mode (-d), DIR will be used to\n");
+        sb.append("                      list the media files when requested by the daemon command\n");
+        sb.append("                      list_extra_files. DIR will not be searched recursively\n");
         sb.append("    --source DIR      TV source folder. You can use this option multiple times\n");
         sb.append("    --library NAME    Windows 7 Library NAME will be used to determine sources\n");
         sb.append("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue\n");

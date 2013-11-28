@@ -27,7 +27,6 @@
 package tv.options;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import tv.DirectoryExistsThread;
 import tv.ExitCode;
@@ -151,6 +150,8 @@ public abstract class Environment {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
         if(args.isServerSet()) {
+            existentSources = DirectoryExistsThread.getExistingDirs(args.getExtraFolders());
+            args.getExtraFolders().retainAll(existentSources);
             return;
         }
         if(!TVScan.showExists(args.getShow())) {

@@ -80,6 +80,13 @@ OPTIONS
       Plays FILE from the filesystem. Can be used with -q to enqueue instead of
       play.
 
+   --files-from DIR
+      Set a directory DIR that contains media files but does not follow the
+      standard /Show Name/Season x/FILE directory structure. The media files in
+      DIR will only be available in daemon mode (-d). The files can be listed
+      with the command "list_extra_files". See the DAEMON COMMANDS section for 
+      more information. DIR will not be searched recursively.
+
    -h, --help
       The help message will be output and the program will exit.
 
@@ -134,6 +141,9 @@ DAEMON COMMANDS
                            line.
       list_stored_eps      Gets the stored episodes (tvdb) in csv format. New
                            line if none. Fields terminated by , enclosed by "
+      list_extra_files     Gets the list of video files from any of the extra 
+                           folders containing media, but not under the 
+                           /showname/season/FILE structure. One path per line.
       get_show_name FILE   Get show name of FILE. Assumes /showname/parent/FILE
       shutdown             Shuts down the daemon
       tv TVARGS            Run tv command with same usage as in the SYNOPSIS.

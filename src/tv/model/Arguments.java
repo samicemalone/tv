@@ -50,7 +50,8 @@ public class Arguments {
     private String CONFIG;
     private String LIBRARY;
     private PlayerInfo PLAYER = new PlayerInfo();
-    private List<String> sourceFolders = null;
+    private final List<String> sourceFolders;
+    private final List<String> extraFolders;
     private boolean isSetOnly = false;
     private boolean isIgnoreSet = false;
     private boolean isServerSet = false;
@@ -63,6 +64,7 @@ public class Arguments {
      */
     public Arguments() {
         sourceFolders = new ArrayList<String>();
+        extraFolders = new ArrayList<String>();
     }
     
     /**
@@ -79,6 +81,24 @@ public class Arguments {
      */
     public List<String> getSourceFolders() {
         return sourceFolders;
+    }
+    
+    /**
+     * Adds an extra folder to be used to list media files when invoked as
+     * a daemon
+     * @param folder full path
+     */
+    public void addExtraFolder(String folder) {
+        extraFolders.add(folder);
+    }
+    
+    /**
+     * Gets a list of the extra folders specified with the --files-from option
+     * @return list of extra folders to list whilst invoked as daemon, or empty
+     * list
+     */
+    public List<String> getExtraFolders() {
+        return extraFolders;
     }
 
     /**

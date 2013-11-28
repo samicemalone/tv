@@ -39,14 +39,16 @@ public class Config {
         
     private String player;
     private String playerExecutable;
-    private List<String> playerArguments;
-    private List<String> sourceDirs;
+    private final List<String> playerArguments;
+    private final List<String> sourceDirs;
+    private final List<String> extraDirs;
     private String libraryName;
     private String mediainfoBinary;
     private String tvdbFile;
     
     public Config() {
         sourceDirs = new ArrayList<String>();
+        extraDirs = new ArrayList<String>();
         playerArguments = new ArrayList<String>();
     }
 
@@ -56,6 +58,14 @@ public class Config {
 
     public void setPlayer(String player) {
         this.player = player;
+    }
+
+    public List<String> getExraFolders() {
+        return extraDirs;
+    }
+
+    public void addExtraFolder(String extraDir) {
+        extraDirs.add(extraDir);
     }
 
     public List<String> getSourceFolders() {

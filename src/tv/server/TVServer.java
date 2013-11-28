@@ -38,13 +38,15 @@ import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
-import tv.util.CommandUtil;
 import tv.TV;
+import tv.filter.ExtensionFilter;
 import tv.io.TVDBManager;
 import tv.model.Episode;
+import tv.util.CommandUtil;
 
 /**
  *
@@ -173,6 +175,15 @@ public class TVServer {
                 }
                 if(command.equals("list_stored_eps")) {
                     out.println(io.getCSVEpisodes(episodeList));
+                }
+                if(command.equals("list_extra_files")) {
+                    List<String> files = new ArrayList<String>();
+                    for(String dir : TV.ENV.getArguments().getExtraFolders()) {
+                        files.addAll(Arrays.asList(new File(dir).list(new ExtensionFilter())));
+                    }
+                    for(String file : files) {
+                        out.println(file);
+                    }
                 }
                 r.close();
                 out.close();
