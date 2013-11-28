@@ -129,7 +129,9 @@ public class TVServer {
                 } catch (InterruptedException ex) {
 
                 } finally {
-                    br.close();
+                    if(br != null) {
+                        br.close();
+                    }
                 }
             } catch (IOException e) {
                 
@@ -164,11 +166,7 @@ public class TVServer {
                     if(f.getParent() != null) {
                         f = new File(f.getParent()).getParentFile();
                     }
-                    if(f == null) {
-                        out.println();
-                    } else {
-                        out.println(f.getName());
-                    }
+                    out.println(f == null ? "" : f.getName());
                 }
                 if(command.equals("list_shows")) {
                     out.println(io.getCSVShows());
