@@ -122,10 +122,10 @@ public abstract class Environment {
         if(config.getPlayerExecutable() != null) {
             args.getPlayerInfo().setPlayerExecutable(config.getPlayerExecutable());
         }
-        if(config.getPlayerArguments() != null && config.getPlayerArguments().length > 0) {
+        if(config.getPlayerArguments().length > 0) {
             args.getPlayerInfo().setPlayerArguments(config.getPlayerArguments());
         }
-        if(config.getSourceFolders() != null) {
+        if(!config.getSourceFolders().isEmpty()) {
             args.getSourceFolders().addAll(config.getSourceFolders());
         }
         if(!config.getExraFolders().isEmpty()) {

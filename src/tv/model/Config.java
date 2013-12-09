@@ -52,6 +52,10 @@ public class Config {
         playerArguments = new ArrayList<String>();
     }
 
+    /**
+     * Get the media player given in the config
+     * @return media player or null if not set
+     */
     public String getPlayer() {
         return player;
     }
@@ -60,6 +64,10 @@ public class Config {
         this.player = player;
     }
 
+    /**
+     * Gets a list of the extra folders given in the config
+     * @return list of extra folders or empty list
+     */
     public List<String> getExraFolders() {
         return extraDirs;
     }
@@ -68,6 +76,10 @@ public class Config {
         extraDirs.add(extraDir);
     }
 
+    /**
+     * Gets a list of the source folders given in the config
+     * @return list of source folders or empty list
+     */
     public List<String> getSourceFolders() {
         return sourceDirs;
     }
@@ -76,6 +88,10 @@ public class Config {
         sourceDirs.add(sourceDir);
     }
 
+    /**
+     * Get the windows library name if given in the config
+     * @return windows library name or null if not specified
+     */
     public String getLibraryName() {
         return libraryName;
     }
@@ -84,6 +100,10 @@ public class Config {
         this.libraryName = libraryName;
     }
 
+    /**
+     * Get the path to the mediainfo binary as given in the config
+     * @return path to mediainfo binary or null if not given
+     */
     public String getMediainfoBinary() {
         return mediainfoBinary;
     }
@@ -92,6 +112,10 @@ public class Config {
         this.mediainfoBinary = mediainfoBinary;
     }
 
+    /**
+     * Get the path to the TVDB file given in the config
+     * @return path to the TVDB file or null if not set
+     */
     public String getTVDBFile() {
         return tvdbFile;
     }
@@ -100,6 +124,10 @@ public class Config {
         this.tvdbFile = tvdbFile;
     }
 
+    /**
+     * Get the path to the media player executable/binary given in the config
+     * @return path to media player executable or null if not set
+     */
     public String getPlayerExecutable() {
         return playerExecutable;
     }
@@ -108,6 +136,11 @@ public class Config {
         this.playerExecutable = playerExecutable;
     }
 
+    /**
+     * Gets an array of arguments to send to media player which were given
+     * in the config
+     * @return array of media player arguments or empty array
+     */
     public String[] getPlayerArguments() {
         return playerArguments.toArray(new String[] {});
     }
