@@ -119,6 +119,7 @@ public class ConfigParser {
         }
         if(key.equals("PLAYER_ARGUMENTS")) {
             c.addPlayerArgument(value);
+            return;
         }
         if(key.equals("FILES_FROM")) {
             c.addExtraFolder(value);

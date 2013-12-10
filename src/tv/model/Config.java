@@ -68,7 +68,7 @@ public class Config {
      * Gets a list of the extra folders given in the config
      * @return list of extra folders or empty list
      */
-    public List<String> getExraFolders() {
+    public List<String> getExtraFolders() {
         return extraDirs;
     }
 

@@ -128,8 +128,8 @@ public abstract class Environment {
         if(!config.getSourceFolders().isEmpty()) {
             args.getSourceFolders().addAll(config.getSourceFolders());
         }
-        if(!config.getExraFolders().isEmpty()) {
-            args.getExtraFolders().addAll(config.getExraFolders());
+        if(!config.getExtraFolders().isEmpty()) {
+            args.getExtraFolders().addAll(config.getExtraFolders());
         }
     }
     
