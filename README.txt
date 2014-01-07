@@ -39,6 +39,7 @@ OPTIONS
          s01                 Whole season
          s02-s04             Season range
          s02-                All seasons from the given season
+         s$                  Latest season
          all                 Every episode
       *  pilot               Pilot episode. Alias for s01e01
       *  latest              Latest episode

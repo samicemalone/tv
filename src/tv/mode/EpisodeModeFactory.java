@@ -46,6 +46,7 @@ public class EpisodeModeFactory {
             case EpisodeModes.ALL:
             case EpisodeModes.SEASONRANGE:
             case EpisodeModes.ALLFROMSEASON:
+            case EpisodeModes.LATEST_SEASON:
                 return new EpisodeMode(mode);
             case EpisodeModes.EPSINGLE:
             case EpisodeModes.PILOT:

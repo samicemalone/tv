@@ -46,6 +46,7 @@ public class EpisodeModes {
     public static final int ALLFROMSEASON = 8;
     public static final int PILOT = 9;
     public static final int LATEST = 10;
+    public static final int LATEST_SEASON = 11;
     
     public static final int INVALID_MODE = -1;
     
@@ -55,7 +56,7 @@ public class EpisodeModes {
      * @return valid array of regex patterns
      */
     private static String[] getValidRegex() {
-        String[] regex = new String[11];
+        String[] regex = new String[12];
         String season = "s[0-9][0-9]"; 
         String ep = season + "e[0-9][0-9]";
         regex[SEASON] = season + "$";
@@ -69,6 +70,7 @@ public class EpisodeModes {
         regex[ALLFROMSEASON] = season + "-$";
         regex[PILOT] = "pilot";
         regex[LATEST] = "latest";
+        regex[LATEST_SEASON] = "s\\$$";
         return regex;
     }
     

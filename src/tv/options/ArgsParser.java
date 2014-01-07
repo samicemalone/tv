@@ -287,6 +287,7 @@ public class ArgsParser {
         sb.append("    s01                 Whole season\n");
         sb.append("    s02-s04             Season range\n");
         sb.append("    s02-                All seasons from the given season\n");
+        sb.append("    s$                  Latest season\n");
         sb.append("    all                 Every episode\n");
         sb.append(" *  pilot               Pilot episode. Alias for s01e01\n");
         sb.append(" *  latest              Latest episode\n");

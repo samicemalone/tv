@@ -5,7 +5,7 @@ _gen_opts() {
 }
 
 _gen_episodes() {
-    COMPREPLY=( $( compgen -W 'all cur prev next pilot latest' -- "$cur") )	
+    COMPREPLY=( $( compgen -W 'all cur prev next pilot latest s\$' -- "$cur") )	
 }
 
 _gen_player() {
@@ -51,7 +51,7 @@ _tv() {
                 *) _gen_episodes ;;
             esac
             return 0 ;;
-        s[0-9][0-9]*|cur|prev|next|pilot|latest)
+        s[0-9][0-9]*|s\$|cur|prev|next|pilot|latest)
             _gen_opts
             return 0 ;;
         *)

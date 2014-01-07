@@ -62,6 +62,8 @@ public class EpisodeMode {
         switch(mode) {
             case EpisodeModes.ALL:
                 return new Season(TV.ENV.getArguments().getShow(), "01");
+            case EpisodeModes.LATEST_SEASON:
+                return new Season(TV.ENV.getArguments().getShow(), TVScan.getLastSeasonNo(TV.ENV.getArguments().getShow()));
         }
         return new Season(TV.ENV.getArguments().getShow(), TVScan.getSeasonNo(TV.ENV.getArguments().getEpisodes()));
     }
@@ -96,6 +98,8 @@ public class EpisodeMode {
                 return seasonRange(season, TV.ENV.getArguments().getEpisodes().split("-"));
             case EpisodeModes.ALLFROMSEASON:
                 return allFromSeason(season);
+            case EpisodeModes.LATEST_SEASON:
+                return seasonFromEpisode(season, "00");
         }
         return new File[] {};
     }
