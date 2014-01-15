@@ -38,6 +38,7 @@ public class Episode {
     private String seasonNo;
     private String episodeNo;
     private String user;
+    private int date;
 
     /**
      * Creates an instance of Episode
@@ -115,5 +116,21 @@ public class Episode {
      */
     public void setShow(String show) {
         this.show = show;
+    }
+
+    /**
+     * Gets the date that the episode was played/stored
+     * @return unix timestamp or 0 if not set
+     */
+    public int getPlayedDate() {
+        return date;
+    }
+
+    /**
+     * Sets the date that the episode was played/stored
+     * @param date unix timestamp
+     */
+    public void setPlayedDate(int date) {
+        this.date = date;
     }
 }

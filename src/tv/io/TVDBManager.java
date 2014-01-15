@@ -49,7 +49,7 @@ public class TVDBManager extends CSV_IO {
     private String filteredUser;
     private boolean isFilterUser;
     
-    private final static int CSV_COLUMNS = 4;
+    private final static int CSV_COLUMNS = 5;
     
     public TVDBManager(File tvdb) {
         super(tvdb);
@@ -95,15 +95,26 @@ public class TVDBManager extends CSV_IO {
     public String getCSVEpisodes(List<Episode> eps) {
         StringBuilder sb = new StringBuilder();
         for(Episode e : eps) {
-            appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo());
+            appendCSVEpisodeLine(sb, e);
         }
         return sb.toString();
     }
     
     /**
+     * Wrapper around {@link #appendCSVLine(java.lang.StringBuilder, java.lang.String...)}.
+     * Appends a CSV formatted line with the values from the episode given in the order:
+     * Show, User, Season No, Episode No, Played Date
+     * @param sb StringBuilder to append to
+     * @param e Episode to append as a CSV line
+     */
+    private void appendCSVEpisodeLine(StringBuilder sb, Episode e) {
+        appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo(), String.valueOf(e.getPlayedDate()));
+    }
+    
+    /**
      * Find an episode in the episode list that matches the show and user given. 
-     * If a match is found, the episode will be updated with the new season and
-     * episode number.
+     * If a match is found, the episode will be updated with the new season,
+     * episode number and play date set as the current time.
      * @param episodes List of episodes to search
      * @param episode Episode to write to the TVDB file
      * @return true if an episode was found and updated. false otherwise
@@ -113,6 +124,7 @@ public class TVDBManager extends CSV_IO {
             if(ep.getShow().equals(episode.getShow()) && ep.getUser().equals(episode.getUser())) {
                 ep.setSeasonNo(episode.getSeasonNo());
                 ep.setEpisodeNo(episode.getEpisodeNo());
+                ep.setPlayedDate((int) (System.currentTimeMillis() / 1000));
                 return true;
             }
         }
@@ -131,17 +143,17 @@ public class TVDBManager extends CSV_IO {
             return;
         }
         StringBuilder sb = new StringBuilder();
+        boolean found = false;
         try {
             List<Episode> eps = readAllStorage();
-            boolean found = findAndUpdateEpisode(eps, episode);
+            found = findAndUpdateEpisode(eps, episode);
             for(Episode e : eps) {
-                appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo());    
+                appendCSVEpisodeLine(sb, e);
             }
-            if(!found) {
-                appendCSVLine(sb, episode.getShow(), episode.getUser(), episode.getSeasonNo(), episode.getEpisodeNo());
-            }
-        } catch(FileNotFoundException ex) {
-            appendCSVLine(sb, episode.getShow(), episode.getUser(), episode.getSeasonNo(), episode.getEpisodeNo());
+        } catch(FileNotFoundException ex) {} // ignored because file will be created
+        if(!found) {
+            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
+            appendCSVEpisodeLine(sb, episode);
         }
         writeFile(sb.toString());
     }
@@ -174,6 +186,7 @@ public class TVDBManager extends CSV_IO {
     protected void handleLine(Matcher m) {
         if(m.find()) {
             Episode ep = new Episode(m.group(1), m.group(2), m.group(3), m.group(4));
+            ep.setPlayedDate(Integer.valueOf(m.group(5)));
             if(isFilterUser) {
                 if(ep.getUser().equals(filteredUser)) {
                     list.put(m.group(1), ep);

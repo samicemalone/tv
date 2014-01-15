@@ -157,7 +157,10 @@ FILES
    The following files are used by tv:
       tvdb.csv
          This file stores the pointers for the TV shows. It is created as needed
-         by the application.
+         by the application. The number of CSV fields changed in version 1.2.
+         Before v1.2, there were 4 fields: Show, User, Season No, Episode No.
+         v1.2 and higher uses 5 fields. The extra field is the date that the
+         episode was played.
       tv.conf
          This is the default file name of the configuration file. This file does
          not exist by default. See sample.tv.conf for usage.
