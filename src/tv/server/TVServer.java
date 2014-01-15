@@ -39,6 +39,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
@@ -46,6 +47,7 @@ import tv.TV;
 import tv.filter.ExtensionFilter;
 import tv.io.TVDBManager;
 import tv.model.Episode;
+import tv.model.LastPlayedComparator;
 import tv.util.CommandUtil;
 
 /**
@@ -172,6 +174,10 @@ public class TVServer {
                     out.println(io.getCSVShows());
                 }
                 if(command.equals("list_stored_eps")) {
+                    out.println(io.getCSVEpisodes(episodeList));
+                }
+                if(command.equals("list_recent_eps")) {
+                    Collections.sort(episodeList, new LastPlayedComparator());
                     out.println(io.getCSVEpisodes(episodeList));
                 }
                 if(command.equals("list_extra_files")) {

@@ -140,6 +140,9 @@ DAEMON COMMANDS
    The listening daemon can accept the following commands:
       list_shows           Gets the list of shows. Double quoted, one show per
                            line.
+      list_recent_eps      Gets the stored episodes (tvdb), ordered by last 
+                           played, in csv format. New line if none. Fields
+                           terminated by , enclosed by "
       list_stored_eps      Gets the stored episodes (tvdb) in csv format. New
                            line if none. Fields terminated by , enclosed by "
       list_extra_files     Gets the list of video files from any of the extra 
