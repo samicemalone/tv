@@ -32,7 +32,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import tv.TV;
 import tv.model.Episode;
@@ -43,10 +44,10 @@ import tv.model.Episode;
  */
 public class TVDBManager extends CSV_IO {
     
-    private HashMap<String, Episode> list;
-    private ArrayList<Episode> episodeList;
-    private String user;
-    private boolean isReadOnlyUser;
+    private Map<String, Episode> list;
+    private List<Episode> episodeList;
+    private String filteredUser;
+    private boolean isFilterUser;
     
     private final static int CSV_COLUMNS = 4;
     
@@ -78,9 +79,8 @@ public class TVDBManager extends CSV_IO {
      */
     public String getCSVShows() {
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
-            String[] epList = new File(TV.ENV.getArguments().getSourceFolders().get(i)).list();
-            for(String show : epList) {
+        for(String showFolder : TV.ENV.getArguments().getSourceFolders()) {
+            for(String show : new File(showFolder).list()) {
                 appendCSVLine(sb, show);
             }
         }
@@ -92,57 +92,58 @@ public class TVDBManager extends CSV_IO {
      * @param eps CSV formatted episode list
      * @return 
      */
-    public String getCSVEpisodes(ArrayList<Episode> eps) {
+    public String getCSVEpisodes(List<Episode> eps) {
         StringBuilder sb = new StringBuilder();
-        Episode e;
-        for(Iterator<Episode> i = eps.iterator(); i.hasNext(); ) {
-            e = i.next();
-            appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo());    
+        for(Episode e : eps) {
+            appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo());
         }
         return sb.toString();
+    }
+    
+    /**
+     * Find an episode in the episode list that matches the show and user given. 
+     * If a match is found, the episode will be updated with the new season and
+     * episode number.
+     * @param episodes List of episodes to search
+     * @param episode Episode to write to the TVDB file
+     * @return true if an episode was found and updated. false otherwise
+     */
+    private boolean findAndUpdateEpisode(List<Episode> episodes, Episode episode) {
+        for(Episode ep : episodes) {
+            if(ep.getShow().equals(episode.getShow()) && ep.getUser().equals(episode.getUser())) {
+                ep.setSeasonNo(episode.getSeasonNo());
+                ep.setEpisodeNo(episode.getEpisodeNo());
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
      * Writes the given episode information to the TV Database.
      * Will attempt to create the parent directory for the TVDB if
      * it doesn't exist.
-     * @param show TV Show
-     * @param user User
-     * @param season Zero Padded Season No
-     * @param episode Zero Padded Episode No
+     * @param episode Episode to write to the TVDB file
      */
-    public void writeStorage(String show, String user, String season, String episode) {
-        if(!CSV_FILE.getParentFile().exists()) {
-            if(!CSV_FILE.getParentFile().mkdir()) {
-                System.out.println("Unable to create a directory at " + CSV_FILE.getParentFile().getAbsolutePath());
-                return;
-            }
+    public void writeStorage(Episode episode) {
+        if(!CSV_FILE.getParentFile().exists() && !CSV_FILE.getParentFile().mkdir()) {
+            System.out.println("Unable to create a directory at " + CSV_FILE.getParentFile().getAbsolutePath());
+            return;
         }
         StringBuilder sb = new StringBuilder();
-        boolean found = false;
         try {
-            ArrayList<Episode> eps = readAllStorage();
-            for(int i = 0; i < eps.size(); i++) {
-                if(eps.get(i).getShow().equals(show) && eps.get(i).getUser().equals(user)) {
-                    eps.get(i).setSeasonNo(season);
-                    eps.get(i).setEpisodeNo(episode);
-                    found = true;
-                    break;
-                }
-            }
-            Episode e;
-            for(Iterator<Episode> i = eps.iterator(); i.hasNext(); ) {
-                e = i.next();
+            List<Episode> eps = readAllStorage();
+            boolean found = findAndUpdateEpisode(eps, episode);
+            for(Episode e : eps) {
                 appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo());    
             }
             if(!found) {
-                appendCSVLine(sb, show, user, season, episode);
+                appendCSVLine(sb, episode.getShow(), episode.getUser(), episode.getSeasonNo(), episode.getEpisodeNo());
             }
-            writeFile(sb.toString());
         } catch(FileNotFoundException ex) {
-            appendCSVLine(sb, show, user, season, episode);
-            writeFile(sb.toString());
+            appendCSVLine(sb, episode.getShow(), episode.getUser(), episode.getSeasonNo(), episode.getEpisodeNo());
         }
+        writeFile(sb.toString());
     }
     
     /**
@@ -152,10 +153,10 @@ public class TVDBManager extends CSV_IO {
      */
     public void readStorage(String user) throws FileNotFoundException {
         list = new HashMap<String, Episode>();
-        isReadOnlyUser = true;
-        this.user = user;
+        isFilterUser = true;
+        filteredUser = user;
         readFile(CSV_COLUMNS);
-        isReadOnlyUser = false;
+        isFilterUser = false;
     }
     
     /**
@@ -163,7 +164,7 @@ public class TVDBManager extends CSV_IO {
      * @return List of episode information, empty list if exists but no eps
      * @throws FileNotFoundException If the TV database doesn't exist
      */
-    public ArrayList<Episode> readAllStorage() throws FileNotFoundException {
+    public List<Episode> readAllStorage() throws FileNotFoundException {
         episodeList = new ArrayList<Episode>();
         readFile(CSV_COLUMNS);
         return episodeList;
@@ -172,14 +173,13 @@ public class TVDBManager extends CSV_IO {
     @Override
     protected void handleLine(Matcher m) {
         if(m.find()) {
-            if(isReadOnlyUser) {
-                if(m.group(2).equals(user)) {
-                    list.put(m.group(1), new Episode(m.group(1), m.group(3), m.group(4)));
+            Episode ep = new Episode(m.group(1), m.group(2), m.group(3), m.group(4));
+            if(isFilterUser) {
+                if(ep.getUser().equals(filteredUser)) {
+                    list.put(m.group(1), ep);
                 }
             } else {
-                Episode tmpEp = new Episode(m.group(1), m.group(3), m.group(4));
-                tmpEp.setUser(m.group(2));
-                episodeList.add(tmpEp);
+                episodeList.add(ep);
             }
         }
     }

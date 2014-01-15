@@ -56,7 +56,7 @@ public class TVServer {
     
     private final static int SERVER_PORT = 5768;
     private boolean isRunning = true;
-    private ArrayList<Episode> episodeList;
+    private List<Episode> episodeList;
     private final TVDBManager io;
     private ServerSocket serverSocket;
     

@@ -88,10 +88,12 @@ public class WriteOnlyPointerMode extends EpisodeMode {
         Season season = getSeason();
         assertStartingSeasonValid(season);
         switch(getMode()) {
-            case EpisodeModes.PILOT: return new Episode(args.getShow(), season.getSeasonString(), "01");
-            case EpisodeModes.LATEST: return new Episode(args.getShow(), season.getSeasonString(), TVScan.getLastEpisodeNo(season));
+            case EpisodeModes.PILOT: 
+                return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), "01");
+            case EpisodeModes.LATEST: 
+                return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), TVScan.getLastEpisodeNo(season));
         }
-        return new Episode(args.getShow(), season.getSeasonString(), TVScan.getEpisodeNo(args.getEpisodes())); 
+        return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), TVScan.getEpisodeNo(args.getEpisodes())); 
     }
     
     
@@ -99,6 +101,7 @@ public class WriteOnlyPointerMode extends EpisodeMode {
      * Get the episode File given by the season and episode number
      * @param season Season Season the episode is in
      * @param episodeNo Episode No
+     * @return episode File
      * @throws ExitException if unable to find the episode given
      */
     public File singleEpisode(Season season, String episodeNo) throws ExitException {
@@ -113,6 +116,7 @@ public class WriteOnlyPointerMode extends EpisodeMode {
      * Wrapper method for singleEpisode(Season, episodeNo) using the users episode string
      * to determine episode number
      * @param season Season Season the episode is in
+     * @return episode File
      * @throws ExitException if unable to find the episode given
      */
     public File singleEpisode(Season season) throws ExitException {

@@ -60,12 +60,7 @@ public class MediaPlayerAction implements Action {
     @Override
     public void execute(File list, Episode pointerEpisode) {
         if(pointerEpisode != null && !TV.ENV.getArguments().isIgnoreSet()) {
-            new TVDBManager(TV.ENV.getTVDB()).writeStorage(
-                pointerEpisode.getShow(),
-                TV.ENV.getArguments().getUser(),
-                pointerEpisode.getSeasonNo(),
-                pointerEpisode.getEpisodeNo()
-            );
+            new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
         }
         if(!TV.ENV.getArguments().isSetOnly()) {
             execute(new File[] { list });

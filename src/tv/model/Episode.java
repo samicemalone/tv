@@ -42,11 +42,13 @@ public class Episode {
     /**
      * Creates an instance of Episode
      * @param show TV Show
+     * @param user TV user
      * @param seasonNo Zero padded season number
      * @param episodeNo Zero padded episode number
      */
-    public Episode(String show, String seasonNo, String episodeNo) {
+    public Episode(String show, String user, String seasonNo, String episodeNo) {
         this.show = show;
+        this.user = user;
         this.seasonNo = seasonNo;
         this.episodeNo = episodeNo;
     }
@@ -100,7 +102,7 @@ public class Episode {
     }
 
     /**
-     * Sets the TV Show
+     * Gets the TV Show
      * @return 
      */
     public String getShow() {
@@ -108,7 +110,7 @@ public class Episode {
     }
 
     /**
-     * Gets the TV Show
+     * Sets the TV Show
      * @param show 
      */
     public void setShow(String show) {

@@ -65,7 +65,7 @@ public class PointerMode extends EpisodeMode {
      */
     private void setNewPointer() {
         if(newPointer == null) {
-            newPointer = new Episode(currentPointer.getShow(), currentPointer.getSeasonNo(), currentPointer.getEpisodeNo());
+            newPointer = new Episode(currentPointer.getShow(), currentPointer.getUser(), currentPointer.getSeasonNo(), currentPointer.getEpisodeNo());
             TVScan.getEpisode(newPointer, TV.ENV.getArguments().getEpisodes());
         }
     }
