@@ -13,7 +13,7 @@ This file describes the installation of "tv" on your machine.
    Environment (JRE). The minimum JRE version that this application supports is
    1.6. See: http://java.com/en/download/index.jsp
 
- * Apache Ant 1.8.3. is required to build from source.
+ * Apache Maven is used to build from source.
  
 ===============================================================================
  2. Build 
@@ -21,7 +21,9 @@ This file describes the installation of "tv" on your machine.
 
 To build the application, run the following command:
 
-    ant jar
+    mvn install
+
+This will create tv.jar file in the "target" directory
     
 ===============================================================================
  3. Configuration 
@@ -51,8 +53,8 @@ dynamically via an array of directory names from some filesystems.
  4. Installation
 ===============================================================================
 
-You can move the dist/tv.jar file to any directory you wish to store and run 
-the program.
+You can move the target/tv.jar file to any directory you wish to
+store and run the program.
 
 ===============================================================================
  5. Running the Program
