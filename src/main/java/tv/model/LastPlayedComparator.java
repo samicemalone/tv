@@ -36,7 +36,7 @@ public class LastPlayedComparator implements Comparator<Episode> {
 
     @Override
     public int compare(Episode o1, Episode o2) {
-        return Integer.compare(o2.getPlayedDate(), o1.getPlayedDate());
+        return new Integer(o2.getPlayedDate()).compareTo(new Integer(o1.getPlayedDate()));
     }
     
 }
