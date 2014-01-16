@@ -177,8 +177,10 @@ public class TVServer {
                     out.println(io.getCSVEpisodes(episodeList));
                 }
                 if(command.equals("list_recent_eps")) {
-                    Collections.sort(episodeList, new LastPlayedComparator());
-                    out.println(io.getCSVEpisodes(episodeList));
+                    List<Episode> sortedList = new ArrayList<Episode>(episodeList.size());
+                    sortedList.addAll(episodeList);
+                    Collections.sort(sortedList, new LastPlayedComparator());
+                    out.println(io.getCSVEpisodes(sortedList));
                 }
                 if(command.equals("list_extra_files")) {
                     List<File> files = new ArrayList<File>();
