@@ -9,7 +9,7 @@ _gen_episodes() {
 }
 
 _gen_player() {
-    COMPREPLY=( $( compgen -W 'vlc omxplayer' -- "$cur") )	
+    COMPREPLY=( $( compgen -W 'vlc omxplayer acestream' -- "$cur") )	
 }
 
 _gen_show() {

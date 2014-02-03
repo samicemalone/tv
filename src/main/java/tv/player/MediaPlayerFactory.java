@@ -45,6 +45,8 @@ public class MediaPlayerFactory {
             String name = player.getPlayer().toLowerCase();
             if(name.equals("omxplayer")) {
                 p = new OMXPlayer();
+            } else if(name.equals("acestream")) {
+                p = new AceStreamPlayer();
             } else if(name.equals("stdout")) {
                 p = new DummyPlayer();
             } else {

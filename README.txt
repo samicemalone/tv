@@ -68,6 +68,7 @@ OPTIONS
       The following media players are currently supported:
          vlc (default)
          omxplayer
+         acestream
 
    --config CONFIG
       Sets CONFIG as the configuration file to use. For the default 
