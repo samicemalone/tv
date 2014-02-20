@@ -46,6 +46,11 @@ public class Config {
     private String mediainfoBinary;
     private String tvdbFile;
     
+    private boolean isTraktEnabled;
+    private String traktUsername;
+    private String traktPasswordSha1;
+    private String traktApiKey;
+    
     public Config() {
         sourceDirs = new ArrayList<String>();
         extraDirs = new ArrayList<String>();
@@ -147,6 +152,40 @@ public class Config {
 
     public void addPlayerArgument(String playerArguments) {
         this.playerArguments.add(playerArguments);
+    }
+
+    public boolean isTraktEnabled() {
+        return isTraktEnabled;
+    }
+    
+    public void setTraktEnabled(String enabled) {
+        if("true".equals(enabled)) {
+            isTraktEnabled = true;
+        }
+    }
+
+    public String getTraktApiKey() {
+        return traktApiKey;
+    }
+    
+    public void setTraktApiKey(String traktApiKey) {
+        this.traktApiKey = traktApiKey;
+    }
+
+    public String getTraktPasswordSha1() {
+        return traktPasswordSha1;
+    }
+
+    public void setTraktPasswordSha1(String traktPasswordSha1) {
+        this.traktPasswordSha1 = traktPasswordSha1;
+    }
+
+    public String getTraktUsername() {
+        return traktUsername;
+    }
+
+    public void setTraktUsername(String traktUsername) {
+        this.traktUsername = traktUsername;
     }
     
 }

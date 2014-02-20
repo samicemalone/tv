@@ -57,6 +57,16 @@ public class WindowsEnvironment extends Environment {
     }
 
     @Override
+    public File getDefaultTraktDB() {
+        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\traktdb.csv");
+    }
+
+    @Override
+    public File getDefaultTraktDBJournal() {
+        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\traktdb-journal.csv");
+    }
+
+    @Override
     public void fromConfig(Config config) {
         if(getArguments().getLibraryName() == null && config.getLibraryName() != null && LibraryManager.isWindows7()) {
             getArguments().getSourceFolders().addAll(LibraryManager.parseLibraryFolders(config.getLibraryName()));

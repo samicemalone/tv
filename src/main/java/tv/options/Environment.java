@@ -36,6 +36,7 @@ import tv.exception.FileNotFoundException;
 import tv.exception.MissingArgumentException;
 import tv.model.Arguments;
 import tv.model.Config;
+import tv.model.TraktCredentials;
 
 /**
  *
@@ -46,6 +47,7 @@ public abstract class Environment {
     private File tvdb;
     private File mediainfo;
     private Arguments args;
+    private TraktCredentials traktCredentials;
     
     /**
      * Get the default TVDB file
@@ -64,6 +66,18 @@ public abstract class Environment {
      * @return default config file
      */
     public abstract File getDefaultConfig();
+    
+    /**
+     * Get the default TraktDB file
+     * @return default TraktDB file
+     */
+    public abstract File getDefaultTraktDB();
+    
+    /**
+     * Get the default TraktDB journal file
+     * @return default TraktDB journal file
+     */
+    public abstract File getDefaultTraktDBJournal();
     
     /**
      * Get the arguments for this Environment
@@ -106,6 +120,23 @@ public abstract class Environment {
     }
     
     /**
+     * Check whether Trakt integration is enabled
+     * @return true if enabled, false otherwise
+     */
+    public boolean isTraktEnabled() {
+        return traktCredentials != null;
+    }
+    
+    /**
+     * Get the Trakt user credentials
+     * @return Trakt user credentials or null if not set/enabled
+     */
+    public TraktCredentials getTraktCredentials() {
+        return traktCredentials;
+    }
+
+    
+    /**
      * Apply the values from the Config file to this Environment
      * @param config Config
      */
@@ -130,6 +161,13 @@ public abstract class Environment {
         }
         if(!config.getExtraFolders().isEmpty()) {
             args.getExtraFolders().addAll(config.getExtraFolders());
+        }
+        if(config.isTraktEnabled()) {
+            traktCredentials = new TraktCredentials(
+                config.getTraktUsername(),
+                config.getTraktPasswordSha1(),
+                config.getTraktApiKey()
+            );
         }
     }
     

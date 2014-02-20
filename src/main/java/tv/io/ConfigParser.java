@@ -123,6 +123,22 @@ public class ConfigParser {
         }
         if(key.equals("FILES_FROM")) {
             c.addExtraFolder(value);
+            return;
+        }
+        if(key.equals("ENABLE_TRAKT")) {
+            c.setTraktEnabled(value);
+            return;
+        }
+        if(key.equals("TRAKT_USERNAME")) {
+            c.setTraktUsername(value);
+            return;
+        }
+        if(key.equals("TRAKT_PASSWORD_SHA1")) {
+            c.setTraktPasswordSha1(value);
+            return;
+        }
+        if(key.equals("TRAKT_API_KEY")) {
+            c.setTraktApiKey(value);
         }
     }
     

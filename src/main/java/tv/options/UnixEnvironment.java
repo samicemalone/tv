@@ -52,5 +52,15 @@ public class UnixEnvironment extends Environment {
     public File getDefaultConfig() {
         return new File(System.getProperty("user.home") + "/.tv/tv.conf");
     }
+
+    @Override
+    public File getDefaultTraktDB() {
+        return new File(System.getProperty("user.home") + "/.tv/traktdb.csv");
+    }
+    
+    @Override
+    public File getDefaultTraktDBJournal() {
+        return new File(System.getProperty("user.home") + "/.tv/traktdb-journal.csv");
+    }
     
 }
