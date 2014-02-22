@@ -48,18 +48,57 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.dstovall</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>1.4.4</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <!-- Optional -->
+                            <onejarVersion>0.97</onejarVersion>
+                            <!-- Optional, default is false -->
+                            <attachToBuild>true</attachToBuild>
+                            <!-- Optional, default is "onejar" -->
+                            <classifier>onejar</classifier>
+                            <filename>tv.jar</filename>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
-    <!--
     <dependencies>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>3.8.1</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
+        <dependency>
+            <!-- https://github.com/UweTrottmann/trakt-java (Fork) -->
+            <groupId>com.jakewharton</groupId>
+            <artifactId>trakt-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.0</version>
+        </dependency>
+    <!--
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>3.8.1</version>
+          <scope>test</scope>
+        </dependency>
     -->
+    </dependencies>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>onejar-maven-plugin.googlecode.com</id>
+            <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+        </pluginRepository>
+    </pluginRepositories>
   
 </project>

@@ -28,6 +28,9 @@ package tv.action;
 
 import java.io.File;
 import tv.TV;
+import tv.TraktClient;
+import tv.exception.CancellationException;
+import tv.exception.TraktException;
 import tv.io.TVDBManager;
 import tv.model.Episode;
 import tv.player.MediaPlayer;
@@ -59,11 +62,23 @@ public class MediaPlayerAction implements Action {
 
     @Override
     public void execute(File list, Episode pointerEpisode) {
-        if(pointerEpisode != null && !TV.ENV.getArguments().isIgnoreSet()) {
-            new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
-        }
         if(!TV.ENV.getArguments().isSetOnly()) {
             execute(new File[] { list });
+        }
+        if(pointerEpisode != null && !TV.ENV.getArguments().isIgnoreSet()) {
+            new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
+            if(TV.ENV.isTraktEnabled()) {
+                TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
+                trakt.processJournal();
+                try {
+                    trakt.markEpisodeAsSeen(pointerEpisode);
+                } catch (TraktException ex) {
+                    System.err.println(ex.getMessage());
+                    trakt.addEpisodeToJournal(pointerEpisode);
+                } catch (CancellationException ex) {
+                    
+                }
+            }
         }
     }
     
