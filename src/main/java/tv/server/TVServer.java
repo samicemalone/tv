@@ -85,7 +85,7 @@ public class TVServer {
 
     public void shutdown() {
         try {
-            Socket s = SocketFactory.getDefault().createSocket(Inet4Address.getByName("127.0.0.1"), 5768);
+            Socket s = SocketFactory.getDefault().createSocket(Inet4Address.getByName("127.0.0.1"), SERVER_PORT);
             PrintWriter out = new PrintWriter(s.getOutputStream(), true);
             out.println("shutdown");
             out.close();
@@ -142,9 +142,12 @@ public class TVServer {
 
         @Override
         public void run() {
+            PrintWriter out = null;
+            BufferedReader r = null;
+            boolean stopRunning = false;
             try {
-                PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-                BufferedReader r = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                out = new PrintWriter(client.getOutputStream(), true);
+                r = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 String command = r.readLine();
                 if(command.equals("shutdown")) {
                     isRunning = false;
@@ -191,11 +194,21 @@ public class TVServer {
                         out.println(file.getAbsolutePath());
                     }
                 }
-                r.close();
-                out.close();
-                client.close();
             } catch (IOException ex) {
-
+                System.err.println(ex.getMessage());
+            } catch (tv.exception.FileNotFoundException ex) {
+                stopRunning = true;
+            } finally {
+                try {
+                    if(r != null && out != null) {
+                        r.close();
+                        out.close();
+                    }
+                    client.close();
+                } catch (IOException ex) {}
+                if(stopRunning) {
+                    shutdown();
+                }
             }
         }
         

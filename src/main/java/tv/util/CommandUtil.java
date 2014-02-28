@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tv.ExitCode;
+import tv.exception.FileNotFoundException;
 import tv.io.LibraryManager;
 
 /**
@@ -45,10 +47,17 @@ public class CommandUtil {
     /**
      * Get the path of Jar file
      * @return Path to Jar file
-     * @throws SecurityException if unable to get protection domain
+     * @throws FileNotFoundException if unable to determine jar file location
      */
-    public static String getJarPath() throws SecurityException {
-        return new File(CommandUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
+    public static String getJarPath() throws FileNotFoundException {
+        try {
+            String uri = CommandUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI().toString();
+            int i = uri.indexOf("!/");
+            if(uri.startsWith("jar:file:/") && i != -1) {
+                return uri.substring("jar:file:/".length(), i);
+            }
+        } catch (Exception ex) {}
+        throw new FileNotFoundException("Unable to determine jar file location", ExitCode.FILE_NOT_FOUND);
     }
     
     /**
@@ -84,16 +93,13 @@ public class CommandUtil {
      * running jar file with the arguments given in dequotedArgsList
      * @param dequotedArgsList List of dequoted arguments to pass to jar
      * @return command string or null if error
+     * @throws FileNotFoundException if unable to locate the jar file
      */
-    public static String[] buildJavaCommandString(List<String> dequotedArgsList) {
+    public static String[] buildJavaCommandString(List<String> dequotedArgsList) throws FileNotFoundException {
         String[] args = new String[dequotedArgsList.size() + 2]; //size - 1 + 3
         args[0] = new File(System.getProperty("java.home"), getBinary("bin/java")).getAbsolutePath();
         args[1] = "-jar";
-        try {
-            args[2] = getJarPath();
-        } catch(SecurityException e) {
-            return null;
-        }
+        args[2] = getJarPath();
         for(int i = 1; i < dequotedArgsList.size(); i++) { // skip [0] = tv
             args[i+2] = dequotedArgsList.get(i);
         }
