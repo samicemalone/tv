@@ -47,6 +47,7 @@ public class Config {
     private String tvdbFile;
     
     private boolean isTraktEnabled;
+    private boolean isTraktUseCheckins;
     private String traktUsername;
     private String traktPasswordSha1;
     private String traktApiKey;
@@ -159,9 +160,15 @@ public class Config {
     }
     
     public void setTraktEnabled(String enabled) {
-        if("true".equals(enabled)) {
-            isTraktEnabled = true;
-        }
+        isTraktEnabled = "true".equals(enabled);
+    }
+
+    public boolean isTraktUseCheckins() {
+        return isTraktUseCheckins;
+    }
+    
+    public void setTraktUseCheckins(String useCheckins) {
+        isTraktUseCheckins = "true".equals(useCheckins);
     }
 
     public String getTraktApiKey() {

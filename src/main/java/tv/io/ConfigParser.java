@@ -93,52 +93,43 @@ public class ConfigParser {
         if(value.isEmpty()) {
             value = null;
         }
+        parseConfig(c, key, value);
+    }
+    
+    /**
+     * Parse the config with the given key and applies the value to the
+     * appropriate action in the config.
+     * @param c Config to be applied to
+     * @param key key defining which action to apply
+     * @param value value of config to set
+     */
+    private static void parseConfig(Config c, String key, String value) {
         if(key.equals("TVDB_FILE")) {
             c.setTVDBFile(value);
-            return;
-        }
-        if(key.equals("SOURCE")) {
+        } else if(key.equals("SOURCE")) {
             c.addSourceFolder(value);
-            return;
-        }
-        if(key.equals("MEDIAINFO_BINARY")) {
+        } else if(key.equals("MEDIAINFO_BINARY")) {
             c.setMediainfoBinary(value);
-            return;
-        }
-        if(key.equals("LIBRARY_NAME")) {
+        } else if(key.equals("LIBRARY_NAME")) {
             c.setLibraryName(value);
-            return;
-        }
-        if(key.equals("PLAYER")) {
+        } else if(key.equals("PLAYER")) {
             c.setPlayer(value);
-            return;
-        }
-        if(key.equals("PLAYER_EXECUTABLE")) {
+        } else if(key.equals("PLAYER_EXECUTABLE")) {
             c.setPlayerExecutable(value);
-            return;
-        }
-        if(key.equals("PLAYER_ARGUMENTS")) {
+        } else if(key.equals("PLAYER_ARGUMENTS")) {
             c.addPlayerArgument(value);
-            return;
-        }
-        if(key.equals("FILES_FROM")) {
+        } else if(key.equals("FILES_FROM")) {
             c.addExtraFolder(value);
-            return;
-        }
-        if(key.equals("ENABLE_TRAKT")) {
+        } else if(key.equals("ENABLE_TRAKT")) {
             c.setTraktEnabled(value);
-            return;
-        }
-        if(key.equals("TRAKT_USERNAME")) {
+        } else if(key.equals("TRAKT_USERNAME")) {
             c.setTraktUsername(value);
-            return;
-        }
-        if(key.equals("TRAKT_PASSWORD_SHA1")) {
+        } else if(key.equals("TRAKT_PASSWORD_SHA1")) {
             c.setTraktPasswordSha1(value);
-            return;
-        }
-        if(key.equals("TRAKT_API_KEY")) {
+        } else if(key.equals("TRAKT_API_KEY")) {
             c.setTraktApiKey(value);
+        } else if(key.equals("TRAKT_USE_CHECKINS")) {
+            c.setTraktUseCheckins(value);
         }
     }
     

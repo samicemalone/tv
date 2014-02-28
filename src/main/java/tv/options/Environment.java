@@ -48,6 +48,7 @@ public abstract class Environment {
     private File mediainfo;
     private Arguments args;
     private TraktCredentials traktCredentials;
+    private boolean isTraktUseCheckins;
     
     /**
      * Get the default TVDB file
@@ -128,6 +129,15 @@ public abstract class Environment {
     }
     
     /**
+     * Check whether Trakt check-ins should be used instead of marking an episode
+     * as seen.
+     * @return true if check-ins shoule be used, false otherwise
+     */
+    public boolean isTraktUseCheckins() {
+        return isTraktUseCheckins;
+    }
+    
+    /**
      * Get the Trakt user credentials
      * @return Trakt user credentials or null if not set/enabled
      */
@@ -168,6 +178,7 @@ public abstract class Environment {
                 config.getTraktPasswordSha1(),
                 config.getTraktApiKey()
             );
+            isTraktUseCheckins = config.isTraktUseCheckins();
         }
     }
     
