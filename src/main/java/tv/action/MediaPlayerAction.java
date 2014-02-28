@@ -71,7 +71,11 @@ public class MediaPlayerAction implements Action {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
                 trakt.processJournal();
                 try {
-                    trakt.markEpisodeAsSeen(pointerEpisode);
+                    if(TV.ENV.isTraktUseCheckins()) {
+                        trakt.checkinEpisode(pointerEpisode);
+                    } else {
+                        trakt.markEpisodeAsSeen(pointerEpisode);
+                    }
                 } catch (TraktException ex) {
                     System.err.println(ex.getMessage());
                     trakt.addEpisodeToJournal(pointerEpisode);

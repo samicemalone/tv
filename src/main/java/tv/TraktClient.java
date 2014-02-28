@@ -30,6 +30,7 @@
 package tv;
 
 import com.jakewharton.trakt.Trakt;
+import com.jakewharton.trakt.entities.CheckinResponse;
 import com.jakewharton.trakt.entities.Response;
 import com.jakewharton.trakt.entities.TvShow;
 import com.jakewharton.trakt.enumerations.Status;
@@ -77,12 +78,7 @@ public class TraktClient {
         if(episode.getPlayedDate() == 0) {
             episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
         }
-        int showId = findShowId(episode.getShow());
-        if(showId == NOT_FOUND) {
-            throw new TraktException("notice: trakt - unable to find any shows that match: " + episode.getShow());
-        } else if (showId == CANCELLED) {
-            throw new CancellationException("notice: trakt - user has cancelled show choice");
-        }
+        int showId = getShowId(episode.getShow());
         try {
             Response response = trakt.showService().episodeSeen(buildEpisodes(showId, episode));
             if(response != null && Status.SUCCESS.equals(response.status)) {
@@ -90,6 +86,73 @@ public class TraktClient {
             }
         } catch (Exception ex) {}
         throw new TraktException("warning: trakt: error whilst marking episode as seen");
+    }
+    
+    /**
+     * Check in the given episode to trakt. If a checkin already exists, it will
+     * be cancelled and this episode will be checked in instead.
+     * @param episode episode to check in
+     * @throws TraktException 
+     * @throws CancellationException if an error occurs whilst checking in
+     */
+    public void checkinEpisode(Episode episode) throws TraktException, CancellationException {
+        int showId = getShowId(episode.getShow());
+        if(!checkin(showId, episode)) {
+            cancelCheckin();
+            checkin(showId, episode);
+        }
+    }
+    
+    /**
+     * Check in the given episode with the given show id and episode information
+     * @param showId trakt tvdb show id
+     * @param episode episode to checkin
+     * @return true if successfully checked in, false otherwise
+     * @throws TraktException if no response is received from trakt or if an
+     * error occurs whilst checking in
+     */
+    private boolean checkin(int showId, Episode episode) throws TraktException {
+        try {
+            CheckinResponse response = trakt.showService().checkin(buildEpisodeCheckin(showId, episode));
+            if(response == null) {
+                throw new TraktException("warning: trakt: no response from checkin request");
+            }
+            return Status.SUCCESS.equals(response.status);
+        } catch (Exception ex) {}
+        throw new TraktException("warning: trakt: error whilst checking in episode");
+    }
+    
+    /**
+     * Cancel the current trakt checkin
+     * @throws TraktException if an error occurs cancelling a checkin
+     */
+    public void cancelCheckin() throws TraktException {
+        try {
+            Response response = trakt.showService().cancelcheckin();
+            if(response != null && Status.SUCCESS.equals(response.status)) {
+                return;
+            }
+        } catch (Exception ex) {}
+        throw new TraktException("warning: trakt: error cancelling checkin");
+    }
+
+    /**
+     * Build an API compatible ShowCheckin object from the given episode information
+     * @param showId trakt tvdb show id
+     * @param episode episode to build
+     * @return ShowCheckin
+     */
+    private ShowService.ShowCheckin buildEpisodeCheckin(int showId, Episode episode) {
+        ShowService.ShowCheckin checkin = new ShowService.ShowCheckin(
+            showId,
+            Integer.valueOf(episode.getSeasonNo()),
+            Integer.valueOf(episode.getEpisodeNo()),
+            "Checked in with tv " + Version.VERSION,
+            Version.VERSION,
+            Version.BUILD_DATE
+        );
+        checkin.duration = 5;
+        return checkin;
     }
     
     /**
@@ -151,6 +214,24 @@ public class TraktClient {
                 System.err.println("warning: trakt: unable to write new journal");
             }
         }
+    }
+    
+    /**
+     * Get the trakt tvdb show id for the given show name.
+     * @param showName
+     * @return trakt tvdb show id
+     * @throws TraktException if an error occurs retrieving search results or 
+     * a show id cannot be found
+     * @throws CancellationException if the user cancelled
+     */
+    private int getShowId(String showName) throws TraktException, CancellationException {
+        int showId = findShowId(showName);
+        if(showId == NOT_FOUND) {
+            throw new TraktException("notice: trakt - unable to find any shows that match: " + showName);
+        } else if (showId == CANCELLED) {
+            throw new CancellationException("notice: trakt - user has cancelled show choice");
+        }
+        return showId;
     }
     
     /**

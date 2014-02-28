@@ -25,7 +25,7 @@ DESCRIPTION
    The default action is to play EPISODES immediately in the given media player.
 
    Marking episodes as seen on Trakt is also supported when navigating episodes.
-   See sample.tv.conf to enable Trakt integration.
+   See sample.tv.conf to see how to enable Trakt integration.
 
 OPTIONS
    The order of the options does not matter as long as TVSHOW EPISODES appear
