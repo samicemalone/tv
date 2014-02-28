@@ -69,8 +69,8 @@ public class MediaPlayerAction implements Action {
             new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
             if(TV.ENV.isTraktEnabled()) {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
-                trakt.processJournal();
                 try {
+                    trakt.processJournal();
                     if(TV.ENV.isTraktUseCheckins()) {
                         trakt.checkinEpisode(pointerEpisode);
                     } else {

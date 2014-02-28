@@ -41,8 +41,10 @@ import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import retrofit.RetrofitError;
 import tv.exception.CancellationException;
 import tv.exception.TraktException;
+import tv.exception.TraktUnauthorizedException;
 import tv.io.TraktDBManager;
 import tv.model.Episode;
 import tv.model.TraktCredentials;
@@ -75,16 +77,16 @@ public class TraktClient {
      * @throws CancellationException if the user cancels the show search results
      */
     public void markEpisodeAsSeen(Episode episode) throws TraktException, CancellationException {
-        if(episode.getPlayedDate() == 0) {
-            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
-        }
+        setEpisodePlayedDate(episode);
         int showId = getShowId(episode.getShow());
         try {
             Response response = trakt.showService().episodeSeen(buildEpisodes(showId, episode));
             if(response != null && Status.SUCCESS.equals(response.status)) {
                 return;
             }
-        } catch (Exception ex) {}
+        } catch (RetrofitError ex) {
+            assertAuthorized(ex);
+        }
         throw new TraktException("warning: trakt: error whilst marking episode as seen");
     }
     
@@ -96,10 +98,17 @@ public class TraktClient {
      * @throws CancellationException if an error occurs whilst checking in
      */
     public void checkinEpisode(Episode episode) throws TraktException, CancellationException {
+        setEpisodePlayedDate(episode);
         int showId = getShowId(episode.getShow());
         if(!checkin(showId, episode)) {
             cancelCheckin();
             checkin(showId, episode);
+        }
+    }
+    
+    private void setEpisodePlayedDate(Episode episode) {
+        if(episode.getPlayedDate() == 0) {
+            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
         }
     }
     
@@ -118,7 +127,9 @@ public class TraktClient {
                 throw new TraktException("warning: trakt: no response from checkin request");
             }
             return Status.SUCCESS.equals(response.status);
-        } catch (Exception ex) {}
+        } catch (RetrofitError ex) {
+            assertAuthorized(ex);
+        }
         throw new TraktException("warning: trakt: error whilst checking in episode");
     }
     
@@ -132,7 +143,9 @@ public class TraktClient {
             if(response != null && Status.SUCCESS.equals(response.status)) {
                 return;
             }
-        } catch (Exception ex) {}
+        } catch (RetrofitError ex) {
+            assertAuthorized(ex);
+        }
         throw new TraktException("warning: trakt: error cancelling checkin");
     }
 
@@ -190,14 +203,17 @@ public class TraktClient {
      * marking as seen. The journal will be read, and an attempt will be made
      * to mark the episodes as seen. Any successfully marked episodes will be 
      * removed from the journal
+     * @throws tv.exception.TraktUnauthorizedException if credentials unauthorized
      */
-    public void processJournal() {
+    public void processJournal() throws TraktUnauthorizedException {
         List<Episode> eps = dbManager.readJournal();
         int size = eps.size();
         for(Iterator<Episode> it = eps.iterator(); it.hasNext(); ) {
             try {
                 markEpisodeAsSeen(it.next());
                 it.remove();
+            } catch (TraktUnauthorizedException ex) {
+                throw ex;
             } catch (TraktException ex) {
                 System.err.println("warning: trakt: unable to mark journaled episodes as seen");
                 break;
@@ -268,10 +284,23 @@ public class TraktClient {
         return NOT_FOUND;
     }
     
+    /**
+     * Assert that the retrofit error given was not caused by unauthorized credentials
+     * @param re retrofit error
+     * @throws TraktUnauthorizedException if credentials are not authorized
+     */
+    private void assertAuthorized(RetrofitError re) throws TraktUnauthorizedException {
+        retrofit.client.Response r = re.getResponse();
+        if(r != null && r.getStatus() == 401) {
+            throw new TraktUnauthorizedException(r.getReason(), re);
+        }
+    }
+    
     private List<TvShow> searchShow(String showName) throws TraktException {
         try {
             return trakt.searchService().shows(showName, 10);
-        } catch(Exception e) {
+        } catch(RetrofitError e) {
+            assertAuthorized(e);
             throw new TraktException("warning: trakt: error whilst searching: " + showName);
         }
     }

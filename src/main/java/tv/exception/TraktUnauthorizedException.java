@@ -33,14 +33,10 @@ package tv.exception;
  *
  * @author Sam Malone
  */
-public class TraktException extends Exception {
-    
-    public TraktException(String message) {
-        super(message);
-    }
-    
-    public TraktException(String message, Throwable cause) {
-        super(message, cause);
+public class TraktUnauthorizedException extends TraktException {
+
+    public TraktUnauthorizedException(String message, Throwable cause) {
+        super("warning: trakt: " + message, cause);
     }
     
 }
