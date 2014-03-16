@@ -53,6 +53,19 @@ public class Episode {
         this.seasonNo = seasonNo;
         this.episodeNo = episodeNo;
     }
+    /**
+     * Creates an instance of Episode
+     * @param show TV Show
+     * @param user TV user
+     * @param seasonNo Season number
+     * @param episodeNo Episode number
+     */
+    public Episode(String show, String user, int seasonNo, int episodeNo) {
+        this.show = show;
+        this.user = user;
+        this.seasonNo = String.format("%02d", seasonNo);
+        this.episodeNo = String.format("%02d", episodeNo);
+    }
     
     /**
      * Gets the user to which this Episode refers

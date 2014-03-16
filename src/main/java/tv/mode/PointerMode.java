@@ -26,13 +26,18 @@
 
 package tv.mode;
 
+import com.jakewharton.trakt.entities.TvShowProgress;
 import java.io.File;
 import tv.ExitCode;
 import tv.TV;
 import tv.TVScan;
+import tv.TraktClient;
+import tv.exception.CancellationException;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
+import tv.exception.TraktException;
 import tv.io.TVDBManager;
+import tv.model.Arguments;
 import tv.model.Episode;
 import tv.model.Season;
 
@@ -42,13 +47,18 @@ import tv.model.Season;
  */
 public class PointerMode extends EpisodeMode {
     
-    private final Episode currentPointer;
+    private Episode currentPointer;
     private Episode newPointer;
 
-    public PointerMode(int mode) throws ExitException {
+    public PointerMode(int mode) {
         super(mode);
-        currentPointer = getCurrentPointer();
+    }
+    
+    public PointerMode readCurrentPointer() throws ExitException {
+        boolean useTraktPointer = TV.ENV.isTraktEnabled() && TV.ENV.getArguments().isTraktPointerSet();
+        currentPointer = useTraktPointer ? getCurrentTraktPointer() : getCurrentTVDBPointer();
         setNewPointer();
+        return this;
     }
 
     /**
@@ -81,13 +91,31 @@ public class PointerMode extends EpisodeMode {
         return new File[] {};
     }
     
+    private static Episode getCurrentTraktPointer() throws ExitException {
+        TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
+        Arguments args = TV.ENV.getArguments();
+        try {
+            TvShowProgress.NextEpisode next = trakt.getNextEpisode(args.getShow());
+            if(next != null) {
+                Episode curPointer = new Episode(args.getShow(), args.getUser(), next.season, next.number);
+                return TVScan.getEpisode(curPointer, "prev");
+            }
+        } catch (TraktException e) {
+            throw new ExitException(e.getMessage(), ExitCode.TRAKT_ERROR);
+        } catch (CancellationException e) {
+            throw new ExitException("exiting: user cancelled whilst choosing the matching show search result.", ExitCode.SHOW_INPUT_REQUIRED);
+        }
+        throw new ExitException("trakt: there is no next episode for this show", ExitCode.EPISODES_NOT_FOUND);
+    }
+
+    
     /**
      * Read the TVDB file to get the current pointer for the given show
      * @return Current episode pointer
      * @throws ExitException if unable to find the TVDB file or the current 
      * episode file or if there is stored episode data for the show
      */
-    private static Episode getCurrentPointer() throws ExitException {
+    private static Episode getCurrentTVDBPointer() throws ExitException {
         TVDBManager io = new TVDBManager(TV.ENV.getTVDB());
         Episode curEp;
         try {

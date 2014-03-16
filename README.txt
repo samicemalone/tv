@@ -4,7 +4,7 @@ NAME
 
 SYNOPSIS
    tv TVSHOW EPISODES [ACTION] [-hvsi] [--source DIR]... [--library NAME]
-      [-r [NO]] [-p PLAYER] [-u USER] [--config CONFIG]
+      [-r [NO]] [-p PLAYER] [-u USER] [--trakt] [--config CONFIG]
    tv -f FILE [ACTION] [-p PLAYER] [--config CONFIG]
    tv -d [--source DIR]... [--library NAME] [-p PLAYER] [--config CONFIG]
    tv -k 
@@ -131,6 +131,13 @@ OPTIONS
       configuration file. If using Windows 7 and the --library option is used,
       then source doesn't need to be set, as the sources will be added from the
       library.
+
+   --trakt
+      The --trakt flag fetches the current episode pointer from trakt instead
+      of reading it from the tvdb file. This flag will only take effect if trakt
+      is enabled via the config file and the EPISODES argument uses a navigable
+      pointer e.g. "next", or uses the pointer for the remaining episodes e.g.
+      "cur-". A navigable pointer will be stored for use locally.
 
    -u USER, --user USER
       Sets the USER to avoid overwriting the default episode pointer so that 

@@ -33,6 +33,9 @@ import com.jakewharton.trakt.Trakt;
 import com.jakewharton.trakt.entities.CheckinResponse;
 import com.jakewharton.trakt.entities.Response;
 import com.jakewharton.trakt.entities.TvShow;
+import com.jakewharton.trakt.entities.TvShowProgress;
+import com.jakewharton.trakt.enumerations.Extended2;
+import com.jakewharton.trakt.enumerations.SortType;
 import com.jakewharton.trakt.enumerations.Status;
 import com.jakewharton.trakt.services.ShowService;
 import java.io.IOException;
@@ -59,9 +62,11 @@ public class TraktClient {
     private static final int CANCELLED = -2;
     
     private final Trakt trakt;
+    private final TraktCredentials credentials;
     private final TraktDBManager dbManager;
 
     public TraktClient(TraktCredentials credentials) {
+        this.credentials = credentials;
         trakt = new Trakt();
         trakt.setAuthentication(credentials.getUsername(), credentials.getPasswordSha1());
         trakt.setApiKey(credentials.getApiKey());
@@ -104,6 +109,28 @@ public class TraktClient {
             cancelCheckin();
             checkin(showId, episode);
         }
+    }
+    
+    /**
+     * Get the next episode to watch for the given show
+     * @param show show name
+     * @return next episode or null if there is no next episode
+     * @throws TraktException if unable to fetch the watched episodes progress
+     * @throws CancellationException if the user cancels if prompted for a show choice
+     */
+    public TvShowProgress.NextEpisode getNextEpisode(String show) throws TraktException, CancellationException {
+        int showId = getShowId(show);
+        try {
+            List<TvShowProgress> progress = trakt.userService().progressWatched(
+                credentials.getUsername(), String.valueOf(showId), SortType.TITLE, Extended2.NORMAL
+            );
+            if(progress != null) {
+                return progress.get(0).next_episode;
+            }
+        } catch (RetrofitError re) {
+            assertAuthorized(re);
+        }
+        throw new TraktException("warning: trakt: unable to fetch the watched episodes progress");
     }
     
     private void setEpisodePlayedDate(Episode episode) {

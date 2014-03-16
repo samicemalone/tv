@@ -39,7 +39,7 @@ public class EpisodeModeFactory {
         switch(mode) {
             case EpisodeModes.POINTER:
             case EpisodeModes.SEASONFROMPOINTER:
-                return new PointerMode(mode);
+                return new PointerMode(mode).readCurrentPointer();
             case EpisodeModes.SEASON:
             case EpisodeModes.SEASONFROMEP:
             case EpisodeModes.EPRANGE:

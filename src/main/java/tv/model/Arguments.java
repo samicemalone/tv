@@ -58,6 +58,7 @@ public class Arguments {
     private boolean isShutDownSet = false;
     private boolean isListPathSet = false;
     private boolean isVersionSet = false;
+    private boolean isTraktPointerSet = false;
     
     /**
      * Creates a new instance of the class
@@ -218,6 +219,22 @@ public class Arguments {
      */
     public String getFileString() {
         return FILE;
+    }
+
+    /**
+     * Checks if the flag is set to fetch the pointer from trakt
+     * @return true if trakt pointer is to be fetched, false otherwise
+     */
+    public boolean isTraktPointerSet() {
+        return isTraktPointerSet;
+    }
+
+    /**
+     * Set the flag to fetch the episode pointer from trakt
+     * @param isTraktPointer true to fetch traktpointer, false to follow the local pointer
+     */
+    public void setTraktPointer(boolean isTraktPointer) {
+        this.isTraktPointerSet = isTraktPointer;
     }
 
     /**

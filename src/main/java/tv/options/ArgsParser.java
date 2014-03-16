@@ -106,45 +106,12 @@ public class ArgsParser {
      * @throws InvalidArgumentException if an unexpected argument is given
      */
     private static boolean parseOption(Arguments args, String[] programArgs, int curIndex) throws InvalidArgumentException {
-        if(programArgs[curIndex].equals("-d") || programArgs[curIndex].equals("--daemon")) {
-            args.setServer(true);
-            return false;
-        }
-        if(programArgs[curIndex].equals("--enqueue") || programArgs[curIndex].equals("-q")) {
-            args.setMediaAction(new MediaPlayerAction(Action.ENQUEUE));
-            return false;
-        }
-        if(programArgs[curIndex].equals("--count") || programArgs[curIndex].equals("-c")) {
-            args.setMediaAction(new CountAction());
-            return false;
-        }
-        if(programArgs[curIndex].equals("--set") || programArgs[curIndex].equals("-s")) {
-            args.setIsSetOnly(true);
-            return false;
-        }
-        if(programArgs[curIndex].equals("--ignore") || programArgs[curIndex].equals("-i")) {
-            args.setIgnore(true);
-            return false;
-        }
-        if(programArgs[curIndex].equals("--list") || programArgs[curIndex].equals("-l")) {
-            args.setMediaAction(new ListAction());
-            return false;
-        }
-        if(programArgs[curIndex].equals("--list-path")) {
-            args.setMediaAction(new ListAction(true));
-            return false;
-        }
-        if(programArgs[curIndex].equals("--size")) {
-            args.setMediaAction(new SizeAction());
+        if(parseFlag(args, programArgs[curIndex])) {
             return false;
         }
         if(programArgs[curIndex].equals("--player") || programArgs[curIndex].equals("-p")) {
             args.getPlayerInfo().setPlayer(programArgs[curIndex+1]);
             return true;
-        }
-        if(programArgs[curIndex].equals("--length")) {
-            args.setMediaAction(new LengthAction());
-            return false;
         }
         if(programArgs[curIndex].equals("-r") || programArgs[curIndex].equals("--random")) {
             // -r is optional. check if next argument is a value or another arg
@@ -194,6 +161,39 @@ public class ArgsParser {
     }
     
     /**
+     * Parse the given flag
+     * @param args Arguments
+     * @param flag Flag to parse
+     * @return true if the flag was parsed, false if not
+     */
+    private static boolean parseFlag(Arguments args, String flag) {
+        if(flag.equals("-d") || flag.equals("--daemon")) {
+            args.setServer(true);
+        } else if(flag.equals("--enqueue") || flag.equals("-q")) {
+            args.setMediaAction(new MediaPlayerAction(Action.ENQUEUE));
+        } else if(flag.equals("--count") || flag.equals("-c")) {
+            args.setMediaAction(new CountAction());
+        } else if(flag.equals("--set") || flag.equals("-s")) {
+            args.setIsSetOnly(true);
+        } else if(flag.equals("--ignore") || flag.equals("-i")) {
+            args.setIgnore(true);
+        } else if(flag.equals("--list") || flag.equals("-l")) {
+            args.setMediaAction(new ListAction());
+        } else if(flag.equals("--list-path")) {
+            args.setMediaAction(new ListAction(true));
+        } else if(flag.equals("--size")) {
+            args.setMediaAction(new SizeAction());
+        } else if(flag.equals("--length")) {
+            args.setMediaAction(new LengthAction());
+        } else if(flag.equals("--trakt")) {
+            args.setTraktPointer(true);
+        } else {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Validates the given Arguments. Validation is successful if no exceptions 
      * were thrown.
      * @param arg parsed Arguments
@@ -234,7 +234,7 @@ public class ArgsParser {
     public static String getHelpMessage() {
         StringBuilder sb = new StringBuilder(4000);
         sb.append("Usage: tv TVSHOW EPISODES [ACTION] [-hvsi] [--source DIR]... [--library NAME]\n");
-        sb.append("          [-r [NO]] [-p MP] [-u USER] [--config CONFIG]\n");
+        sb.append("          [-r [NO]] [-p MP] [-u USER] [--trakt] [--config CONFIG]\n");
         sb.append("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]\n");
         sb.append("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]\n");
         sb.append("             [--files-from DIR]...");
@@ -247,6 +247,10 @@ public class ArgsParser {
         sb.append("                      or single episode format.\n");
         sb.append("    -i, --ignore      Do not remember the episode. EPISODES can be prev, cur,\n");
         sb.append("                      next, pilot, latest or single episode format.\n");
+        sb.append("    --trakt           Use trakt to determine the current episode pointer. For\n");
+        sb.append("                      use with navigable EPISODES e.g. \"next\" or remaning\n");
+        sb.append("                      episodes in a season e.g. \"next-\". Trakt must be\n");
+        sb.append("                      enabled via config.\n");
         sb.append("    -r, --random [NO] Selects random episode(s) from the EPISODES range given.\n");
         sb.append("                      If NO is omitted, 1 random episode will be returned.\n");
         sb.append("                      If NO is \"all\" then all EPISODES will be randomized.\n");
