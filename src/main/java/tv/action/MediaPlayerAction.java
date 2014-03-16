@@ -70,7 +70,6 @@ public class MediaPlayerAction implements Action {
             if(TV.ENV.isTraktEnabled()) {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
                 try {
-                    trakt.processJournal();
                     if(TV.ENV.isTraktUseCheckins()) {
                         trakt.checkinEpisode(pointerEpisode);
                     } else {

@@ -31,6 +31,7 @@ package tv;
 import java.io.File;
 import tv.action.Action;
 import tv.exception.ExitException;
+import tv.exception.TraktUnauthorizedException;
 import tv.filter.RandomFilter;
 import tv.io.ConfigParser;
 import tv.io.LibraryManager;
@@ -101,6 +102,10 @@ public class TV {
         Action mediaAction = ENV.getArguments().getMediaAction();
         int mode = EpisodeModes.getEpisodesMode(ENV.getArguments().getEpisodes());
         try {
+            if(TV.ENV.isTraktEnabled()) {
+                TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
+                trakt.processJournal();
+            }
             EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode);
             File[] list = episodesMode.buildFileList();
             if(list.length == 1) {
@@ -110,6 +115,8 @@ public class TV {
                     ENV.getArguments().getRandomCount() == 0 ? list : RandomFilter.filter(list)
                 );
             }
+        } catch (TraktUnauthorizedException e) {
+            System.err.println(e.getMessage());
         } catch (ExitException e) {
             System.err.println(e.getMessage());
         }
