@@ -90,10 +90,9 @@ public class ConfigParser {
         } catch(IndexOutOfBoundsException ex) {
             throw new ParseException("Unable to parse the line " + line, ExitCode.CONFIG_PARSE_ERROR);
         }
-        if(value.isEmpty()) {
-            value = null;
+        if(!value.isEmpty()) {
+            parseConfig(c, key, value);
         }
-        parseConfig(c, key, value);
     }
     
     /**
