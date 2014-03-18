@@ -56,7 +56,6 @@ public class Arguments {
     private boolean isIgnoreSet = false;
     private boolean isServerSet = false;
     private boolean isShutDownSet = false;
-    private boolean isListPathSet = false;
     private boolean isVersionSet = false;
     private boolean isTraktPointerSet = false;
     
@@ -349,22 +348,6 @@ public class Arguments {
      */
     public void setPlayerInfo(PlayerInfo player) {
         PLAYER = player;
-    }
-
-    /**
-     * Sets the list path flag
-     * @param b 
-     */
-    public void setListPath(boolean b) {
-        isListPathSet = b;
-    }
-    
-    /**
-     * Checks if the flag is set to display the full paths when listing
-     * @return true if flag is set, false otherwise
-     */
-    public boolean isListPathSet() {
-        return isListPathSet;
     }
 
     /**
