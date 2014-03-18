@@ -28,6 +28,8 @@
  */
 package tv.model;
 
+import java.util.Arrays;
+
 /**
  *
  * @author Sam Malone
@@ -37,6 +39,14 @@ public class PlayerInfo {
     private String player;
     private String playerExecutable;
     private String[] playerArguments;
+
+    public PlayerInfo() {
+        
+    }
+    
+    public PlayerInfo(String player) {
+        this.player = player;
+    }
 
     public String getPlayer() {
         return player;
@@ -61,5 +71,31 @@ public class PlayerInfo {
     public void setPlayerArguments(String[] playerArguments) {
         this.playerArguments = playerArguments;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 53 * hash + (this.player != null ? this.player.hashCode() : 0);
+        hash = 53 * hash + (this.playerExecutable != null ? this.playerExecutable.hashCode() : 0);
+        hash = 53 * hash + Arrays.deepHashCode(this.playerArguments);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final PlayerInfo other = (PlayerInfo) obj;
+        if((this.player == null) ? (other.player != null) : !this.player.equals(other.player)) {
+            return false;
+        }
+        if((this.playerExecutable == null) ? (other.playerExecutable != null) : !this.playerExecutable.equals(other.playerExecutable)) {
+            return false;
+        }
+        return Arrays.deepEquals(this.playerArguments, other.playerArguments);
+    }
+    
+    
     
 }

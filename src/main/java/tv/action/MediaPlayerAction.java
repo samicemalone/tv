@@ -84,5 +84,19 @@ public class MediaPlayerAction implements Action {
             }
         }
     }
+
+    @Override
+    public int hashCode() {
+        return 47 * 7 + this.action;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final MediaPlayerAction other = (MediaPlayerAction) obj;
+        return this.action == other.action;
+    }
     
 }

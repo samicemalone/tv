@@ -65,7 +65,6 @@ public class ListAction implements Action {
         execute(new File[] { list });
     }
     
-    
     /**
      * Prints the list of media files from the given list of files/directories
      * to stdout.
@@ -79,6 +78,20 @@ public class ListAction implements Action {
                 System.out.println(listPath ? CommandUtil.getCanonicalPath(file) : file.getName());
             }
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return 79 * 5 + (this.listPath ? 1 : 0);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ListAction other = (ListAction) obj;
+        return this.listPath == other.listPath;
     }
     
 }
