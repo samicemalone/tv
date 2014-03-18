@@ -141,7 +141,9 @@ public class ArgsParser {
             return true;
         }
         if(programArgs[curIndex].equals("--library")) {
-            args.setLibraryName(programArgs[curIndex+1]);
+            if(LibraryManager.isWindows7()) {
+                args.setLibraryName(programArgs[curIndex+1]);
+            }
             return true;
         }
         if(programArgs[curIndex].equals("--user") || programArgs[curIndex].equals("-u")) {
@@ -237,7 +239,7 @@ public class ArgsParser {
         sb.append("          [-r [NO]] [-p MP] [-u USER] [--trakt] [--config CONFIG]\n");
         sb.append("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]\n");
         sb.append("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]\n");
-        sb.append("             [--files-from DIR]...");
+        sb.append("             [--files-from DIR]...\n");
         sb.append("       tv -k\n");
         sb.append('\n');
         sb.append("    -u, --user USER   To be used when EPISODES is either prev, cur, next.\n");

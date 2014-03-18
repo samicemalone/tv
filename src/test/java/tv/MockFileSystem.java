@@ -45,10 +45,12 @@ public class MockFileSystem {
         "Scrubs", "Friends", "Modern Family"
     };
     
+    private final static File MOCK_ROOT = new File("mockroot_tv");
+    
     public final static int NUM_SEASONS = 3;
     public final static int NUM_EPISODES = 12;
     
-    private final static File MOCK_ROOT = new File("mockroot_tv");
+    public final static File CONFIG_FILE = new File(MOCK_ROOT, "tv.conf");
     
     public static List<String> getSourceFolders() {
         return Arrays.asList(MOCK_ROOT.getAbsolutePath());
