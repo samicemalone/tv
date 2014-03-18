@@ -27,6 +27,7 @@
 package tv.mode;
 
 import tv.ExitCode;
+import tv.TVScan;
 import tv.exception.ExitException;
 
 /**
@@ -35,11 +36,11 @@ import tv.exception.ExitException;
  */
 public class EpisodeModeFactory {
     
-    public static EpisodeMode getEpisodeMode(int mode) throws ExitException {
+    public static EpisodeMode getEpisodeMode(int mode, TVScan scanner) throws ExitException {
         switch(mode) {
             case EpisodeModes.POINTER:
             case EpisodeModes.SEASONFROMPOINTER:
-                return new PointerMode(mode).readCurrentPointer();
+                return new PointerMode(mode, scanner).readCurrentPointer();
             case EpisodeModes.SEASON:
             case EpisodeModes.SEASONFROMEP:
             case EpisodeModes.EPRANGE:
@@ -47,11 +48,11 @@ public class EpisodeModeFactory {
             case EpisodeModes.SEASONRANGE:
             case EpisodeModes.ALLFROMSEASON:
             case EpisodeModes.LATEST_SEASON:
-                return new EpisodeMode(mode);
+                return new EpisodeMode(mode, scanner);
             case EpisodeModes.EPSINGLE:
             case EpisodeModes.PILOT:
             case EpisodeModes.LATEST:
-                return new WriteOnlyPointerMode(mode);
+                return new WriteOnlyPointerMode(mode, scanner);
         }
         throw new ExitException("The episode mode given is not valid", ExitCode.EPISODES_NOT_FOUND);
     } 

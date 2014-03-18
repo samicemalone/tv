@@ -37,26 +37,27 @@ import tv.TVScan;
  */
 public class Season {
     
+    public static Season fromEpisode(TVScan scanner, Episode ep) {
+        int season = Integer.valueOf(ep.getSeasonNo());
+        return new Season(season, scanner.getSeasonDirectory(ep.getShow(), season));
+    }
+    
     private final File seasonDir;
     private final String seasonNoString;
     private final int seasonNo;
     
-    public static Season fromEpisode(Episode pointerEpisode) {
-        return new Season(pointerEpisode.getShow(), pointerEpisode.getSeasonNo());
-    }
-    
-    public Season(String show, int season) {
+    public Season(int season, File dir) {
         seasonNo = season;
         seasonNoString = String.format("%02d", season);
-        seasonDir = TVScan.getSeasonDirectory(show, seasonNo);
+        seasonDir = dir;
     }
     
-    public Season(String show, String season) {
+    public Season(String season, File dir) {
         seasonNo = Integer.valueOf(season);
         seasonNoString = season;
-        seasonDir = TVScan.getSeasonDirectory(show, seasonNo);
+        seasonDir = dir;
     }
-    
+
     /**
      * Gets the directory of the season location
      * @return 

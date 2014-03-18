@@ -29,6 +29,7 @@ package tv.mode;
 import com.jakewharton.trakt.entities.TvShowProgress;
 import java.io.File;
 import tv.ExitCode;
+import tv.NavigableEpisode;
 import tv.TV;
 import tv.TVScan;
 import tv.TraktClient;
@@ -50,8 +51,8 @@ public class PointerMode extends EpisodeMode {
     private Episode currentPointer;
     private Episode newPointer;
 
-    public PointerMode(int mode) {
-        super(mode);
+    public PointerMode(int mode, TVScan scanner) {
+        super(mode, scanner);
     }
     
     public PointerMode readCurrentPointer() throws ExitException {
@@ -66,7 +67,8 @@ public class PointerMode extends EpisodeMode {
      * @return Season
      */
     private Season getSeason() {
-        return new Season(TV.ENV.getArguments().getShow(), newPointer.getSeasonNo());
+        int season = Integer.valueOf(newPointer.getSeasonNo());
+        return getTvScanner().getSeason(TV.ENV.getArguments().getShow(), season);
     }
     
     /**
@@ -75,8 +77,8 @@ public class PointerMode extends EpisodeMode {
      */
     private void setNewPointer() {
         if(newPointer == null) {
-            newPointer = new Episode(currentPointer.getShow(), currentPointer.getUser(), currentPointer.getSeasonNo(), currentPointer.getEpisodeNo());
-            TVScan.getEpisode(newPointer, TV.ENV.getArguments().getEpisodes());
+            newPointer = new Episode(currentPointer);
+            new NavigableEpisode(getTvScanner()).navigate(newPointer, TV.ENV.getArguments().getEpisodes());
         }
     }
     
@@ -91,14 +93,14 @@ public class PointerMode extends EpisodeMode {
         return new File[] {};
     }
     
-    private static Episode getCurrentTraktPointer() throws ExitException {
+    private Episode getCurrentTraktPointer() throws ExitException {
         TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
         Arguments args = TV.ENV.getArguments();
         try {
             TvShowProgress.NextEpisode next = trakt.getNextEpisode(args.getShow());
             if(next != null) {
                 Episode curPointer = new Episode(args.getShow(), args.getUser(), next.season, next.number);
-                return TVScan.getEpisode(curPointer, "prev");
+                return new NavigableEpisode(getTvScanner()).navigate(curPointer, "prev");
             }
         } catch (TraktException e) {
             throw new ExitException(e.getMessage(), ExitCode.TRAKT_ERROR);

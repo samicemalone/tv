@@ -32,6 +32,7 @@ import tv.TV;
 import tv.TVScan;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
+import tv.model.Arguments;
 import tv.model.Episode;
 import tv.model.Season;
 
@@ -44,14 +45,17 @@ import tv.model.Season;
 public class EpisodeMode {
     
     private final int mode;
+    private final TVScan tvScanner;
     
     /**
      * Creates a new EpisodeMode instance
      * @param mode EpisodeModes Episode Mode
+     * @param scanner TV Scanner
      * @see EpisodeModes
      */
-    public EpisodeMode(int mode) {
+    public EpisodeMode(int mode, TVScan scanner) {
         this.mode = mode;
+        this.tvScanner = scanner;
     }
     
     /**
@@ -59,13 +63,15 @@ public class EpisodeMode {
      * @return Starting Season
      */
     private Season getStartingSeason() {
+        Arguments args = TV.ENV.getArguments();
         switch(mode) {
             case EpisodeModes.ALL:
-                return new Season(TV.ENV.getArguments().getShow(), "01");
+                return getTvScanner().getSeason(args.getShow(), 1);
             case EpisodeModes.LATEST_SEASON:
-                return new Season(TV.ENV.getArguments().getShow(), TVScan.getLastSeasonNo(TV.ENV.getArguments().getShow()));
+                int season = Integer.valueOf(getTvScanner().getLastSeasonNo(args.getShow()));
+                return getTvScanner().getSeason(args.getShow(), season);
         }
-        return new Season(TV.ENV.getArguments().getShow(), TVScan.getSeasonNo(TV.ENV.getArguments().getEpisodes()));
+        return getTvScanner().getSeason(args.getShow(), TVScan.getSeasonNo(args.getEpisodes()));
     }
     
     /**
@@ -75,6 +81,14 @@ public class EpisodeMode {
      */
     public int getMode() {
         return mode;
+    }
+
+    /**
+     * Get the TvScanner to be used to scan for content
+     * @return TvScanner
+     */
+    public TVScan getTvScanner() {
+        return tvScanner;
     }
     
     /**
@@ -121,8 +135,8 @@ public class EpisodeMode {
      * @return list of all episode Files
      * @throws ExitException if unable to find any episodes
      */
-    public static File[] allEpisodes(Season season) throws ExitException {
-        File[] eps = TVScan.getAllEpisodes(season, TV.ENV.getArguments().getShow());
+    public File[] allEpisodes(Season season) throws ExitException {
+        File[] eps = getTvScanner().getAllEpisodes(season, TV.ENV.getArguments().getShow());
         if(eps == null || eps.length == 0) {
             throw new ExitException("Unable to find any episodes", ExitCode.EPISODES_NOT_FOUND);
         }
@@ -136,8 +150,8 @@ public class EpisodeMode {
      * @return List of episode Files in the given range
      * @throws ExitException if unable to find any episodes in the given range
      */
-    public static File[] episodeRange(Season season, String[] rangeArray) throws ExitException {
-        File[] eprange = TVScan.getEpisodeRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
+    public File[] episodeRange(Season season, String[] rangeArray) throws ExitException {
+        File[] eprange = getTvScanner().getEpisodeRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
         if(eprange == null || eprange.length == 0) {
             throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
         }
@@ -151,8 +165,8 @@ public class EpisodeMode {
      * @return List of episode Files
      * @throws ExitException if unable to find any episodes in the given range
      */
-    public static File[] seasonFromEpisode(Season season, String epString) throws ExitException {
-        File[] eps = TVScan.getEpisodesFrom(season, epString);
+    public File[] seasonFromEpisode(Season season, String epString) throws ExitException {
+        File[] eps = getTvScanner().getEpisodesFrom(season, epString);
         if(eps == null || eps.length == 0) {
             throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
         }
@@ -166,8 +180,8 @@ public class EpisodeMode {
      * @return List of episode Files in the season range
      * @throws ExitException if unable to fid the seasons in the given range
      */
-    public static File[] seasonRange(Season season, String[] rangeArray) throws ExitException {
-        File[] range = TVScan.getSeasonRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
+    public File[] seasonRange(Season season, String[] rangeArray) throws ExitException {
+        File[] range = getTvScanner().getSeasonRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
         if(range == null || range.length == 0) {
             throw new ExitException("Unable to find the seasons in the given range", ExitCode.SEASON_RANGE_NOT_FOUND);
         }
@@ -180,8 +194,8 @@ public class EpisodeMode {
      * @return List of episode Files
      * @throws ExitException if unable to find the episodes in the given range
      */
-    public static File[] allFromSeason(Season season) throws ExitException {
-        File[] eps = TVScan.getSeasonsFrom(season, TV.ENV.getArguments().getShow());
+    public File[] allFromSeason(Season season) throws ExitException {
+        File[] eps = getTvScanner().getSeasonsFrom(season, TV.ENV.getArguments().getShow());
         if(eps == null || eps.length == 0) {
             throw new ExitException("Unable to find the episodes in the given range", ExitCode.SEASON_RANGE_NOT_FOUND);
         }
@@ -191,6 +205,7 @@ public class EpisodeMode {
     /**
      * Get the new episode pointer to be set
      * @return new episode pointer or null if one should be not be set
+     * @throws tv.exception.ExitException
      */
     public Episode getNewPointer() throws ExitException {
         return null;

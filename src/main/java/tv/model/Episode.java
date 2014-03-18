@@ -66,6 +66,17 @@ public class Episode {
         this.seasonNo = String.format("%02d", seasonNo);
         this.episodeNo = String.format("%02d", episodeNo);
     }
+
+    /**
+     * Copies the Episode e to a new instance
+     * @param e Episode to copy
+     */
+    public Episode(Episode e) {
+        show = e.getShow();
+        user = e.getUser();
+        seasonNo = e.getSeasonNo();
+        episodeNo = e.getEpisodeNo();
+    }
     
     /**
      * Gets the user to which this Episode refers
@@ -146,4 +157,33 @@ public class Episode {
     public void setPlayedDate(int date) {
         this.date = date;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s - s%se%s", show, seasonNo, episodeNo);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        } else if (obj == this) {
+            return true;
+        } else if (!(obj instanceof Episode)) {
+            return false;
+        }
+        Episode o2 = (Episode) obj;
+        return show.equals(o2.getShow()) && seasonNo.equals(o2.getSeasonNo()) && episodeNo.equals(o2.getEpisodeNo());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + (this.show != null ? this.show.hashCode() : 0);
+        hash = 37 * hash + (this.seasonNo != null ? this.seasonNo.hashCode() : 0);
+        hash = 37 * hash + (this.episodeNo != null ? this.episodeNo.hashCode() : 0);
+        hash = 37 * hash + (this.user != null ? this.user.hashCode() : 0);
+        return hash;
+    }
+    
 }

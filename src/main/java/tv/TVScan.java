@@ -38,7 +38,6 @@ import tv.filter.ExtensionFilter;
 import tv.filter.RangeFilter;
 import tv.filter.SeasonDirectoryFilter;
 import tv.filter.SeasonSubsetFilter;
-import tv.model.Episode;
 import tv.model.Season;
 
 /**
@@ -46,13 +45,12 @@ import tv.model.Season;
  * @author Sam Malone
  */
 public class TVScan {
+
+    public List<String> sources;
     
-    /*
-     * Offset Values
-     */
-    public static final int PREV = -1;
-    public static final int CUR = 0;
-    public static final int NEXT = 1;
+    public TVScan(List<String> sources) {
+        this.sources = sources;
+    }
     
     /**
      * Gets the integer season number for the given episode string
@@ -84,92 +82,12 @@ public class TVScan {
         }
         File[] list = season.getSeasonDir().listFiles(new ExtensionFilter());
         Pattern p = Pattern.compile("s" + season.getSeasonString() + "e(" + epNo + "|[0-9][0-9]e" + epNo + ")|" + season.getSeasonNo()  + "x" + epNo + "|" + season.getSeasonNo() + epNo, Pattern.CASE_INSENSITIVE);
-        for(int i = 0; i < list.length; i++) {
-            if(p.matcher(filterFileName(list[i].getName())).find()) {
-                return list[i];
+        for(File episode : list) {
+            if(p.matcher(filterFileName(episode.getName())).find()) {
+                return episode;
             }
         }
         return null;
-    }
-    
-    /**
-     * Perform addition on a string interpreted as an integer
-     * @param str Base string to perform addition on e.g. "03"
-     * @param num Amount to add to the string
-     * @return Zero padded string of addition result
-     */
-    public static String addIntString(String str, int num) {
-        int val = Integer.valueOf(str) + num;
-        if(val < 10) {
-            return "0" + String.valueOf(val);
-        }
-        return String.valueOf(val);
-    }
-    
-    /**
-     * Parses the given string to determine the offset
-     * @param str Offset string e.g. next, cur, prev
-     * @return either PREV, CUR or NEXT depending on offset string
-     */
-    private static int parseStringOffset(String str) {
-        if(str.startsWith("n")) {
-            return NEXT;
-        }
-        if(str.startsWith("p")) {
-            return PREV;
-        }
-        return CUR;
-    }
-    
-    /**
-     * Gets the Episode object that represents the episode with the given offset
-     * @param e Episode
-     * @param offsetString Offset string e.g. next, cur, prev
-     * @return Modified episode e that represents the episode with the given offset
-     */
-    public static Episode getEpisode(Episode e, String offsetString) {
-        Season season = new Season(e.getShow(), e.getSeasonNo());
-        int offset = parseStringOffset(offsetString);
-        String episodeNo = addIntString(e.getEpisodeNo(), offset);
-        File episode = getEpisode(season, episodeNo);
-        if(episode != null) {
-            // check for double episode
-            File currentFile = getEpisode(season, e.getEpisodeNo());
-            if(episode.equals(currentFile) && offset != CUR) {
-                String offsetEpNo = addIntString(episodeNo, offset);
-                File offsetFile = getEpisode(season, offsetEpNo);
-                // check offset episode exists
-                if(offsetFile != null) {
-                    e.setEpisodeNo(offsetEpNo);
-                    return e;
-                }
-            } else {
-                e.setEpisodeNo(episodeNo);
-                return e;
-            }
-        }
-        // check other next, previous season
-        Season offsetSeason = new Season(e.getShow(), Integer.valueOf(e.getSeasonNo()) + offset);
-        if(offsetSeason.getSeasonDir() == null) {
-            return e;
-        }
-        switch (offset) {
-            case PREV:
-                String lastEpisode = getLastEpisodeNo(offsetSeason);
-                e.setSeasonNo(addIntString(e.getSeasonNo(), PREV));
-                e.setEpisodeNo(addIntString(lastEpisode, 0));
-                break;
-            case NEXT:
-                episode = getEpisode(offsetSeason, "00");
-                if(episode == null) {
-                    e.setEpisodeNo("01");
-                } else {
-                    e.setEpisodeNo("00");
-                }
-                e.setSeasonNo(addIntString(e.getSeasonNo(), NEXT));
-                break;
-        }
-        return e;
     }
     
     /**
@@ -182,8 +100,8 @@ public class TVScan {
         Pattern p = Pattern.compile("[sS][0-9][0-9][eE]([0-9][0-9])|[0-9]+x([0-9][0-9])");
         Matcher m;
         int lastEpisode = -1;
-        for(int i = 0; i < list.length; i++) {
-            m = p.matcher(filterFileName(list[i].getName()));
+        for(File episode : list) {
+            m = p.matcher(filterFileName(episode.getName()));
             if(m.find() && m.groupCount() == 2) {
                 int curEp;
                 if(m.group(1) == null && m.group(2) != null) {
@@ -207,11 +125,11 @@ public class TVScan {
      * @param show TV Show
      * @return Zero padded season number or null if error
      */
-    public static String getLastSeasonNo(String show) {
+    public String getLastSeasonNo(String show) {
         File showFolder = null;
-        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
-            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
-                showFolder = new File(TV.ENV.getArguments().getSourceFolders().get(i) + File.separator + show);
+        for(String source : sources) {
+            if(directoryExists(source, show)) {
+                showFolder = new File(source, show);
                 break;
             }
         }
@@ -257,7 +175,7 @@ public class TVScan {
      * @param show TV Show
      * @return Episode List or empty array
      */
-    public static File[] getAllEpisodes(Season season, String show) {
+    public File[] getAllEpisodes(Season season, String show) {
         return getSeasonsFrom(season, show);
     }
     
@@ -269,7 +187,7 @@ public class TVScan {
      * @param endEp End episode in range e.g. s04e02
      * @return List of files in the given range or empty array
      */
-    public static File[] getEpisodeRange(Season season, String show, String startEp, String endEp) {
+    public File[] getEpisodeRange(Season season, String show, String startEp, String endEp) {
         int i = getSeasonNo(startEp);
         int endSeason = getSeasonNo(endEp);
         if(i > endSeason) {
@@ -304,7 +222,7 @@ public class TVScan {
      * @param startEp Episode number to start from e.g. "05"
      * @return List of files matched or empty array if none found
      */
-    public static File[] getEpisodesFrom(Season season, String startEp) {
+    public File[] getEpisodesFrom(Season season, String startEp) {
         return season.getSeasonDir().listFiles(new SeasonSubsetFilter(startEp));
     }
     
@@ -316,7 +234,7 @@ public class TVScan {
      * @param endSeason End season e.g. s04
      * @return list of files matched or empty array if none found
      */
-    public static File[] getSeasonRange(Season season, String show, String startSeason, String endSeason) {
+    public File[] getSeasonRange(Season season, String show, String startSeason, String endSeason) {
         File[] tmpSeason = season.getSeasonDir().listFiles(new ExtensionFilter());
         int i = getSeasonNo(startSeason);
         int maxSeason = getSeasonNo(endSeason);
@@ -339,7 +257,7 @@ public class TVScan {
      * @param show TV Show
      * @return list of files matched or empty array if none found
      */
-    public static File[] getSeasonsFrom(Season season, String show) {
+    public File[] getSeasonsFrom(Season season, String show) {
         File seasonDir = season.getSeasonDir();
         File[] tmpSeason = seasonDir.listFiles(new ExtensionFilter());
         List<File> list = new ArrayList<File>(tmpSeason.length*3);
@@ -353,18 +271,31 @@ public class TVScan {
     }
     
     /**
+     * Get the Season information for the given show and season
+     * @param show show
+     * @param season season
+     * @return season
+     */
+    public Season getSeason(String show, int season) {
+        return new Season(season, getSeasonDirectory(show, season));
+    }
+    
+    /**
      * Gets the season directory File for the given show and season
      * @param show TV Show
      * @param season Season number
      * @return Season directory file or null if not found
      */
-    public static File getSeasonDirectory(String show, int season) {
-        File f;
-        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
-            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
+    public File getSeasonDirectory(String show, int season) {
+        for(String source : sources) {
+            if(new File(source, show).exists()) {
                 for(String seasonPrefix : SeasonDirectoryFilter.SEASON_DIRECTORY_PREFIX) {
-                    f = new File(TV.ENV.getArguments().getSourceFolders().get(i) + File.separator + show + File.separator + seasonPrefix + " " + season);
-                    if(f.exists()) {
+                    StringBuilder dir = new StringBuilder();
+                    dir.append(source).append(File.separator);
+                    dir.append(show).append(File.separator);
+                    dir.append(seasonPrefix).append(' ').append(season);
+                    File f;
+                    if((f = new File(dir.toString())).exists()) {
                         return f;
                     }
                 }
@@ -388,12 +319,12 @@ public class TVScan {
      * @param show TV Show
      * @return true if show exists in at least one source folder, otherwise false
      */
-    public static boolean showExists(String show) {
+    public boolean showExists(String show) {
         if(show.trim().equals("") || show.trim().equals("..")) {
             return false;
         }
-        for(int i = 0; i < TV.ENV.getArguments().getSourceFolders().size(); i++) {
-            if(directoryExists(TV.ENV.getArguments().getSourceFolders().get(i), show)) {
+        for(String sourceDir : sources) {
+            if(directoryExists(sourceDir, show)) {
                 return true;
             }
         }

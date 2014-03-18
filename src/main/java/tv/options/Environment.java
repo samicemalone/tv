@@ -206,7 +206,7 @@ public abstract class Environment {
             args.getExtraFolders().retainAll(existentSources);
             return;
         }
-        if(!TVScan.showExists(args.getShow())) {
+        if(!new TVScan(args.getSourceFolders()).showExists(args.getShow())) {
             throw new FileNotFoundException("Unable to find show: " + args.getShow(), ExitCode.SHOW_NOT_FOUND);
         }
     }

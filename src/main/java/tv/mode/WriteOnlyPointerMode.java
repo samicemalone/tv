@@ -46,10 +46,11 @@ public class WriteOnlyPointerMode extends EpisodeMode {
     /**
      * Create a new WriteOnlyPointerMode instance.
      * @param mode EpisodeModes Episode Mode
+     * @param scanner TV Scanner
      * @see EpisodeModes
      */
-    public WriteOnlyPointerMode(int mode) {
-        super(mode);
+    public WriteOnlyPointerMode(int mode, TVScan scanner) {
+        super(mode, scanner);
     }
     
     /**
@@ -59,10 +60,12 @@ public class WriteOnlyPointerMode extends EpisodeMode {
     private Season getSeason() {
         Arguments args = TV.ENV.getArguments();
         switch(getMode()) {
-            case EpisodeModes.PILOT: return new Season(args.getShow(), 1);
-            case EpisodeModes.LATEST: return new Season(args.getShow(), TVScan.getLastSeasonNo(args.getShow()));
+            case EpisodeModes.PILOT: return getTvScanner().getSeason(args.getShow(), 1);
+            case EpisodeModes.LATEST:
+                int season = Integer.valueOf(getTvScanner().getLastSeasonNo(args.getShow()));
+                return getTvScanner().getSeason(args.getShow(), season);
         }
-        return new Season(args.getShow(), TVScan.getSeasonNo(args.getEpisodes()));
+        return getTvScanner().getSeason(args.getShow(), TVScan.getSeasonNo(args.getEpisodes()));
     }
 
     @Override

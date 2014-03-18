@@ -106,7 +106,8 @@ public class TV {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
                 trakt.processJournal();
             }
-            EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode);
+            TVScan tvScanner = new TVScan(TV.ENV.getArguments().getSourceFolders());
+            EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvScanner);
             File[] list = episodesMode.buildFileList();
             if(list.length == 1) {
                 mediaAction.execute(list[0], episodesMode.getNewPointer());
