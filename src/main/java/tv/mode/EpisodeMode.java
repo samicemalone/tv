@@ -107,7 +107,7 @@ public class EpisodeMode {
             case EpisodeModes.EPRANGE:
                 return episodeRange(season, TV.ENV.getArguments().getEpisodes().split("-"));
             case EpisodeModes.ALL:
-                return allEpisodes(season);
+                return allEpisodes();
             case EpisodeModes.SEASONRANGE:
                 return seasonRange(season, TV.ENV.getArguments().getEpisodes().split("-"));
             case EpisodeModes.ALLFROMSEASON:
@@ -131,12 +131,11 @@ public class EpisodeMode {
     
     /**
      * Get the list of all episode Files
-     * @param season Starting season (usually 1)
      * @return list of all episode Files
      * @throws ExitException if unable to find any episodes
      */
-    public File[] allEpisodes(Season season) throws ExitException {
-        File[] eps = getTvScanner().getAllEpisodes(season, TV.ENV.getArguments().getShow());
+    public File[] allEpisodes() throws ExitException {
+        File[] eps = getTvScanner().getAllEpisodes(TV.ENV.getArguments().getShow());
         if(eps == null || eps.length == 0) {
             throw new ExitException("Unable to find any episodes", ExitCode.EPISODES_NOT_FOUND);
         }

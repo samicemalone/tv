@@ -31,11 +31,12 @@ package tv;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- *
+ * 
  * @author Sam Malone
  */
 public class MockFileSystem {
@@ -44,8 +45,9 @@ public class MockFileSystem {
         "Scrubs", "Friends", "Modern Family"
     };
     
-    private final static int numSeasons = 3;
-    private final static int numEpisodes = 12;
+    public final static int NUM_SEASONS = 3;
+    public final static int NUM_EPISODES = 12;
+    
     private final static File MOCK_ROOT = new File("mockroot_tv");
     
     public static List<String> getSourceFolders() {
@@ -58,6 +60,34 @@ public class MockFileSystem {
         }
         createStandardShows();
         createShowExceptions();
+    }
+    
+    public static File getShowDir(String show) {
+        return new File(MOCK_ROOT, show).getAbsoluteFile();
+    }
+    
+    public static File getSeasonDir(String show, int season) {
+        return new File(getShowDir(show), "Season " + season);
+    }
+    
+    public static File getEpisodeFile(String show, int season, int episode) {
+        return new File(getSeasonDir(show, season), genFileName(show, season, episode));
+    }
+    
+    public static File[] getAllEpisodes(String show) {
+        List<File> list = new ArrayList<File>(NUM_EPISODES * NUM_SEASONS);
+        for(int season = 1; season <= NUM_SEASONS; season++) {
+            list.addAll(Arrays.asList(getSeasonDir(show, season).listFiles()));
+        }
+        return list.toArray(new File[0]);
+    }
+    
+    public static File[] getFullSeasonEpisodes(String show, int startSeason, int endSeason) {
+        List<File> list = new ArrayList<File>(NUM_EPISODES * (endSeason - startSeason + 1));
+        while(startSeason <= endSeason) {
+            list.addAll(Arrays.asList(getSeasonDir(show, startSeason++).listFiles()));
+        }
+        return list.toArray(new File[0]);
     }
     
     private static void createStandardShows() throws IOException {
@@ -83,7 +113,7 @@ public class MockFileSystem {
     }
     
     private static void createSeasons(String show, File showDir) throws IOException {
-        for(int i = 1; i <= numSeasons; i++) {
+        for(int i = 1; i <= NUM_SEASONS; i++) {
             File seasonDir = new File(showDir, "Season " + i);
             seasonDir.mkdir();
             createEpisodes(show, i, seasonDir);
@@ -95,12 +125,12 @@ public class MockFileSystem {
     }
     
     private static void createEpisodes(String show, int season, File seasonDir, int start) throws IOException {
-        for(int i = start; i <= numEpisodes; i++) {
+        for(int i = start; i <= NUM_EPISODES; i++) {
             new File(seasonDir, genFileName(show, season, i)).createNewFile();
         }
     }
     
-    private static String genFileName(String show, int season, int episode) {
+    public static String genFileName(String show, int season, int episode) {
         return genFileName(show, season, episode, 1);
     }
     
@@ -115,7 +145,6 @@ public class MockFileSystem {
     
     public static void delete() {
         delete(MOCK_ROOT);
-        //MOCK_ROOT.delete();
     }
     
     private static void delete(File dir) {
@@ -131,6 +160,5 @@ public class MockFileSystem {
         }
         dir.delete();
     }
-    
     
 }

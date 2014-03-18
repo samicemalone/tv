@@ -33,6 +33,7 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,9 +71,32 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
+    public void testNavigateCurrent() {
+        Episode toNavigate = new Episode("Scrubs", "", 1, 5);
+        Episode expResult = toNavigate;
+        Episode result = episode.navigate(toNavigate, "next");
+        assertSame(expResult, result);
+    }
+
+    /**
+     * Test of navigate method, of class NavigableEpisode.
+     */
+    @Test
     public void testNavigateNext() {
         Episode toNavigate = new Episode("Scrubs", "", 1, 5);
         Episode expResult = new Episode("Scrubs", "", 1, 6);
+        Episode result = episode.navigate(toNavigate, "next");
+        assertEquals(expResult, result);
+    }
+
+    /**
+     * Test of navigate method, of class NavigableEpisode.
+     */
+    @Test
+    public void testNavigateNextDoubleEp() {
+        String show = "The Walking Dead";
+        Episode toNavigate = new Episode(show, "", 1, 2);
+        Episode expResult = new Episode(show, "", 1, 4);
         Episode result = episode.navigate(toNavigate, "next");
         assertEquals(expResult, result);
     }
@@ -85,6 +109,24 @@ public class NavigableEpisodeTest {
         Episode toNavigate = new Episode("Scrubs", "", 1, 6);
         Episode expResult = new Episode("Scrubs", "", 1, 5);
         Episode result = episode.navigate(toNavigate, "prev");
+        assertEquals(expResult, result);
+    }
+    
+
+    /**
+     * Test of navigate method, of class NavigableEpisode.
+     */
+    @Test
+    public void testNavigatePreviousDoubleEp() {
+        String show = "The Walking Dead";
+        // the mock episode 1x02 is a double (ep 2 and 3).
+        Episode toNavigate = new Episode(show, "", 1, 4);
+        Episode expResult = new Episode(show, "", 1, 3);
+        Episode result = episode.navigate(toNavigate, "prev");
+        assertEquals(expResult, result);
+        toNavigate = expResult;
+        expResult = new Episode(show, "", 1, 1);
+        result = episode.navigate(toNavigate, "prev");
         assertEquals(expResult, result);
     }
 

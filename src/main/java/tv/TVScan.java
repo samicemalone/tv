@@ -73,7 +73,7 @@ public class TVScan {
     /**
      * Gets a single episode file from the given season directory and episode string
      * @param season Season directory
-     * @param epNo Episode string e.g. "s01e03"
+     * @param epNo Episode number e.g. "03"
      * @return single episode or null if not found
      */
     public static File getEpisode(Season season, String epNo) {
@@ -81,13 +81,22 @@ public class TVScan {
             return null;
         }
         File[] list = season.getSeasonDir().listFiles(new ExtensionFilter());
-        Pattern p = Pattern.compile("s" + season.getSeasonString() + "e(" + epNo + "|[0-9][0-9]e" + epNo + ")|" + season.getSeasonNo()  + "x" + epNo + "|" + season.getSeasonNo() + epNo, Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile(buildEpisodeRegex(season, epNo), Pattern.CASE_INSENSITIVE);
         for(File episode : list) {
             if(p.matcher(filterFileName(episode.getName())).find()) {
                 return episode;
             }
         }
         return null;
+    }
+    
+    private static String buildEpisodeRegex(Season s, String epNo) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('s').append(s.getSeasonString());
+        sb.append("(e").append(epNo).append("|(e\\d\\d)+e").append(epNo).append(")");
+        sb.append('|').append(s.getSeasonNo()).append("(x").append(epNo).append("|(x\\d\\d)+x").append(epNo).append(')');
+        sb.append('|').append(s.getSeasonNo()).append(epNo);
+        return sb.toString();
     }
     
     /**
@@ -171,12 +180,11 @@ public class TVScan {
     
     /**
      * Gets all the episodes from the given show
-     * @param season First Season
      * @param show TV Show
      * @return Episode List or empty array
      */
-    public File[] getAllEpisodes(Season season, String show) {
-        return getSeasonsFrom(season, show);
+    public File[] getAllEpisodes(String show) {
+        return getSeasonsFrom(getSeason(show, 1), show);
     }
     
     /**
@@ -214,7 +222,6 @@ public class TVScan {
         }
         return list.toArray(new File[0]);
     }
-    
     
     /**
      * Gets a list of files from the episode given in the season directory given
