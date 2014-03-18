@@ -224,6 +224,9 @@ public class ArgsParser {
         if(arg.isServerSet()) {
             return;
         }
+        if(arg.isSetOnly() && arg.isIgnoreSet()) {
+            throw new InvalidArgumentException("-s and -i flags cannot be set together", ExitCode.UNEXPECTED_ARGUMENT);
+        }
         if(!EpisodeModes.episodesValid(arg.getEpisodes())) {
             throw new InvalidArgumentException("Unable to parse the episodes given: " + arg.getEpisodes(), ExitCode.PARSE_EPISODES_FAILED);
         }

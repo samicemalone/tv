@@ -306,7 +306,8 @@ public class ArgsParserTest {
             "--config", configFile.getAbsolutePath()
         ));
         String[][] argsArray = new String[][] {
-            arg("Scrubs", "-r", "-l"), arg("s01", "-u")
+            arg("Scrubs", "-r", "-l"), arg("s01", "-u"),
+            arg("Scrubs", "pilot", "-i", "-s")
         };
         try {
             ArgsParser.validate(args);
