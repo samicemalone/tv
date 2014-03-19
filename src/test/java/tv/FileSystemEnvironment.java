@@ -49,4 +49,8 @@ public class FileSystemEnvironment {
         MockFileSystem.delete();
     }
     
+    protected String[] arg(String... args) {
+        return args;
+    }
+    
 }

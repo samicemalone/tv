@@ -79,7 +79,7 @@ public class ConfigParser {
      * @throws ParseException if unable to determine a key and value from the line
      */
     private static void parseLine(Config c, String line) throws ParseException {
-        if(line.isEmpty() || line.charAt(0) == '#') {
+        if(line.isEmpty() || line.trim().charAt(0) == '#') {
             return;
         }
         String key, value;
@@ -110,7 +110,9 @@ public class ConfigParser {
         } else if(key.equals("MEDIAINFO_BINARY")) {
             c.setMediainfoBinary(value);
         } else if(key.equals("LIBRARY_NAME")) {
-            c.setLibraryName(value);
+            if(LibraryManager.isWindows7()) {
+                c.setLibraryName(value);
+            }
         } else if(key.equals("PLAYER")) {
             c.setPlayer(value);
         } else if(key.equals("PLAYER_EXECUTABLE")) {
