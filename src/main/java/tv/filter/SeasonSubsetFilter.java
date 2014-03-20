@@ -39,10 +39,10 @@ import java.util.regex.Pattern;
  */
 public class SeasonSubsetFilter implements FilenameFilter {
     
-    private int startEp;
+    private final int startEp;
     
-    public SeasonSubsetFilter(String startEp) {
-        this.startEp = Integer.valueOf(startEp);
+    public SeasonSubsetFilter(int startEp) {
+        this.startEp = startEp;
     }
 
     @Override

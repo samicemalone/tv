@@ -34,6 +34,8 @@ import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
 import tv.model.Arguments;
 import tv.model.Episode;
+import tv.model.EpisodeRange;
+import tv.model.Range;
 import tv.model.Season;
 
 /**
@@ -99,17 +101,18 @@ public class EpisodeMode {
     public File[] buildFileList() throws ExitException {
         Season season = getStartingSeason();
         assertStartingSeasonValid(season);
+        String episodeString = TV.ENV.getArguments().getEpisodes();
         switch(mode) {
             case EpisodeModes.SEASON:
                 return seasonFromEpisode(season, "00");
             case EpisodeModes.SEASONFROMEP:
-                return seasonFromEpisode(season, TVScan.getEpisodeNo(TV.ENV.getArguments().getEpisodes()));
+                return seasonFromEpisode(season, TVScan.getEpisodeNo(episodeString));
             case EpisodeModes.EPRANGE:
-                return episodeRange(season, TV.ENV.getArguments().getEpisodes().split("-"));
+                return episodeRange(season, EpisodeRange.fromArray(episodeString.split("-")));
             case EpisodeModes.ALL:
                 return allEpisodes();
             case EpisodeModes.SEASONRANGE:
-                return seasonRange(season, TV.ENV.getArguments().getEpisodes().split("-"));
+                return seasonRange(season, Range.fromSeason(episodeString.split("-")));
             case EpisodeModes.ALLFROMSEASON:
                 return allFromSeason(season);
             case EpisodeModes.LATEST_SEASON:
@@ -145,16 +148,16 @@ public class EpisodeMode {
     /**
      * Gets the episodes Files in given episode range
      * @param season Starting season in the range i.e. the season for rangeArray[0]
-     * @param rangeArray rangeArray[0]: start episode, rangeArray[1]: end episode
+     * @param range Range of episodes
      * @return List of episode Files in the given range
      * @throws ExitException if unable to find any episodes in the given range
      */
-    public File[] episodeRange(Season season, String[] rangeArray) throws ExitException {
-        File[] eprange = getTvScanner().getEpisodeRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
-        if(eprange == null || eprange.length == 0) {
+    public File[] episodeRange(Season season, EpisodeRange range) throws ExitException {
+        File[] list = getTvScanner().getEpisodeRange(season, TV.ENV.getArguments().getShow(), range);
+        if(list == null || list.length == 0) {
             throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
         }
-        return eprange;
+        return list;
     }
     
     /**
@@ -165,7 +168,7 @@ public class EpisodeMode {
      * @throws ExitException if unable to find any episodes in the given range
      */
     public File[] seasonFromEpisode(Season season, String epString) throws ExitException {
-        File[] eps = getTvScanner().getEpisodesFrom(season, epString);
+        File[] eps = getTvScanner().getEpisodesFrom(season, Integer.valueOf(epString));
         if(eps == null || eps.length == 0) {
             throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
         }
@@ -175,12 +178,12 @@ public class EpisodeMode {
     /**
      * Get all the episodes from the given season range
      * @param season Starting season
-     * @param rangeArray rangeArray[0]: start season, rangeArray[1]: end season e.g. s03
+     * @param seasonRange Range of seasons inclusive
      * @return List of episode Files in the season range
      * @throws ExitException if unable to fid the seasons in the given range
      */
-    public File[] seasonRange(Season season, String[] rangeArray) throws ExitException {
-        File[] range = getTvScanner().getSeasonRange(season, TV.ENV.getArguments().getShow(), rangeArray[0], rangeArray[1]);
+    public File[] seasonRange(Season season, Range seasonRange) throws ExitException {
+        File[] range = getTvScanner().getSeasonRange(season, TV.ENV.getArguments().getShow(), seasonRange);
         if(range == null || range.length == 0) {
             throw new ExitException("Unable to find the seasons in the given range", ExitCode.SEASON_RANGE_NOT_FOUND);
         }

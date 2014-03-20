@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tv.model.Range;
 
 /**
  *
@@ -39,12 +40,10 @@ import java.util.regex.Pattern;
  */
 public class RangeFilter implements FilenameFilter {
     
-    private int startEp;
-    private int endEp;
-    
-    public RangeFilter(String startEp, String endEp) {
-        this.startEp = Integer.valueOf(startEp);
-        this.endEp = Integer.valueOf(endEp);
+    private final Range range;
+
+    public RangeFilter(Range range) {
+        this.range = range;
     }
 
     @Override
@@ -61,7 +60,7 @@ public class RangeFilter implements FilenameFilter {
             } else {
                 curEp = Integer.valueOf(m.group(1));
             }
-            if(curEp >= startEp && curEp <= endEp) {
+            if(curEp >= range.getStart() && curEp <= range.getEnd()) {
                 return true;
             }
         }

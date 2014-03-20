@@ -35,6 +35,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+import tv.model.EpisodeRange;
+import tv.model.Range;
 import tv.model.Season;
 
 /**
@@ -133,8 +135,7 @@ public class TVScanTest extends FileSystemEnvironment {
     public void testGetEpisodeRange() {
         String show = "Scrubs";
         Season season = new Season(1, MockFileSystem.getSeasonDir(show, 1));
-        String startEp = "s01e10";
-        String endEp = "s02e02";
+        EpisodeRange range = new EpisodeRange(1, 10, 2, 2);
         File[] expResult = new File[] {
             MockFileSystem.getEpisodeFile(show, 1, 10),
             MockFileSystem.getEpisodeFile(show, 1, 11),
@@ -142,7 +143,7 @@ public class TVScanTest extends FileSystemEnvironment {
             MockFileSystem.getEpisodeFile(show, 2, 1),
             MockFileSystem.getEpisodeFile(show, 2, 2)
         };
-        File[] result = tvScanner.getEpisodeRange(season, show, startEp, endEp);
+        File[] result = tvScanner.getEpisodeRange(season, show, range);
         assertArrayEquals(expResult, result);
     }
 
@@ -153,7 +154,7 @@ public class TVScanTest extends FileSystemEnvironment {
     public void testGetEpisodesFrom() {
         String show = "Scrubs";
         Season season = new Season(1, MockFileSystem.getSeasonDir(show, 1));
-        String startEp = "09";
+        int startEp = 9;
         File[] expResult = new File[] {
             MockFileSystem.getEpisodeFile(show, 1, 9),
             MockFileSystem.getEpisodeFile(show, 1, 10),
@@ -171,10 +172,8 @@ public class TVScanTest extends FileSystemEnvironment {
     public void testGetSeasonRange() {
         String show = "Scrubs";
         Season season = new Season(2, MockFileSystem.getSeasonDir(show, 2));
-        String startSeason = "s02";
-        String endSeason = "s03";
         File[] expResult = MockFileSystem.getFullSeasonEpisodes(show, 2, 3);
-        File[] result = tvScanner.getSeasonRange(season, show, startSeason, endSeason);
+        File[] result = tvScanner.getSeasonRange(season, show, new Range(2, 3));
         assertArrayEquals(expResult, result);
     }
 
