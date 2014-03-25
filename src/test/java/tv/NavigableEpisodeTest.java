@@ -37,6 +37,7 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import tv.exception.SeasonNotFoundException;
 import tv.model.Episode;
 
 /**
@@ -71,7 +72,7 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
-    public void testNavigateCurrent() {
+    public void testNavigateCurrent() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 5);
         Episode expResult = toNavigate;
         Episode result = episode.navigate(toNavigate, "next");
@@ -82,7 +83,7 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
-    public void testNavigateNext() {
+    public void testNavigateNext() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 5);
         Episode expResult = new Episode("Scrubs", "", 1, 6);
         Episode result = episode.navigate(toNavigate, "next");
@@ -93,7 +94,7 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
-    public void testNavigateNextDoubleEp() {
+    public void testNavigateNextDoubleEp() throws SeasonNotFoundException {
         String show = "The Walking Dead";
         Episode toNavigate = new Episode(show, "", 1, 2);
         Episode expResult = new Episode(show, "", 1, 4);
@@ -105,7 +106,7 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
-    public void testNavigatePrevious() {
+    public void testNavigatePrevious() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 6);
         Episode expResult = new Episode("Scrubs", "", 1, 5);
         Episode result = episode.navigate(toNavigate, "prev");
@@ -117,7 +118,7 @@ public class NavigableEpisodeTest {
      * Test of navigate method, of class NavigableEpisode.
      */
     @Test
-    public void testNavigatePreviousDoubleEp() {
+    public void testNavigatePreviousDoubleEp() throws SeasonNotFoundException {
         String show = "The Walking Dead";
         // the mock episode 1x02 is a double (ep 2 and 3).
         Episode toNavigate = new Episode(show, "", 1, 4);

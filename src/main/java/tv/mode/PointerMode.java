@@ -36,6 +36,7 @@ import tv.TraktClient;
 import tv.exception.CancellationException;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
+import tv.exception.SeasonNotFoundException;
 import tv.exception.TraktException;
 import tv.io.TVDBManager;
 import tv.model.Arguments;
@@ -75,7 +76,7 @@ public class PointerMode extends EpisodeMode {
      * Copies the current pointer to {@link #newPointer} and modifies the new pointer
      * by the offset specified by the episode string.
      */
-    private void setNewPointer() {
+    private void setNewPointer() throws SeasonNotFoundException {
         if(newPointer == null) {
             newPointer = new Episode(currentPointer);
             new NavigableEpisode(getTvScanner()).navigate(newPointer, TV.ENV.getArguments().getEpisodes());

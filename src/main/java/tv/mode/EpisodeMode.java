@@ -32,6 +32,7 @@ import tv.TV;
 import tv.TVScan;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
+import tv.exception.SeasonNotFoundException;
 import tv.model.Arguments;
 import tv.model.Episode;
 import tv.model.EpisodeRange;
@@ -124,11 +125,11 @@ public class EpisodeMode {
     /**
      * Assert that the given season is valid
      * @param season season
-     * @throws FileNotFoundException if the season cannot be found
+     * @throws SeasonNotFoundException if the season cannot be found
      */
-    public static void assertStartingSeasonValid(Season season) throws FileNotFoundException {
+    public static void assertStartingSeasonValid(Season season) throws SeasonNotFoundException {
         if(season.getSeasonDir() == null || !season.getSeasonDir().exists()) {
-            throw new FileNotFoundException("Season could not be found", ExitCode.SEASON_NOT_FOUND);
+            throw new SeasonNotFoundException("Season " + season.getSeasonNo() + " could not be found");
         }
     }
     

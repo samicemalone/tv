@@ -30,6 +30,7 @@
 package tv;
 
 import java.io.File;
+import tv.exception.SeasonNotFoundException;
 import tv.model.Episode;
 import tv.model.Season;
 
@@ -68,8 +69,9 @@ public class NavigableEpisode {
      * @param toNavigate episode to navigate from
      * @param strOffset offset string e.g. next, cur, prev
      * @return modified Episode toNavigate that represents the episode with the given offset
+     * @throws tv.exception.SeasonNotFoundException if unable to find the season given by toNavigate
      */
-    public Episode navigate(Episode toNavigate, String strOffset) {
+    public Episode navigate(Episode toNavigate, String strOffset) throws SeasonNotFoundException {
         int offset = parseStringOffset(strOffset);
         if(offset == CUR) {
             return toNavigate;
