@@ -30,8 +30,8 @@ package tv.filter;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import tv.matcher.EpisodeMatcher;
+import tv.model.EpisodeMatch;
 import tv.model.Range;
 
 /**
@@ -41,8 +41,10 @@ import tv.model.Range;
 public class RangeFilter implements FilenameFilter {
     
     private final Range range;
+    private final EpisodeMatcher matcher;
 
-    public RangeFilter(Range range) {
+    public RangeFilter(EpisodeMatcher matcher, Range range) {
+        this.matcher = matcher;
         this.range = range;
     }
 
@@ -51,16 +53,12 @@ public class RangeFilter implements FilenameFilter {
         if(!ExtensionFilter.isValid(name)) {
             return false;
         }
-        Pattern p = Pattern.compile("[sS][0-9][0-9][eE]([0-9][0-9])|x([0-9][0-9])");
-        Matcher m = p.matcher(name);
-        if(m.find() && m.groupCount() == 2) {
-            int curEp;
-            if(m.group(1) == null && m.group(2) != null) {
-                curEp = Integer.valueOf(m.group(2));
-            } else {
-                curEp = Integer.valueOf(m.group(1));
-            }
-            if(curEp >= range.getStart() && curEp <= range.getEnd()) {
+        EpisodeMatch m = matcher.match(name);
+        if(m == null) {
+            return false;
+        }
+        for(int episodeNo : m.getEpisodes()) {
+            if(episodeNo >= range.getStart() && episodeNo <= range.getEnd()) {
                 return true;
             }
         }
