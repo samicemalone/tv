@@ -29,8 +29,6 @@
 
 package tv.matcher;
 
-import tv.matcher.WordDelimitedMatcher;
-import tv.matcher.EpisodeFileMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -50,6 +48,8 @@ public class WordDelimitedMatcherTest {
     public void testMatch() {
         String[] fileNames = new String[] {
             "the.league ep2 name.mkv",
+            "the_league - e2 - name.mkv",
+            "the_league_e02_name.mkv",
             "the.league ep02 name.mkv",
             "the.league.ep.02.name.mkv",
         };
@@ -68,6 +68,8 @@ public class WordDelimitedMatcherTest {
     @Test
     public void testMatchWithSeason() {
         String[] fileNames = new String[] {
+            "the_league - season 1 - e2 - name.mkv",
+            "the_league_season_1_e02_name.mkv",
             "the league season 1 ep 2 name.mkv",
             "the.league.season.1.ep02.name.mkv",
             "the league season 1 episode 2 name.mkv",
@@ -87,6 +89,9 @@ public class WordDelimitedMatcherTest {
     @Test
     public void testMatchDouble() {
         String[] fileNames = new String[] {
+            "the_league - e1e2 - name.mkv",
+            "the_league_e01_e02_name.mkv",
+            "the_league_e01_name_e02_name.mkv",
             "the.league ep01ep02 pilot.mkv",
             "the.league ep1ep2 pilot.mkv",
             "the_league_ep01_ep02_pilot.mkv",
@@ -111,6 +116,9 @@ public class WordDelimitedMatcherTest {
     @Test
     public void testMatchDoubleWithSeason() {
         String[] fileNames = new String[] {
+            "the_league - season 1 - e2e3 - name.mkv",
+            "the_league_season_1_e02_e03_name.mkv",
+            "the_league_season_1_e02_name_e03_name.mkv",
             "the league season 1 ep 2 ep 3 name.mkv",
             "the league season1 ep2 ep3 name.mkv",
             "the league season1ep2ep3 name.mkv",
@@ -137,6 +145,9 @@ public class WordDelimitedMatcherTest {
     @Test
     public void testMatchQuad() {
         String[] fileNames = new String[] {
+            "the_league - e1e2e3e4 - name.mkv",
+            "the_league_e01_e02_e03_e04_name.mkv",
+            "the_league_e01_name_e02_name_e03_name_e04_name.mkv",
             "the.league ep01ep02ep03ep04 pilot.mkv",
             "the.league ep1ep2ep3ep4 pilot.mkv",
             "the_league_ep01_ep02_ep03_ep04_pilot.mkv",
@@ -163,6 +174,9 @@ public class WordDelimitedMatcherTest {
     @Test
     public void testMatchQuadWithSeason() {
         String[] fileNames = new String[] {
+            "the_league - season 1 - e2e3e4e5 - name.mkv",
+            "the_league_season_1_e02_e03_e04_e05_name.mkv",
+            "the_league_season_1_e02_name_e03_name_e04_name_e05_name.mkv",
             "the league season 1 ep 2 ep 3 ep 4 ep 5 name.mkv",
             "the league season1 ep2 ep3 ep4 ep5 name.mkv",
             "the league season1ep2ep3ep4ep5 name.mkv",

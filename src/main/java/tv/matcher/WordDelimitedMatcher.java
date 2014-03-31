@@ -37,6 +37,8 @@ import tv.model.EpisodeMatch;
  * Matches: (with variants of separators)
  * the.league ep01 pilot.mkv
  * the.league.ep.01.pilot.mkv
+ * the.league e02 name.mkv
+ * the_league - e2 - name.mkv
  * the.league ep01ep02 pilot.mkv
  * the.league.ep_01_ep_02.pilot.mkv
  * the league season 1 episode 1 pilot.mkv
@@ -47,7 +49,7 @@ import tv.model.EpisodeMatch;
 public class WordDelimitedMatcher implements EpisodeFileMatcher.Matcher {
     
     private final static String separator = "[_\\-. +]*";
-    private final static String epSeparator = "(?:ep|episode)";
+    private final static String epSeparator = "(?:e|ep|episode)";
 
     private final static Pattern pattern = Pattern.compile(
         new StringBuilder().append("(?:season").append(separator).append("(\\d+)").append(separator)
