@@ -27,35 +27,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tv.filter;
+package tv.model;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import tv.matcher.EpisodeMatcher;
-import tv.model.EpisodeMatch;
+import java.util.Collection;
 
 /**
  *
  * @author Sam Malone
  */
-public class EpisodeFilter implements FilenameFilter {
+public abstract class AbstractEpisode {
     
-    private final EpisodeMatcher matcher;
-    private final int episodeNo;
-
-    public EpisodeFilter(EpisodeMatcher m, int epNo) {
-        matcher = m;
-        episodeNo = epNo;
-    }
+    public abstract Collection<Integer> getEpisodes();
     
-    @Override
-    public boolean accept(File dir, String name) {
-        if(!ExtensionFilter.isValid(name)) {
-            return false;
+    public Range getEpisodesAsRange() {
+        int min = Integer.MAX_VALUE;
+        int max = -1;
+        for(int ep : getEpisodes()) {
+            if(ep < min) {
+                min = ep;
+            }
+            if(ep > max) {
+                max = ep;
+            }
         }
-        EpisodeMatch m = matcher.match(name);
-        return m != null && m.getEpisodes().contains(new Integer(episodeNo));
+        return new Range(min, max);
+    }
+    
+    public boolean episodeMatches(MatchCondition<Integer> condition) {
+        for(Integer ep : getEpisodes()) {
+            if(condition.matches(ep)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isEpisodeNo(final int episode) {
+        return episodeMatches(new MatchCondition<Integer>() {
+            @Override
+            public boolean matches(Integer toMatch) {
+                return toMatch == episode;
+            }
+        });
+    }
+    
+    public boolean isEpisodeInRange(final Range range) {
+        return episodeMatches(new MatchCondition<Integer>() {
+            @Override
+            public boolean matches(Integer toMatch) {
+                return toMatch >= range.getStart() && toMatch <= range.getEnd();
+            }
+        });
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for(int episode : getEpisodes()) {
+            sb.append('e').append(String.format("%02d", episode));
+        }
+        return sb.toString();
+    }
     
 }

@@ -26,29 +26,23 @@
 
 package tv.mode;
 
-import java.io.File;
-import tv.ExitCode;
-import tv.TV;
+import java.util.List;
 import tv.TVScan;
 import tv.exception.ExitException;
-import tv.exception.FileNotFoundException;
-import tv.exception.SeasonNotFoundException;
-import tv.model.Arguments;
+import tv.matcher.TVMatcher;
 import tv.model.Episode;
-import tv.model.EpisodeRange;
-import tv.model.Range;
-import tv.model.Season;
+import tv.model.EpisodeMatch;
 
 /**
- * EpisodeMode should be used for modes that do not involve using the pointer.
+ * For episode modes that don't need to use a pointer, see {@link EpisodeRangeMode}.
  * For episode modes that can read and write to a pointer, see {@link PointerMode}.
  * For episode modes that only need to write to a pointer, see {@link WriteOnlyPointerMode}.
  * @author Sam Malone
  */
-public class EpisodeMode {
+public abstract class EpisodeMode {
     
     private final int mode;
-    private final TVScan tvScanner;
+    private final TVMatcher tvMatcher;
     
     /**
      * Creates a new EpisodeMode instance
@@ -58,23 +52,7 @@ public class EpisodeMode {
      */
     public EpisodeMode(int mode, TVScan scanner) {
         this.mode = mode;
-        this.tvScanner = scanner;
-    }
-    
-    /**
-     * Get the starting season for the current episode mode
-     * @return Starting Season
-     */
-    private Season getStartingSeason() {
-        Arguments args = TV.ENV.getArguments();
-        switch(mode) {
-            case EpisodeModes.ALL:
-                return getTvScanner().getSeason(args.getShow(), 1);
-            case EpisodeModes.LATEST_SEASON:
-                int season = Integer.valueOf(getTvScanner().getLastSeasonNo(args.getShow()));
-                return getTvScanner().getSeason(args.getShow(), season);
-        }
-        return getTvScanner().getSeason(args.getShow(), TVScan.getSeasonNo(args.getEpisodes()));
+        this.tvMatcher = new TVMatcher(scanner);
     }
     
     /**
@@ -87,131 +65,36 @@ public class EpisodeMode {
     }
 
     /**
-     * Get the TvScanner to be used to scan for content
-     * @return TvScanner
+     * Get the TVMatcher
+     * @return TVMatcher
      */
-    public TVScan getTvScanner() {
-        return tvScanner;
+    public TVMatcher getTvMatcher() {
+        return tvMatcher;
     }
     
     /**
-     * Build the list of episode Files as specified by the episode mode
-     * @return List of episode Files or empty File array if none found
-     * @throws ExitException if unable to determine the list of files for the given mode
+     * Find the episode files that match the specified episode mode
+     * @return List of episode Files or empty list if none found
+     * @throws ExitException if unable to determine the list of episodes to
+     * match
      */
-    public File[] buildFileList() throws ExitException {
-        Season season = getStartingSeason();
-        assertStartingSeasonValid(season);
-        String episodeString = TV.ENV.getArguments().getEpisodes();
-        switch(mode) {
-            case EpisodeModes.SEASON:
-                return seasonFromEpisode(season, "00");
-            case EpisodeModes.SEASONFROMEP:
-                return seasonFromEpisode(season, TVScan.getEpisodeNo(episodeString));
-            case EpisodeModes.EPRANGE:
-                return episodeRange(season, EpisodeRange.fromArray(episodeString.split("-")));
-            case EpisodeModes.ALL:
-                return allEpisodes();
-            case EpisodeModes.SEASONRANGE:
-                return seasonRange(season, Range.fromSeason(episodeString.split("-")));
-            case EpisodeModes.ALLFROMSEASON:
-                return allFromSeason(season);
-            case EpisodeModes.LATEST_SEASON:
-                return seasonFromEpisode(season, "00");
-        }
-        return new File[] {};
-    }
+    public abstract List<EpisodeMatch> findMatches() throws ExitException;
     
     /**
-     * Assert that the given season is valid
-     * @param season season
-     * @throws SeasonNotFoundException if the season cannot be found
-     */
-    public static void assertStartingSeasonValid(Season season) throws SeasonNotFoundException {
-        if(season.getSeasonDir() == null || !season.getSeasonDir().exists()) {
-            throw new SeasonNotFoundException("Season " + season.getSeasonNo() + " could not be found");
-        }
-    }
-    
-    /**
-     * Get the list of all episode Files
-     * @return list of all episode Files
-     * @throws ExitException if unable to find any episodes
-     */
-    public File[] allEpisodes() throws ExitException {
-        File[] eps = getTvScanner().getAllEpisodes(TV.ENV.getArguments().getShow());
-        if(eps == null || eps.length == 0) {
-            throw new ExitException("Unable to find any episodes", ExitCode.EPISODES_NOT_FOUND);
-        }
-        return eps;
-    }
-    
-    /**
-     * Gets the episodes Files in given episode range
-     * @param season Starting season in the range i.e. the season for rangeArray[0]
-     * @param range Range of episodes
-     * @return List of episode Files in the given range
-     * @throws ExitException if unable to find any episodes in the given range
-     */
-    public File[] episodeRange(Season season, EpisodeRange range) throws ExitException {
-        File[] list = getTvScanner().getEpisodeRange(season, TV.ENV.getArguments().getShow(), range);
-        if(list == null || list.length == 0) {
-            throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
-        }
-        return list;
-    }
-    
-    /**
-     * Gets the episodes including and greater than epString in the same season
-     * @param season Season
-     * @param epString Episode No e.g. 02
+     * Find the episode files that match the specified episode mode or throw
+     * an ExitException if no matches are found.
      * @return List of episode Files
-     * @throws ExitException if unable to find any episodes in the given range
+     * @throws ExitException if unable to determine the list of episodes to
+     * match or if there are no episode matches
      */
-    public File[] seasonFromEpisode(Season season, String epString) throws ExitException {
-        File[] eps = getTvScanner().getEpisodesFrom(season, Integer.valueOf(epString));
-        if(eps == null || eps.length == 0) {
-            throw new ExitException("Unable to find any episodes in the given range", ExitCode.EPISODES_RANGE_NOT_FOUND);
-        }
-        return eps;
-    }
-
-    /**
-     * Get all the episodes from the given season range
-     * @param season Starting season
-     * @param seasonRange Range of seasons inclusive
-     * @return List of episode Files in the season range
-     * @throws ExitException if unable to fid the seasons in the given range
-     */
-    public File[] seasonRange(Season season, Range seasonRange) throws ExitException {
-        File[] range = getTvScanner().getSeasonRange(season, TV.ENV.getArguments().getShow(), seasonRange);
-        if(range == null || range.length == 0) {
-            throw new ExitException("Unable to find the seasons in the given range", ExitCode.SEASON_RANGE_NOT_FOUND);
-        }
-        return range;
-    }
-
-    /**
-     * Get all the episodes from the given season, and any remaining seasons
-     * @param season Starting season
-     * @return List of episode Files
-     * @throws ExitException if unable to find the episodes in the given range
-     */
-    public File[] allFromSeason(Season season) throws ExitException {
-        File[] eps = getTvScanner().getSeasonsFrom(season, TV.ENV.getArguments().getShow());
-        if(eps == null || eps.length == 0) {
-            throw new ExitException("Unable to find the episodes in the given range", ExitCode.SEASON_RANGE_NOT_FOUND);
-        }
-        return eps;
-    }
+    public abstract List<EpisodeMatch> findMatchesOrThrow() throws ExitException;
     
     /**
      * Get the new episode pointer to be set
+     * @param match matched episode
      * @return new episode pointer or null if one should be not be set
-     * @throws tv.exception.ExitException
+     * @throws tv.exception.ExitException if unable to determine the new pointer
      */
-    public Episode getNewPointer() throws ExitException {
-        return null;
-    }
+    public abstract Episode getNewPointer(EpisodeMatch match) throws ExitException;
     
 }

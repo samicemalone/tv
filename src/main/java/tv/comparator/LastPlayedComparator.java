@@ -24,9 +24,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tv.model;
+package tv.comparator;
 
 import java.util.Comparator;
+import tv.model.Episode;
 
 /**
  *

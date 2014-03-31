@@ -47,7 +47,7 @@ import tv.TV;
 import tv.filter.ExtensionFilter;
 import tv.io.TVDBManager;
 import tv.model.Episode;
-import tv.model.LastPlayedComparator;
+import tv.comparator.LastPlayedComparator;
 import tv.util.CommandUtil;
 
 /**

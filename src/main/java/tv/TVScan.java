@@ -29,20 +29,10 @@
 package tv;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import tv.filter.EpisodeFilter;
+import tv.exception.SeasonNotFoundException;
 import tv.filter.ExtensionFilter;
-import tv.filter.RangeFilter;
-import tv.filter.SeasonDirectoryFilter;
-import tv.filter.SeasonSubsetFilter;
-import tv.matcher.EpisodeMatcher;
-import tv.model.EpisodeRange;
-import tv.model.Range;
+import tv.matcher.TVMatcher;
 import tv.model.Season;
 
 /**
@@ -76,183 +66,33 @@ public class TVScan {
     }
     
     /**
-     * Gets a single episode file from the given season directory and episode string
-     * @param season Season directory
-     * @param epNo Episode number e.g. "03"
-     * @return single episode or null if not found
+     * List the video files in the given season
+     * @param season season to list
+     * @return list of files in season directory. empty array if none or error
      */
-    public static File getEpisode(Season season, String epNo) {
-        if(!season.getSeasonDir().exists()) {
-            return null;
-        }
-        EpisodeMatcher matcher = new EpisodeMatcher();
-        File[] list = season.getSeasonDir().listFiles(new EpisodeFilter(matcher, Integer.valueOf(epNo)));
-        return list.length != 0 ? list[0] : null;
+    public File[] listFiles(Season season) {
+        File[] list = season.getDir().listFiles(new ExtensionFilter());
+        return list == null ? new File[] {} : list;
     }
     
     /**
-     * Gets the last episode number in the given season
-     * @param season Season
-     * @return Last Zero padded episode number or null if error occurred
-     */
-    public static String getLastEpisodeNo(Season season) {
-        File[] list = season.getSeasonDir().listFiles(new ExtensionFilter());
-        Pattern p = Pattern.compile("[sS][0-9][0-9][eE]([0-9][0-9])|[0-9]+x([0-9][0-9])");
-        Matcher m;
-        int lastEpisode = -1;
-        for(File episode : list) {
-            m = p.matcher(filterFileName(episode.getName()));
-            if(m.find() && m.groupCount() == 2) {
-                int curEp;
-                if(m.group(1) == null && m.group(2) != null) {
-                    curEp = Integer.valueOf(m.group(2));
-                } else {
-                    curEp = Integer.valueOf(m.group(1));
-                }
-                if(curEp > lastEpisode) {
-                    lastEpisode = curEp;
-                }
-            }
-        }
-        if(lastEpisode == -1) {
-            return null;
-        }
-        return String.format("%02d", lastEpisode);
-    }
-    
-    /**
-     * Gets the last (largest) season number for the given show
-     * @param show TV Show
-     * @return Zero padded season number or null if error
-     */
-    public String getLastSeasonNo(String show) {
-        File showFolder = getShowDirectory(show);
-        if(showFolder == null) {
-            return null;
-        }
-        SeasonDirectoryFilter.Max maxSeasonFilter = new SeasonDirectoryFilter.Max();
-        File[] seasonDirs = showFolder.listFiles(maxSeasonFilter);
-        if(seasonDirs == null || maxSeasonFilter.getMax() == -1) {
-            return null;
-        }
-        return String.format("%02d", maxSeasonFilter.getMax());
-    }
-    
-    /**
-     * Filters the given file name to remove possible ambiguities such
-     * as 720p and 1080p strings.
-     * @param fileName
-     * @return Filtered fileName
-     */
-    private static String filterFileName(String fileName) {
-        return fileName.replaceAll("720p", "").replaceAll("1080p", "");
-    }
-    
-    /**
-     * Gets all the episodes from the given show
-     * @param show TV Show
-     * @return Episode List or empty array
-     */
-    public File[] getAllEpisodes(String show) {
-        return getSeasonsFrom(getSeason(show, 1), show);
-    }
-    
-    /**
-     * Gets the list of files in the given episode range
-     * @param season Starting Season
-     * @param show TV Show
-     * @param range EpisodeRange
-     * @return List of files in the given range or empty array
-     */
-    public File[] getEpisodeRange(Season season, String show, EpisodeRange range) {
-        EpisodeMatcher matcher = new EpisodeMatcher();
-        if(range.getStartSeason() > range.getEndSeason()) {
-            return new File[] {};
-        } else if(range.getStartSeason() == range.getEndSeason()) {
-            return season.getSeasonDir().listFiles(new RangeFilter(matcher, range.toRange()));
-        }
-        List<File> list = new ArrayList<File>();
-        // add episodes from starting season in range
-        addFilteredFiles(list, season.getSeasonDir(), new SeasonSubsetFilter(matcher, range.getStartEpisode()));
-        // add full seasons in between range if applicable
-        addSeasonsToList(list, show, new Range(range.getStartSeason() + 1, range.getEndSeason() - 1));
-        // add remaining episodes of the end season in range
-        File seasonDir = getSeasonDirectory(show, range.getEndSeason());
-        if(seasonDir != null) {
-            addFilteredFiles(list, seasonDir, new RangeFilter(matcher, new Range(0, range.getEndEpisode())));
-        }
-        return list.toArray(new File[0]);
-    }
-    
-    /**
-     * Adds the list of files from seasonDir to list that match the given
-     * filename filter
-     * @param list list to add filtered files to
-     * @param seasonDir directory to get list of files
-     * @param filter filter files based on filename
-     */
-    private void addFilteredFiles(List<File> list, File seasonDir, FilenameFilter filter) {
-        list.addAll(Arrays.asList(seasonDir.listFiles(filter)));
-    }
-    
-    /**
-     * Gets a list of files from the episode given in the season directory given
-     * @param season Season directory
-     * @param startEp Episode number to start from
-     * @return List of files matched or empty array if none found
-     */
-    public File[] getEpisodesFrom(Season season, int startEp) {
-        return season.getSeasonDir().listFiles(new SeasonSubsetFilter(new EpisodeMatcher(), startEp));
-    }
-    
-    /**
-     * Get a list of files from the startSeason to the endSeason
-     * @param season Starting Season
-     * @param show TV Show
-     * @param range SeasonRange
-     * @return list of files matched or empty array if none found
-     */
-    public File[] getSeasonRange(Season season, String show, Range range) {
-        if(range.getStart() > range.getEnd()) {
-            return new File[] {};
-        }
-        List<File> list = new ArrayList<File>();
-        addFilteredFiles(list, season.getSeasonDir(), new ExtensionFilter());
-        addSeasonsToList(list, show, new Range(range.getStart() + 1, range.getEnd()));
-        return list.toArray(new File[0]);
-    }
-    
-    /**
-     * Get a list of all the episodes for the given show starting from seasonNo
-     * @param season Starting Season
-     * @param show TV Show
-     * @return list of files matched or empty array if none found
-     */
-    public File[] getSeasonsFrom(Season season, String show) {
-        List<File> list = new ArrayList<File>();
-        addFilteredFiles(list, season.getSeasonDir(), new ExtensionFilter());
-        addSeasonsToList(list, show, Range.maxRange(season.getSeasonNo() + 1));
-        return list.toArray(new File[0]);
-    }
-    
-    /**
-     * Add the episodes that exist in range of seasons given for show
-     * @param list list to add episodes to
+     * List the video files in the given season of show
      * @param show tv show
-     * @param range SeasonRange (inclusive start and end)
-     * @return list
+     * @param seasonNo season to list
+     * @return list of files in season directory. empty array if none or error
+     * @throws tv.exception.SeasonNotFoundException if unable to find season
      */
-    private List<File> addSeasonsToList(List<File> list, String show, Range range) {
-        int i = range.getStart();
-        File seasonDir;
-        while(i <= range.getEnd() && (seasonDir = getSeasonDirectory(show, i++)) != null) {
-            addFilteredFiles(list, seasonDir, new ExtensionFilter());
+    public File[] listFiles(String show, int seasonNo) throws SeasonNotFoundException {
+        Season season = getSeason(show, seasonNo);
+        if(season.getDir() == null || !season.getDir().exists()) {
+            throw new SeasonNotFoundException(String.format("Season %s could not be found for %s", seasonNo, show));
         }
-        return list;
+        return listFiles(season);
     }
     
     /**
-     * Get the Season information for the given show and season
+     * Get the Season information for the given show and season.
+     * The season directory will be null if the season doesn't exist
      * @param show show
      * @param season season
      * @return season
@@ -270,7 +110,7 @@ public class TVScan {
     public File getSeasonDirectory(String show, int season) {
         for(String source : sources) {
             if(new File(source, show).exists()) {
-                for(String seasonPrefix : SeasonDirectoryFilter.SEASON_DIRECTORY_PREFIX) {
+                for(String seasonPrefix : TVMatcher.SEASON_DIRECTORY_PREFIXES) {
                     StringBuilder dir = new StringBuilder();
                     dir.append(source).append(File.separator);
                     dir.append(show).append(File.separator);

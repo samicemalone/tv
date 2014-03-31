@@ -31,13 +31,9 @@ package tv;
 
 import java.io.File;
 import org.junit.After;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-import tv.model.EpisodeRange;
-import tv.model.Range;
-import tv.model.Season;
 
 /**
  *
@@ -58,7 +54,7 @@ public class TVScanTest extends FileSystemEnvironment {
     }
 
     /**
-     * Test of getSeasonNo method, of class TVScan.
+     * Test of asInt method, of class TVScan.
      */
     @Test
     public void testGetSeasonNo() {
@@ -80,117 +76,7 @@ public class TVScanTest extends FileSystemEnvironment {
     }
 
     /**
-     * Test of getEpisode method, of class TVScan.
-     */
-    @Test
-    public void testGetEpisode() {
-        String show = "Scrubs";
-        int s = 1;
-        Season season = new Season(s, MockFileSystem.getSeasonDir(show, s));
-        String epNo = "04";
-        File expResult = MockFileSystem.getEpisodeFile(show, s, 4);
-        File result = TVScan.getEpisode(season, epNo);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getLastEpisodeNo method, of class TVScan.
-     */
-    @Test
-    public void testGetLastEpisodeNo() {
-        String show = "Scrubs";
-        int s = 1;
-        Season season = new Season(s, MockFileSystem.getSeasonDir(show, s));
-        String expResult = String.valueOf(MockFileSystem.NUM_EPISODES);
-        String result = TVScan.getLastEpisodeNo(season);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getLastSeasonNo method, of class TVScan.
-     */
-    @Test
-    public void testGetLastSeasonNo() {
-        String show = "Scrubs";
-        String expResult = String.format("%02d", MockFileSystem.NUM_SEASONS);
-        String result = tvScanner.getLastSeasonNo(show);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of getAllEpisodes method, of class TVScan.
-     */
-    @Test
-    public void testGetAllEpisodes() {
-        String show = "Scrubs";
-        File[] expResult = MockFileSystem.getAllEpisodes(show);
-        File[] result = tvScanner.getAllEpisodes(show);
-        assertArrayEquals(expResult, result);
-    }
-
-    /**
-     * Test of getEpisodeRange method, of class TVScan.
-     */
-    @Test
-    public void testGetEpisodeRange() {
-        String show = "Scrubs";
-        Season season = new Season(1, MockFileSystem.getSeasonDir(show, 1));
-        EpisodeRange range = new EpisodeRange(1, 10, 2, 2);
-        File[] expResult = new File[] {
-            MockFileSystem.getEpisodeFile(show, 1, 10),
-            MockFileSystem.getEpisodeFile(show, 1, 11),
-            MockFileSystem.getEpisodeFile(show, 1, 12),
-            MockFileSystem.getEpisodeFile(show, 2, 1),
-            MockFileSystem.getEpisodeFile(show, 2, 2)
-        };
-        File[] result = tvScanner.getEpisodeRange(season, show, range);
-        assertArrayEquals(expResult, result);
-    }
-
-    /**
-     * Test of getEpisodesFrom method, of class TVScan.
-     */
-    @Test
-    public void testGetEpisodesFrom() {
-        String show = "Scrubs";
-        Season season = new Season(1, MockFileSystem.getSeasonDir(show, 1));
-        int startEp = 9;
-        File[] expResult = new File[] {
-            MockFileSystem.getEpisodeFile(show, 1, 9),
-            MockFileSystem.getEpisodeFile(show, 1, 10),
-            MockFileSystem.getEpisodeFile(show, 1, 11),
-            MockFileSystem.getEpisodeFile(show, 1, 12)
-        };
-        File[] result = tvScanner.getEpisodesFrom(season, startEp);
-        assertArrayEquals(expResult, result);
-    }
-
-    /**
-     * Test of getSeasonRange method, of class TVScan.
-     */
-    @Test
-    public void testGetSeasonRange() {
-        String show = "Scrubs";
-        Season season = new Season(2, MockFileSystem.getSeasonDir(show, 2));
-        File[] expResult = MockFileSystem.getFullSeasonEpisodes(show, 2, 3);
-        File[] result = tvScanner.getSeasonRange(season, show, new Range(2, 3));
-        assertArrayEquals(expResult, result);
-    }
-
-    /**
-     * Test of getSeasonsFrom method, of class TVScan.
-     */
-    @Test
-    public void testGetSeasonsFrom() {
-        String show = "Scrubs";
-        Season season = new Season(2, MockFileSystem.getSeasonDir(show, 2));
-        File[] expResult = MockFileSystem.getFullSeasonEpisodes(show, 2, MockFileSystem.NUM_SEASONS);
-        File[] result = tvScanner.getSeasonsFrom(season, show);
-        assertArrayEquals(expResult, result);
-    }
-
-    /**
-     * Test of getSeasonDirectory method, of class TVScan.
+     * Test of getDirectory method, of class TVScan.
      */
     @Test
     public void testGetSeasonDirectory() {

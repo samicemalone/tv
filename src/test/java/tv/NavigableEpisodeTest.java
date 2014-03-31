@@ -29,38 +29,27 @@
 
 package tv;
 
-import java.io.IOException;
 import org.junit.After;
-import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import tv.exception.SeasonNotFoundException;
+import tv.matcher.TVMatcher;
 import tv.model.Episode;
+import tv.model.EpisodeMatch;
 
 /**
  *
  * @author Sam Malone
  */
-public class NavigableEpisodeTest {
+public class NavigableEpisodeTest extends FileSystemEnvironment {
     
     private NavigableEpisode episode;
     
-    @BeforeClass
-    public static void setUpClass() throws IOException {
-        MockFileSystem.create();
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-        MockFileSystem.delete();
-    }
-    
     @Before
     public void setUp() {
-        episode = new NavigableEpisode(new TVScan(MockFileSystem.getSourceFolders()));
+        TVScan scanner = new TVScan(MockFileSystem.getSourceFolders());
+        episode = new NavigableEpisode(new TVMatcher(scanner));
     }
     
     @After
@@ -70,65 +59,76 @@ public class NavigableEpisodeTest {
 
     /**
      * Test of navigate method, of class NavigableEpisode.
+     * @throws tv.exception.SeasonNotFoundException
      */
     @Test
     public void testNavigateCurrent() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 5);
-        Episode expResult = toNavigate;
-        Episode result = episode.navigate(toNavigate, "next");
-        assertSame(expResult, result);
+        EpisodeMatch expResult = new EpisodeMatch(1, 5);
+        EpisodeMatch result = episode.navigate(toNavigate, "cur");
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());        
     }
 
     /**
      * Test of navigate method, of class NavigableEpisode.
+     * @throws tv.exception.SeasonNotFoundException
      */
     @Test
     public void testNavigateNext() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 5);
-        Episode expResult = new Episode("Scrubs", "", 1, 6);
-        Episode result = episode.navigate(toNavigate, "next");
-        assertEquals(expResult, result);
+        EpisodeMatch expResult = new EpisodeMatch(1, 6);
+        EpisodeMatch result = episode.navigate(toNavigate, "next");
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());  
     }
 
     /**
      * Test of navigate method, of class NavigableEpisode.
+     * @throws tv.exception.SeasonNotFoundException
      */
     @Test
     public void testNavigateNextDoubleEp() throws SeasonNotFoundException {
-        String show = "The Walking Dead";
-        Episode toNavigate = new Episode(show, "", 1, 2);
-        Episode expResult = new Episode(show, "", 1, 4);
-        Episode result = episode.navigate(toNavigate, "next");
-        assertEquals(expResult, result);
+        Episode toNavigate = new Episode("The Walking Dead", "", 1, 2);
+        EpisodeMatch expResult = new EpisodeMatch(1, 4);
+        EpisodeMatch result = episode.navigate(toNavigate, "next");
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());  
     }
 
     /**
      * Test of navigate method, of class NavigableEpisode.
+     * @throws tv.exception.SeasonNotFoundException
      */
     @Test
     public void testNavigatePrevious() throws SeasonNotFoundException {
         Episode toNavigate = new Episode("Scrubs", "", 1, 6);
-        Episode expResult = new Episode("Scrubs", "", 1, 5);
-        Episode result = episode.navigate(toNavigate, "prev");
-        assertEquals(expResult, result);
+        EpisodeMatch expResult = new EpisodeMatch(1, 5);
+        EpisodeMatch result = episode.navigate(toNavigate, "prev");
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());  
     }
     
 
     /**
      * Test of navigate method, of class NavigableEpisode.
+     * @throws tv.exception.SeasonNotFoundException
      */
     @Test
     public void testNavigatePreviousDoubleEp() throws SeasonNotFoundException {
         String show = "The Walking Dead";
         // the mock episode 1x02 is a double (ep 2 and 3).
         Episode toNavigate = new Episode(show, "", 1, 4);
-        Episode expResult = new Episode(show, "", 1, 3);
-        Episode result = episode.navigate(toNavigate, "prev");
-        assertEquals(expResult, result);
-        toNavigate = expResult;
-        expResult = new Episode(show, "", 1, 1);
+        EpisodeMatch expResult = new EpisodeMatch(1, 2);
+        expResult.getEpisodes().add(3);
+        EpisodeMatch result = episode.navigate(toNavigate, "prev");
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());
+        toNavigate = new Episode(show, "", expResult);
+        expResult = new EpisodeMatch(1, 1);
         result = episode.navigate(toNavigate, "prev");
-        assertEquals(expResult, result);
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());
     }
 
     /**
@@ -137,9 +137,10 @@ public class NavigableEpisodeTest {
     @Test
     public void testNavigateSeasonPrevious() {
         Episode toNavigate = new Episode("Scrubs", "", 3, 1);
-        Episode expResult = new Episode("Scrubs", "", 2, 12);
-        Episode result = episode.navigateSeason(toNavigate, NavigableEpisode.PREV);
-        assertEquals(expResult, result);
+        EpisodeMatch expResult = new EpisodeMatch(2, 12);
+        EpisodeMatch result = episode.navigateSeason(toNavigate, NavigableEpisode.PREV);
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());
     }
     
     /**
@@ -148,9 +149,54 @@ public class NavigableEpisodeTest {
     @Test
     public void testNavigateSeasonNext() {
         Episode toNavigate = new Episode("Scrubs", "", 2, 12);
-        Episode expResult = new Episode("Scrubs", "", 3, 1);
-        Episode result = episode.navigateSeason(toNavigate, NavigableEpisode.NEXT);
-        assertEquals(expResult, result);
+        EpisodeMatch expResult = new EpisodeMatch(3, 1);
+        EpisodeMatch result = episode.navigateSeason(toNavigate, NavigableEpisode.NEXT);
+        assertEquals(expResult.getSeason(), result.getSeason());        
+        assertEquals(expResult.getEpisodes(), result.getEpisodes());
+    }
+    
+    /**
+     * Test of navigateSeason method, of class NavigableEpisode.
+     */
+    @Test
+    public void testNavigateShowAscending() {
+        for(int i = 1; i <= MockFileSystem.NUM_SEASONS; i++) {
+            for(int j = 1; j <= MockFileSystem.NUM_EPISODES; j++) {
+                int season = (j == MockFileSystem.NUM_EPISODES) ? i + 1 : i;
+                int expEp = (j == MockFileSystem.NUM_EPISODES) ? 1 : j + 1;
+                Episode toNavigate = new Episode("Scrubs", "", i, j);
+                EpisodeMatch expResult = new EpisodeMatch(season, expEp);
+                EpisodeMatch result = episode.navigate(toNavigate, "next");
+                if(result == null && i == MockFileSystem.NUM_SEASONS && j == MockFileSystem.NUM_EPISODES) {
+                    return;
+                }
+                System.out.println("Navigating: " + toNavigate + " : to : " + expResult);
+                assertEquals(expResult.getSeason(), result.getSeason());
+                assertEquals(expResult.getEpisodes(), result.getEpisodes());
+            }
+        }
+    }
+    
+    /**
+     * Test of navigateSeason method, of class NavigableEpisode.
+     */
+    @Test
+    public void testNavigateShowDescending() {
+        for(int i = MockFileSystem.NUM_SEASONS; i > 0; i--) {
+            for(int j = MockFileSystem.NUM_EPISODES; j > 0; j--) {
+                int season = (j == 1) ? i - 1 : i;
+                int expEp = (j == 1) ? MockFileSystem.NUM_EPISODES : j - 1;
+                Episode toNavigate = new Episode("Scrubs", "", i, j);
+                EpisodeMatch expResult = new EpisodeMatch(season, expEp);
+                EpisodeMatch result = episode.navigate(toNavigate, "prev");
+                if(result == null && i == 1 && j == 1) {
+                    return;
+                }
+                System.out.println("Navigating: " + toNavigate + " : to : " + expResult);
+                assertEquals(expResult.getSeason(), result.getSeason());
+                assertEquals(expResult.getEpisodes(), result.getEpisodes());
+            }
+        }
     }
     
 }

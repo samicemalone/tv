@@ -28,43 +28,37 @@
  */
 package tv.model;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Sam Malone
  */
-public class Episode {
+public class Episode extends AbstractEpisode {
 
+    private List<Integer> episodes;
+    private File episodeFile;
     private String show;
-    private String seasonNo;
-    private String episodeNo;
     private String user;
-    private int date;
-
-    /**
-     * Creates an instance of Episode
-     * @param show TV Show
-     * @param user TV user
-     * @param seasonNo Zero padded season number
-     * @param episodeNo Zero padded episode number
-     */
-    public Episode(String show, String user, String seasonNo, String episodeNo) {
+    private int season;
+    private int playedDate;
+   
+    public Episode(String show, String user, EpisodeMatch episodeMatch) {
         this.show = show;
         this.user = user;
-        this.seasonNo = seasonNo;
-        this.episodeNo = episodeNo;
+        this.season = episodeMatch.getSeason();
+        this.episodes = episodeMatch.getEpisodes();
+        this.episodeFile = episodeMatch.getEpisodeFile();
     }
-    /**
-     * Creates an instance of Episode
-     * @param show TV Show
-     * @param user TV user
-     * @param seasonNo Season number
-     * @param episodeNo Episode number
-     */
-    public Episode(String show, String user, int seasonNo, int episodeNo) {
+   
+    public Episode(String show, String user, int seasonNo, int episode) {
         this.show = show;
         this.user = user;
-        this.seasonNo = String.format("%02d", seasonNo);
-        this.episodeNo = String.format("%02d", episodeNo);
+        this.season = seasonNo;
+        this.episodes = new ArrayList<Integer>();
+        this.episodes.add(episode);
     }
 
     /**
@@ -74,8 +68,9 @@ public class Episode {
     public Episode(Episode e) {
         show = e.getShow();
         user = e.getUser();
-        seasonNo = e.getSeasonNo();
-        episodeNo = e.getEpisodeNo();
+        season = e.getSeason();
+        episodes = e.getEpisodes();
+        episodeFile = e.getEpisodeFile();
     }
     
     /**
@@ -95,35 +90,27 @@ public class Episode {
     }
 
     /**
-     * Gets the episode number
-     * @return Zero padded episode number
+     * Sets the episode numbers
+     * @param episodes episode numbers
      */
-    public String getEpisodeNo() {
-        return episodeNo;
-    }
-
-    /**
-     * Sets the episode number
-     * @param episodeNo Zero padded episode number
-     */
-    public void setEpisodeNo(String episodeNo) {
-        this.episodeNo = episodeNo;
+    public void setEpisodes(List<Integer> episodes) {
+        this.episodes = episodes;
     }
 
     /**
      * Gets the season number
-     * @return Zero padded season number
+     * @return season number
      */
-    public String getSeasonNo() {
-        return seasonNo;
+    public int getSeason() {
+        return season;
     }
 
     /**
      * Sets the season number
-     * @param seasonNo Zero padded season number
+     * @param season season number
      */
-    public void setSeasonNo(String seasonNo) {
-        this.seasonNo = seasonNo;
+    public void setSeason(int season) {
+        this.season = season;
     }
 
     /**
@@ -147,7 +134,7 @@ public class Episode {
      * @return unix timestamp or 0 if not set
      */
     public int getPlayedDate() {
-        return date;
+        return playedDate;
     }
 
     /**
@@ -155,35 +142,29 @@ public class Episode {
      * @param date unix timestamp
      */
     public void setPlayedDate(int date) {
-        this.date = date;
+        this.playedDate = date;
     }
 
     @Override
     public String toString() {
-        return String.format("%s - s%se%s", show, seasonNo, episodeNo);
+        return String.format("%s - s%02d%s", show, season, super.toString());
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        } else if (obj == this) {
-            return true;
-        } else if (!(obj instanceof Episode)) {
-            return false;
-        }
-        Episode o2 = (Episode) obj;
-        return show.equals(o2.getShow()) && seasonNo.equals(o2.getSeasonNo()) && episodeNo.equals(o2.getEpisodeNo());
+    public List<Integer> getEpisodes() {
+        return episodes;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + (this.show != null ? this.show.hashCode() : 0);
-        hash = 37 * hash + (this.seasonNo != null ? this.seasonNo.hashCode() : 0);
-        hash = 37 * hash + (this.episodeNo != null ? this.episodeNo.hashCode() : 0);
-        hash = 37 * hash + (this.user != null ? this.user.hashCode() : 0);
-        return hash;
+    public File getEpisodeFile() {
+        return episodeFile;
+    }
+    
+    /**
+     * Check if the episode file contains more than one episode
+     * @return true if multi-episode, false otherwise
+     */
+    public boolean isMultiEpisode() {
+        return getEpisodes().size() > 1;
     }
     
 }

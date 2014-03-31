@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import tv.model.EpisodeMatch;
 
 /**
  * 
@@ -74,12 +75,19 @@ public class MockFileSystem {
         return new File(getSeasonDir(show, season), genFileName(show, season, episode));
     }
     
-    public static File[] getAllEpisodes(String show) {
-        List<File> list = new ArrayList<File>(NUM_EPISODES * NUM_SEASONS);
-        for(int season = 1; season <= NUM_SEASONS; season++) {
-            list.addAll(Arrays.asList(getSeasonDir(show, season).listFiles()));
-        }
-        return list.toArray(new File[0]);
+    public static EpisodeMatch getEpisodeMatch(String show, int season, int episode) {
+        return new EpisodeMatch(getEpisodeFile(show, season, episode), season, episode);
+    }
+    
+    public static List<EpisodeMatch> getFullSeasonEpisodeMatches(String show, int startSeason, int endSeason) {
+        List<EpisodeMatch> list = new ArrayList<EpisodeMatch>(NUM_EPISODES * (endSeason - startSeason + 1));
+        while(startSeason <= endSeason) {
+            for(int i = 1; i <= NUM_EPISODES; i++) {
+                list.add(getEpisodeMatch(show, startSeason, i));
+            }
+            startSeason++; 
+       }
+        return list;
     }
     
     public static File[] getFullSeasonEpisodes(String show, int startSeason, int endSeason) {

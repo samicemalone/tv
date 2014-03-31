@@ -27,53 +27,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tv.matcher;
-
-import java.util.regex.Pattern;
-import tv.model.EpisodeMatch;
+package tv.model;
 
 /**
- *
+ * 
  * @author Sam Malone
+ * @param <T>
  */
-public class EpisodeMatcher {
-    
-    public interface Matcher {
-        public EpisodeMatch match(String fileName);
-    }
+public interface MatchCondition<T> {
     
     /**
-     * Strip common tags from an episode filename that may interfere with
-     * matching. Tags removed:
-     *   Qualities: e.g. 720p, 1080i, 480p
-     *   Codecs: e.g. ac3, dd5.1, aac2.0, dd 7.1, h.264, x264
-     * @param fileName fileName to strip of tags
-     * @return stripped filename
+     * Checks if the value given matches this condition
+     * @param toMatch
+     * @return true if this condition matches, false otherwise
      */
-    public static String stripCommonTags(String fileName) {
-        String regex = "(?:720|480|1080)[ip]|([hx][_\\-. +]*264)|dd[_\\-. +]?[257][_\\-. +]*[01]|ac3|aac[_\\-. +]*(?:[257][_\\-. +]*[01])*";
-        Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        return p.matcher(fileName).replaceAll("");
-    }
-    
-    public EpisodeMatch match(String fileName) {
-        return match(stripCommonTags(fileName),
-            new SEDelimitedMatcher(),
-            new XDelimitedMatcher(),
-            new WordDelimitedMatcher(),
-            new NoDelimiterMatcher(),
-            new PartMatcher()
-        );
-    }
-    
-    private EpisodeMatch match(String fileName, Matcher... parsers) {
-        for(Matcher matcher : parsers) {
-            EpisodeMatch m = matcher.match(fileName);
-            if(m != null) {
-                return m;
-            }
-        }
-        return null;
-    }
-    
+    public boolean matches(T toMatch);
 }

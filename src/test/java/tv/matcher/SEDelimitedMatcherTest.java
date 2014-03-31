@@ -29,6 +29,8 @@
 
 package tv.matcher;
 
+import tv.matcher.SEDelimitedMatcher;
+import tv.matcher.EpisodeFileMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -39,6 +41,8 @@ import tv.model.EpisodeMatch;
  */
 public class SEDelimitedMatcherTest {    
 
+    private final String path = "C:\\TV\\The League\\Season 1\\";
+    
     /**
      * Test of match method, of class SEDelimitedMatcher.
      */
@@ -56,7 +60,7 @@ public class SEDelimitedMatcherTest {
         SEDelimitedMatcher instance = new SEDelimitedMatcher();
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 1);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -84,7 +88,7 @@ public class SEDelimitedMatcherTest {
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 1);
             expResult.getEpisodes().add(2);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -110,11 +114,11 @@ public class SEDelimitedMatcherTest {
         };
         SEDelimitedMatcher instance = new SEDelimitedMatcher();
         for(String fileName : fileNames) {
-            EpisodeMatch expResult = new EpisodeMatch(1, 1);
+            EpisodeMatch expResult = new EpisodeMatch(null, 1, 1);
             expResult.getEpisodes().add(2);
             expResult.getEpisodes().add(3);
             expResult.getEpisodes().add(4);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }

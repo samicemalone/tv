@@ -29,6 +29,7 @@
 
 package tv.matcher;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -49,7 +50,7 @@ import tv.model.EpisodeMatch;
  * etc...
  * @author Sam Malone
  */
-public class SEDelimitedMatcher implements EpisodeMatcher.Matcher {
+public class SEDelimitedMatcher implements EpisodeFileMatcher.Matcher {
     
     private final static String separator = "[_\\-. +x]*";
 
@@ -62,8 +63,8 @@ public class SEDelimitedMatcher implements EpisodeMatcher.Matcher {
     );
 
     @Override
-    public EpisodeMatch match(String fileName) {
-        Matcher m = pattern.matcher(fileName);
+    public EpisodeMatch match(String absolutePath, String filteredFileName) {
+        Matcher m = pattern.matcher(filteredFileName);
         if(m.find()) {
             int season = Integer.valueOf(m.group(1));
             int episode = Integer.valueOf(m.group(2));

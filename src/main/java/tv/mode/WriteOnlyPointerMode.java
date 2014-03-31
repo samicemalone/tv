@@ -26,14 +26,15 @@
 
 package tv.mode;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import tv.ExitCode;
 import tv.TV;
 import tv.TVScan;
 import tv.exception.ExitException;
 import tv.model.Arguments;
 import tv.model.Episode;
-import tv.model.Season;
+import tv.model.EpisodeMatch;
 
 /**
  * WriteOnlyPointerMode should be used for modes that write an pointer but do
@@ -43,87 +44,43 @@ import tv.model.Season;
  */
 public class WriteOnlyPointerMode extends EpisodeMode {
     
-    /**
-     * Create a new WriteOnlyPointerMode instance.
-     * @param mode EpisodeModes Episode Mode
-     * @param scanner TV Scanner
-     * @see EpisodeModes
-     */
     public WriteOnlyPointerMode(int mode, TVScan scanner) {
         super(mode, scanner);
     }
-    
-    /**
-     * Get the Season that the specified write-only pointer refers to
-     * @return Season
-     */
-    private Season getSeason() {
-        Arguments args = TV.ENV.getArguments();
-        switch(getMode()) {
-            case EpisodeModes.PILOT: return getTvScanner().getSeason(args.getShow(), 1);
-            case EpisodeModes.LATEST:
-                int season = Integer.valueOf(getTvScanner().getLastSeasonNo(args.getShow()));
-                return getTvScanner().getSeason(args.getShow(), season);
-        }
-        return getTvScanner().getSeason(args.getShow(), TVScan.getSeasonNo(args.getEpisodes()));
-    }
 
     @Override
-    public File[] buildFileList() throws ExitException {
-        Season season = getSeason();
-        assertStartingSeasonValid(season);
+    public List<EpisodeMatch> findMatches() throws ExitException {
+        String show = TV.ENV.getArguments().getShow();
+        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
         switch(getMode()) {
-            case EpisodeModes.EPSINGLE: return new File[] { singleEpisode(season) }; 
-            case EpisodeModes.PILOT: return new File[] { singleEpisode(season, "01") };
-            case EpisodeModes.LATEST: return new File[] { singleEpisode(season, TVScan.getLastEpisodeNo(season)) };
-        }
-        return new File[] {};
-    }
-
-    /**
-     * Get the new episode pointer to be set
-     * @return new episode pointer or null if one should be not be set
-     * @throws ExitException if the season given isn't valid
-     */
-    @Override
-    public Episode getNewPointer() throws ExitException {
-        Arguments args = TV.ENV.getArguments();
-        Season season = getSeason();
-        assertStartingSeasonValid(season);
-        switch(getMode()) {
-            case EpisodeModes.PILOT: 
-                return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), "01");
+            case EpisodeModes.EPSINGLE:
+                int season = TVScan.getSeasonNo(TV.ENV.getArguments().getEpisodes());
+                int episode = Integer.valueOf(TVScan.getEpisodeNo(TV.ENV.getArguments().getEpisodes()));
+                matches.add(getTvMatcher().matchEpisode(show, season, episode));
+                break;
+            case EpisodeModes.PILOT:
+                matches.add(getTvMatcher().matchEpisode(show, 1, 1));
+                break;
             case EpisodeModes.LATEST: 
-                return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), TVScan.getLastEpisodeNo(season));
+                matches.add(getTvMatcher().matchLatestEpisode(show));
+                break;
         }
-        return new Episode(args.getShow(), args.getUser(), season.getSeasonString(), TVScan.getEpisodeNo(args.getEpisodes())); 
+        return matches;
     }
     
-    
-    /**
-     * Get the episode File given by the season and episode number
-     * @param season Season Season the episode is in
-     * @param episodeNo Episode No
-     * @return episode File
-     * @throws ExitException if unable to find the episode given
-     */
-    public File singleEpisode(Season season, String episodeNo) throws ExitException {
-        File ep = TVScan.getEpisode(season, episodeNo);
-        if(ep == null) {
-            throw new ExitException("Unable to find the episode given", ExitCode.EPISODES_NOT_FOUND);
+    @Override
+    public List<EpisodeMatch> findMatchesOrThrow() throws ExitException {
+        List<EpisodeMatch> matches = findMatches();
+        if(matches.isEmpty()) {
+            throw new ExitException("Unable to match the episode given", ExitCode.EPISODES_NOT_FOUND);
         }
-        return ep;
+        return matches;
     }
-    
-    /**
-     * Wrapper method for singleEpisode(Season, episodeNo) using the users episode string
-     * to determine episode number
-     * @param season Season Season the episode is in
-     * @return episode File
-     * @throws ExitException if unable to find the episode given
-     */
-    public File singleEpisode(Season season) throws ExitException {
-        return singleEpisode(season, TVScan.getEpisodeNo(TV.ENV.getArguments().getEpisodes()));
+
+    @Override
+    public Episode getNewPointer(EpisodeMatch match) throws ExitException {
+        Arguments args = TV.ENV.getArguments();
+        return new Episode(args.getShow(), args.getUser(), match);
     }
     
 }

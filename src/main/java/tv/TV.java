@@ -29,16 +29,19 @@
 package tv;
 
 import java.io.File;
+import java.util.List;
 import tv.action.Action;
 import tv.exception.ExitException;
 import tv.exception.TraktUnauthorizedException;
 import tv.filter.RandomFilter;
 import tv.io.ConfigParser;
 import tv.io.LibraryManager;
+import tv.matcher.EpisodeFileMatcher;
 import tv.mode.EpisodeMode;
 import tv.mode.EpisodeModeFactory;
 import tv.mode.EpisodeModes;
 import tv.model.Config;
+import tv.model.EpisodeMatch;
 import tv.options.ArgsParser;
 import tv.options.Environment;
 import tv.options.UnixEnvironment;
@@ -108,9 +111,10 @@ public class TV {
             }
             TVScan tvScanner = new TVScan(TV.ENV.getArguments().getSourceFolders());
             EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvScanner);
-            File[] list = episodesMode.buildFileList();
+            List<EpisodeMatch> matches = episodesMode.findMatchesOrThrow();
+            File[] list = EpisodeFileMatcher.toFileArray(matches);
             if(list.length == 1) {
-                mediaAction.execute(list[0], episodesMode.getNewPointer());
+                mediaAction.execute(list[0], episodesMode.getNewPointer(matches.get(0)));
             } else {
                 mediaAction.execute(
                     ENV.getArguments().getRandomCount() == 0 ? list : RandomFilter.filter(list)

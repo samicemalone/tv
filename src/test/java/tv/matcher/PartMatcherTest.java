@@ -29,6 +29,8 @@
 
 package tv.matcher;
 
+import tv.matcher.PartMatcher;
+import tv.matcher.EpisodeFileMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -38,6 +40,8 @@ import tv.model.EpisodeMatch;
  * @author Sam Malone
  */
 public class PartMatcherTest {
+    
+    private final String path = "C:\\TV\\The Pacific\\Season 1\\";
 
     /**
      * Test of match method, of class PartMatcher.
@@ -54,9 +58,9 @@ public class PartMatcherTest {
             "the_pacific_pt2_name.mkv",
         };
         PartMatcher instance = new PartMatcher();
-        EpisodeMatch expResult = new EpisodeMatch(2);
+        EpisodeMatch expResult = new EpisodeMatch(1, 2);
         for(String fileName : fileNames) {
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
             assertEquals(expResult.getSeason(), result.getSeason());
         }
@@ -85,9 +89,9 @@ public class PartMatcherTest {
         };
         PartMatcher instance = new PartMatcher();
         for(int i = 0; i < fileNames.length; i++) {
-            EpisodeMatch expResult = new EpisodeMatch((i * 2) + 1);
+            EpisodeMatch expResult = new EpisodeMatch(1, (i * 2) + 1);
             expResult.getEpisodes().add((i * 2) + 2);
-            EpisodeMatch result = instance.match(fileNames[i]);
+            EpisodeMatch result = instance.match(path + fileNames[i], EpisodeFileMatcher.stripCommonTags(fileNames[i]));
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
             assertEquals(expResult.getSeason(), result.getSeason());
         }
@@ -116,11 +120,11 @@ public class PartMatcherTest {
         };
         PartMatcher instance = new PartMatcher();
         for(int i = 0; i < fileNames.length; i++) {
-            EpisodeMatch expResult = new EpisodeMatch((i * 4) + 1);
+            EpisodeMatch expResult = new EpisodeMatch(1, (i * 4) + 1);
             expResult.getEpisodes().add((i * 4) + 2);
             expResult.getEpisodes().add((i * 4) + 3);
             expResult.getEpisodes().add((i * 4) + 4);
-            EpisodeMatch result = instance.match(fileNames[i]);
+            EpisodeMatch result = instance.match(path + fileNames[i], EpisodeFileMatcher.stripCommonTags(fileNames[i]));
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
             assertEquals(expResult.getSeason(), result.getSeason());
         }

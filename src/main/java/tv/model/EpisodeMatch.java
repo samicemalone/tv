@@ -29,6 +29,7 @@
 
 package tv.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,25 +37,40 @@ import java.util.List;
  *
  * @author Sam Malone
  */
-public class EpisodeMatch {
+public class EpisodeMatch extends AbstractEpisode {
     
     public final static int NO_SEASON = -1;
     
     private int season;
+    private File episodeFile;
     private List<Integer> episodes;
 
     public EpisodeMatch() {
+        this(null);
+    }
+
+    public EpisodeMatch(File file) {
         season = NO_SEASON;
+        episodeFile = file;
         episodes = new ArrayList<Integer>();
     }
 
     public EpisodeMatch(int episode) {
-        this(NO_SEASON, episode);
+        this(null, NO_SEASON, episode);
     }
 
     public EpisodeMatch(int season, int episode) {
-        episodes = new ArrayList<Integer>();
+        this(null, season, episode);
+    }
+
+    public EpisodeMatch(File file, int episode) {
+        this(file, NO_SEASON, episode);
+    }
+
+    public EpisodeMatch(File file, int season, int episode) {
+        this.episodeFile = file;
         this.season = season;
+        this.episodes = new ArrayList<Integer>();
         this.episodes.add(episode);
     }
 
@@ -66,8 +82,22 @@ public class EpisodeMatch {
         this.season = season;
     }
 
+    @Override
     public List<Integer> getEpisodes() {
         return episodes;
+    }
+
+    public File getEpisodeFile() {
+        return episodeFile;
+    }
+
+    public void setEpisodeFile(File episodeFile) {
+        this.episodeFile = episodeFile;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("s%02d%s", season, super.toString());
     }
     
 }

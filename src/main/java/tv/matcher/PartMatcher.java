@@ -29,8 +29,6 @@
 
 package tv.matcher;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import tv.model.EpisodeMatch;
@@ -42,7 +40,7 @@ import tv.model.RomanNumeral;
  * the.pacific.pt.i.pt.ii.pilot.mkv
  * @author Sam Malone
  */
-public class PartMatcher implements EpisodeMatcher.Matcher {
+public class PartMatcher implements EpisodeFileMatcher.Matcher {
     
     private static final String romanNumeralsStrict = "^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$";
     private static final String romanNumerals = "[MDCLXVI]+";
@@ -56,8 +54,8 @@ public class PartMatcher implements EpisodeMatcher.Matcher {
     );
 
     @Override
-    public EpisodeMatch match(String fileName) {
-        Matcher m = pattern.matcher(fileName);
+    public EpisodeMatch match(String absolutePath, String filteredFileName) {
+        Matcher m = pattern.matcher(filteredFileName);
         EpisodeMatch em = new EpisodeMatch();
         boolean hasMatched = false;
         while(m.find()) {
@@ -70,6 +68,13 @@ public class PartMatcher implements EpisodeMatcher.Matcher {
                     em.getEpisodes().add(romanDec);
                 }
             }
+        }
+        if(hasMatched) {
+            Matcher seasonMatcher = TVMatcher.SEASON_PATTERN.matcher(absolutePath);
+            if(!seasonMatcher.find()) {
+                return null;
+            }
+            em.setSeason(Integer.valueOf(seasonMatcher.group(1)));
         }
         return hasMatched ? em : null;
     }

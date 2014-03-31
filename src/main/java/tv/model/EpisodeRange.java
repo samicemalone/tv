@@ -42,7 +42,7 @@ public class EpisodeRange {
             TVScan.getSeasonNo(episodesRange[0]),
             Integer.valueOf(TVScan.getEpisodeNo(episodesRange[0])),
             TVScan.getSeasonNo(episodesRange[1]),
-            Integer.valueOf(TVScan.getEpisodeNo(episodesRange[0]))
+            Integer.valueOf(TVScan.getEpisodeNo(episodesRange[1]))
         );
     }
     

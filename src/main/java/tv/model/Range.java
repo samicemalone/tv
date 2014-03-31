@@ -61,4 +61,8 @@ public class Range {
         return start;
     }
     
+    public boolean isInRange(Range range) {
+        return range.getEnd() >= start && range.getStart() <= end;
+    }
+    
 }

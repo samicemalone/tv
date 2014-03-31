@@ -109,6 +109,12 @@ public class TraktClient {
             cancelCheckin();
             checkin(showId, episode);
         }
+        if(episode.isMultiEpisode()) {
+            Episode copy = new Episode(episode);
+            // start episode in range is checked in, so remove it before marking the rest seen
+            copy.getEpisodes().remove(0);
+            markEpisodeAsSeen(copy);
+        }
     }
     
     /**
@@ -177,7 +183,9 @@ public class TraktClient {
     }
 
     /**
-     * Build an API compatible ShowCheckin object from the given episode information
+     * Build an API compatible ShowCheckin object from the given episode information.
+     * If the episode file contains multiple episodes, only the first episode will
+     * be checked in.
      * @param showId trakt tvdb show id
      * @param episode episode to build
      * @return ShowCheckin
@@ -185,8 +193,8 @@ public class TraktClient {
     private ShowService.ShowCheckin buildEpisodeCheckin(int showId, Episode episode) {
         ShowService.ShowCheckin checkin = new ShowService.ShowCheckin(
             showId,
-            Integer.valueOf(episode.getSeasonNo()),
-            Integer.valueOf(episode.getEpisodeNo()),
+            episode.getSeason(),
+            episode.getEpisodesAsRange().getStart(),
             "Checked in with tv " + Version.VERSION,
             Version.VERSION,
             Version.BUILD_DATE
@@ -202,13 +210,13 @@ public class TraktClient {
      * @return episodes
      */
     private ShowService.Episodes buildEpisodes(int showId, Episode episode) {
-        ShowService.Episodes episodes = new ShowService.Episodes(                
-            showId,
-            Integer.valueOf(episode.getSeasonNo()),
-            Integer.valueOf(episode.getEpisodeNo())
-        );
-        episodes.episodes.get(0).last_played = String.valueOf(episode.getPlayedDate());
-        return episodes;
+        List<ShowService.Episodes.Episode> list = new ArrayList<ShowService.Episodes.Episode>();
+        for(int curEp : episode.getEpisodes()) {
+            ShowService.Episodes.Episode tmpEp = new ShowService.Episodes.Episode(episode.getSeason(), curEp);
+            tmpEp.last_played = String.valueOf(episode.getPlayedDate());
+            list.add(tmpEp);
+        }
+        return new ShowService.Episodes(showId, list);
     }
     
     /**

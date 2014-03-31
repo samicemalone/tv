@@ -27,7 +27,8 @@
 package tv.mode;
 
 import com.jakewharton.trakt.entities.TvShowProgress;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import tv.ExitCode;
 import tv.NavigableEpisode;
 import tv.TV;
@@ -36,12 +37,11 @@ import tv.TraktClient;
 import tv.exception.CancellationException;
 import tv.exception.ExitException;
 import tv.exception.FileNotFoundException;
-import tv.exception.SeasonNotFoundException;
 import tv.exception.TraktException;
 import tv.io.TVDBManager;
 import tv.model.Arguments;
 import tv.model.Episode;
-import tv.model.Season;
+import tv.model.EpisodeMatch;
 
 /**
  *
@@ -50,7 +50,6 @@ import tv.model.Season;
 public class PointerMode extends EpisodeMode {
     
     private Episode currentPointer;
-    private Episode newPointer;
 
     public PointerMode(int mode, TVScan scanner) {
         super(mode, scanner);
@@ -59,39 +58,47 @@ public class PointerMode extends EpisodeMode {
     public PointerMode readCurrentPointer() throws ExitException {
         boolean useTraktPointer = TV.ENV.isTraktEnabled() && TV.ENV.getArguments().isTraktPointerSet();
         currentPointer = useTraktPointer ? getCurrentTraktPointer() : getCurrentTVDBPointer();
-        setNewPointer();
         return this;
-    }
-
-    /**
-     * Get the season the episode that the episode pointer points to
-     * @return Season
-     */
-    private Season getSeason() {
-        int season = Integer.valueOf(newPointer.getSeasonNo());
-        return getTvScanner().getSeason(TV.ENV.getArguments().getShow(), season);
-    }
-    
-    /**
-     * Copies the current pointer to {@link #newPointer} and modifies the new pointer
-     * by the offset specified by the episode string.
-     */
-    private void setNewPointer() throws SeasonNotFoundException {
-        if(newPointer == null) {
-            newPointer = new Episode(currentPointer);
-            new NavigableEpisode(getTvScanner()).navigate(newPointer, TV.ENV.getArguments().getEpisodes());
-        }
     }
     
     @Override
-    public File[] buildFileList() throws ExitException {
-        Season season = getSeason();
-        assertStartingSeasonValid(season);
-        switch(getMode()) {
-            case EpisodeModes.POINTER: return new File[] { episodePointer(season) };
-            case EpisodeModes.SEASONFROMPOINTER: return seasonFromEpisode(season, newPointer.getEpisodeNo());
+    public List<EpisodeMatch> findMatches() throws ExitException {
+        String offset = TV.ENV.getArguments().getEpisodes();
+        EpisodeMatch m = new NavigableEpisode(getTvMatcher()).navigate(currentPointer, offset);
+        if(m == null) {
+            String message = String.format("Unable to find the episode to navigate to. (current = %s)", currentPointer);
+            throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
         }
-        return new File[] {};
+        String show = TV.ENV.getArguments().getShow();
+        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
+        switch(getMode()) {
+            case EpisodeModes.POINTER:
+                matches.add(m);
+                break;
+            case EpisodeModes.SEASONFROMPOINTER:
+                int episode = m.getEpisodesAsRange().getStart();
+                matches.addAll(getTvMatcher().matchEpisodesFrom(show, m.getSeason(), episode));
+                break;
+        }
+        return matches;
+    }
+    
+    @Override
+    public List<EpisodeMatch> findMatchesOrThrow() throws ExitException {
+        List<EpisodeMatch> matches = findMatches();
+        if(matches.isEmpty()) {
+            if(getMode() == EpisodeModes.SEASONFROMPOINTER) {
+                throw new ExitException("Unable to match the episodes from the given pointer", ExitCode.EPISODES_NOT_FOUND);
+            }
+            throw new ExitException("Unable to match the episode given", ExitCode.EPISODES_NOT_FOUND);
+        }
+        return matches;
+    }
+    
+    @Override
+    public Episode getNewPointer(EpisodeMatch match) throws ExitException {
+        Arguments args = TV.ENV.getArguments();
+        return new Episode(args.getShow(), args.getUser(), match);
     }
     
     private Episode getCurrentTraktPointer() throws ExitException {
@@ -100,8 +107,13 @@ public class PointerMode extends EpisodeMode {
         try {
             TvShowProgress.NextEpisode next = trakt.getNextEpisode(args.getShow());
             if(next != null) {
-                Episode curPointer = new Episode(args.getShow(), args.getUser(), next.season, next.number);
-                return new NavigableEpisode(getTvScanner()).navigate(curPointer, "prev");
+                Episode nextEp = new Episode(args.getShow(), args.getUser(), next.season, next.number);
+                EpisodeMatch m = new NavigableEpisode(getTvMatcher()).navigate(nextEp, "prev");
+                if(m == null) {
+                    String message = String.format("unable to find the current episode after fetching the trakt pointer (current = %s)", nextEp);
+                    throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
+                }
+                return new Episode(args.getShow(), args.getUser(), m);
             }
         } catch (TraktException e) {
             throw new ExitException(e.getMessage(), ExitCode.TRAKT_ERROR);
@@ -133,38 +145,6 @@ public class PointerMode extends EpisodeMode {
             throw new FileNotFoundException("The TVDB could not be found", ExitCode.FILE_NOT_FOUND);
         }
         return curEp;
-    }
-    
-    /**
-     * Get the new episode pointer to be set
-     * @return new episode pointer or null if one should be not be set
-     * @throws ExitException if there is no episode data stored for the show
-     */
-    @Override
-    public Episode getNewPointer() throws ExitException {
-        switch(getMode()) {
-            case EpisodeModes.POINTER:
-                if(newPointer == null) {
-                    throw new ExitException("There is no episode data stored for this show", ExitCode.NO_STORED_EPISODE_DATA);
-                }
-                return newPointer;
-        }
-        return null;
-    }
-
-    /**
-     * Get the requested episode File as from the given episode pointer
-     * @param season Season that the episode pointer points to
-     * @return episode File the episode pointer points to
-     * @throws ExitException if unable to find the episode at the pointer offset
-     * given.
-     */
-    public File episodePointer(Season season) throws ExitException {
-        File ep = TVScan.getEpisode(season, newPointer.getEpisodeNo());
-        if(ep == null) {
-            throw new ExitException("Unable to find the episode offset given", ExitCode.EPISODE_POINTER_INVALID);
-        }
-        return ep;
     }
     
 }

@@ -36,15 +36,14 @@ import tv.exception.SeasonNotFoundException;
  *
  * @author Sam Malone
  */
-public class Season {
+public class Season implements Comparable<Season> {
     
     public static Season fromEpisode(TVScan scanner, Episode ep) throws SeasonNotFoundException {
-        int season = Integer.valueOf(ep.getSeasonNo());
-        File seasonDir = scanner.getSeasonDirectory(ep.getShow(), season);
+        File seasonDir = scanner.getSeasonDirectory(ep.getShow(), ep.getSeason());
         if(seasonDir == null) {
             throw new SeasonNotFoundException("Could not find the season directory for: " + ep);
         }
-        return new Season(season, seasonDir);
+        return new Season(ep.getSeason(), seasonDir);
     }
     
     private final File seasonDir;
@@ -56,18 +55,12 @@ public class Season {
         seasonNoString = String.format("%02d", season);
         seasonDir = dir;
     }
-    
-    public Season(String season, File dir) {
-        seasonNo = Integer.valueOf(season);
-        seasonNoString = season;
-        seasonDir = dir;
-    }
 
     /**
      * Gets the directory of the season location
      * @return 
      */
-    public File getSeasonDir() {
+    public File getDir() {
         return seasonDir;
     }
     
@@ -75,7 +68,7 @@ public class Season {
      * Get season number
      * @return 
      */
-    public int getSeasonNo() {
+    public int asInt() {
         return seasonNo;
     }
     
@@ -83,7 +76,12 @@ public class Season {
      * Gets the season as a string, zero padded to at least 2 characters
      * @return Season String
      */
-    public String getSeasonString() {
+    public String asString() {
         return seasonNoString;
+    }
+
+    @Override
+    public int compareTo(Season o) {
+        return Integer.compare(seasonNo, o.asInt());
     }
 }

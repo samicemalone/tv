@@ -37,17 +37,17 @@ import tv.model.EpisodeMatch;
 
 /**
  * Matches: (with variants of separators)
- * the.league - 1x01 - pilot.mkv",
- * the.league - 1x01x02 - pilot.mkv",
- * the.league - 1x01x02x03x04 - pilot.mkv",
- * the.league 1x1x2x3x4 pilot.mkv",
- * the.league.1x01_1x02.pilot.mkv",
- * the.league.1x01.pilot.1x02.pilot.cont.mkv",
- * the league - 1x01+1x02 - pilot.mkv"
+ * the.league - 1x01 - pilot.mkv
+ * the.league - 1x01x02 - pilot.mkv
+ * the.league - 1x01x02x03x04 - pilot.mkv
+ * the.league 1x1x2x3x4 pilot.mkv
+ * the.league.1x01_1x02.pilot.mkv
+ * the.league.1x01.pilot.1x02.pilot.cont.mkv
+ * the league - 1x01+1x02 - pilot.mkv
  * etc...
  * @author Sam Malone
  */
-public class XDelimitedMatcher implements EpisodeMatcher.Matcher {
+public class XDelimitedMatcher implements EpisodeFileMatcher.Matcher {
     
     private final static String separator = "[_\\-. +]*";
 
@@ -59,8 +59,8 @@ public class XDelimitedMatcher implements EpisodeMatcher.Matcher {
     );
 
     @Override
-    public EpisodeMatch match(String fileName) {
-        Matcher m = pattern.matcher(fileName);
+    public EpisodeMatch match(String absolutePath, String filteredFileName) {
+        Matcher m = pattern.matcher(filteredFileName);
         if(m.find()) {
             int season = Integer.valueOf(m.group(1));
             int episode = Integer.valueOf(m.group(2));

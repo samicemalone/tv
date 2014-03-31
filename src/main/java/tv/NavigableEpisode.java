@@ -29,9 +29,10 @@
 
 package tv;
 
-import java.io.File;
-import tv.exception.SeasonNotFoundException;
+import tv.matcher.TVMatcher;
 import tv.model.Episode;
+import tv.model.EpisodeMatch;
+import tv.model.Range;
 import tv.model.Season;
 
 /**
@@ -40,17 +41,6 @@ import tv.model.Season;
  */
 public class NavigableEpisode {
     
-    private static class Offset {
-        
-        private final String offsetEpisodeNo;
-        private final File offsetEpisode;
-
-        public Offset(Season season, String episodeNo, int offset) {
-            offsetEpisodeNo = addIntString(episodeNo, offset);
-            offsetEpisode = TVScan.getEpisode(season, offsetEpisodeNo);
-        }
-    }
-    
     /*
      * Offset Values
      */
@@ -58,40 +48,45 @@ public class NavigableEpisode {
     public static final int CUR = 0;
     public static final int NEXT = 1;
 
-    private final TVScan tvScanner;
+    private final TVMatcher tvMatcher;
     
-    public NavigableEpisode(TVScan scanner) {
-        tvScanner = scanner;
+    public NavigableEpisode(TVMatcher matcher) {
+        tvMatcher = matcher;
     }
     
     /**
-     * Navigate from the episode by the offset given.
-     * @param toNavigate episode to navigate from
+     * Navigate from the episode by the offset given. The episode given will
+     * be checked for a multi episode match before navigating. If the episode
+     * given cannot be found, it is assumed to be a single episode and will be
+     * navigated as normal.
+     * @param episode episode to navigate from
      * @param strOffset offset string e.g. next, cur, prev
-     * @return modified Episode toNavigate that represents the episode with the given offset
-     * @throws tv.exception.SeasonNotFoundException if unable to find the season given by toNavigate
+     * @return navigated Episode with the given offset or null if navigated 
+     * episode is not found
      */
-    public Episode navigate(Episode toNavigate, String strOffset) throws SeasonNotFoundException {
+    public EpisodeMatch navigate(Episode episode, String strOffset) {
         int offset = parseStringOffset(strOffset);
-        if(offset == CUR) {
-            return toNavigate;
+        Season season = tvMatcher.getSeason(episode.getShow(), episode.getSeason());
+        Range episodeRange = episode.getEpisodesAsRange();
+        if(season.getDir() == null) {
+            boolean isNavigateSeason = offset == PREV && (episodeRange.getStart() - 1) < 1;
+            return isNavigateSeason ? navigateSeason(episode, offset) : null;
         }
-        Season season = Season.fromEpisode(tvScanner, toNavigate);
-        Offset o = new Offset(season, toNavigate.getEpisodeNo(), offset);
-        if(o.offsetEpisode != null) {
-            // check for multi part episodes to skip over if they in the same file
-            File currentFile = TVScan.getEpisode(season, toNavigate.getEpisodeNo());
-            while(o.offsetEpisode.equals(currentFile)) {
-                Offset tmpOffset = new Offset(season, o.offsetEpisodeNo, offset);
-                if(tmpOffset.offsetEpisode == null) {
-                    return navigateSeason(toNavigate, offset);
-                }
-                o = tmpOffset;
-            }
-            toNavigate.setEpisodeNo(o.offsetEpisodeNo);
-            return toNavigate;
+        int episodeNoBound = (offset == NEXT) ? episodeRange.getEnd() : episodeRange.getStart();
+        EpisodeMatch curMatch = tvMatcher.matchEpisode(season, episodeNoBound);
+        if(curMatch != null) {
+            episodeRange = curMatch.getEpisodesAsRange();
+            episodeNoBound = (offset == NEXT) ? episodeRange.getEnd() : episodeRange.getStart();
         }
-        return navigateSeason(toNavigate, offset);
+        EpisodeMatch m = tvMatcher.matchEpisode(season, episodeNoBound + offset);
+        if(m != null || offset == CUR) { 
+            return m;
+        }
+        // check another offset episode to see if it's missing or likely to be end of season
+        if(tvMatcher.matchEpisode(season, episodeNoBound + offset + offset) != null) {
+            return null; // found extra offset episode so dont skip to offset season
+        }
+        return navigateSeason(episode, offset);
     }
     
     /**
@@ -99,38 +94,28 @@ public class NavigableEpisode {
      * season.
      * @param toNavigate episode to navigate from
      * @param offset {@link #PREV} or {@link #NEXT}
-     * @return modified Episode toNavigate. if unable to find previous/next season
-     * directory, toNavigate will not be modified.
+     * @return navigated episode at the start of the next season or the end of
+     * the previous season or null if no offset episode is found
      */
-    public Episode navigateSeason(Episode toNavigate, int offset) {
-        int season = Integer.valueOf(toNavigate.getSeasonNo()) + offset;
-        Season offsetSeason = tvScanner.getSeason(toNavigate.getShow(), season);
-        if(offsetSeason.getSeasonDir() != null) {
-            if(offset == PREV) {
-                String lastEpisode = TVScan.getLastEpisodeNo(offsetSeason);
-                toNavigate.setSeasonNo(addIntString(toNavigate.getSeasonNo(), PREV));
-                toNavigate.setEpisodeNo(addIntString(lastEpisode, 0));
-            } else if(offset == NEXT) {
-                File prequel = TVScan.getEpisode(offsetSeason, "00");
-                toNavigate.setEpisodeNo(prequel == null ? "01" : "00");
-                toNavigate.setSeasonNo(addIntString(toNavigate.getSeasonNo(), NEXT));
+    public EpisodeMatch navigateSeason(Episode toNavigate, int offset) {
+        int season = toNavigate.getSeason() + offset;
+        Season offsetSeason = tvMatcher.getTvScanner().getSeason(toNavigate.getShow(), season);
+        if(offsetSeason.getDir() == null) {
+            return null;
+        }
+        EpisodeMatch match = null;
+        if(offset == PREV) {
+            if((match = tvMatcher.matchLargestEpisode(offsetSeason)) == null) {
+                return null;
+            }
+        } else if(offset == NEXT) {
+            if((match = tvMatcher.matchEpisode(offsetSeason, 0)) == null) {
+                if((match = tvMatcher.matchEpisode(offsetSeason, 1)) == null) {
+                    return null;
+                }
             }
         }
-        return toNavigate;
-    }
-    
-    /**
-     * Perform addition on a string interpreted as an integer
-     * @param str Base string to perform addition on e.g. "03"
-     * @param num Amount to add to the string
-     * @return Zero padded string of addition result
-     */
-    public static String addIntString(String str, int num) {
-        int val = Integer.valueOf(str) + num;
-        if(val < 10) {
-            return "0" + String.valueOf(val);
-        }
-        return String.valueOf(val);
+        return match;
     }
     
     /**

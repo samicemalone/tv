@@ -29,6 +29,8 @@
 
 package tv.matcher;
 
+import tv.matcher.EpisodeFileMatcher;
+import tv.matcher.NoDelimiterMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -52,8 +54,9 @@ public class NoDelimiterMatcherTest {
         };
         NoDelimiterMatcher instance = new NoDelimiterMatcher();
         EpisodeMatch expResult = new EpisodeMatch(1, 2);
+        String path = "C:\\TV\\The League\\Season 1\\";
         for(String fileName : fileNames) {
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
             assertEquals(expResult.getSeason(), result.getSeason());
         }

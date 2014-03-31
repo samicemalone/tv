@@ -29,6 +29,8 @@
 
 package tv.matcher;
 
+import tv.matcher.WordDelimitedMatcher;
+import tv.matcher.EpisodeFileMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -38,6 +40,8 @@ import tv.model.EpisodeMatch;
  * @author Sam Malone
  */
 public class WordDelimitedMatcherTest {
+    
+    private final String path = "C:\\TV\\The League\\Season 1\\";
 
     /**
      * Test of match method, of class XDelimitedMatcher.
@@ -51,8 +55,8 @@ public class WordDelimitedMatcherTest {
         };
         WordDelimitedMatcher instance = new WordDelimitedMatcher();
         for(String fileName : fileNames) {
-            EpisodeMatch expResult = new EpisodeMatch(2);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch expResult = new EpisodeMatch(1, 2);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -71,7 +75,7 @@ public class WordDelimitedMatcherTest {
         WordDelimitedMatcher instance = new WordDelimitedMatcher();
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 2);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -93,9 +97,9 @@ public class WordDelimitedMatcherTest {
         };
         WordDelimitedMatcher instance = new WordDelimitedMatcher();
         for(String fileName : fileNames) {
-            EpisodeMatch expResult = new EpisodeMatch(1);
+            EpisodeMatch expResult = new EpisodeMatch(1, 1);
             expResult.getEpisodes().add(2);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -121,7 +125,7 @@ public class WordDelimitedMatcherTest {
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 2);
             expResult.getEpisodes().add(3);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -143,12 +147,11 @@ public class WordDelimitedMatcherTest {
         };
         WordDelimitedMatcher instance = new WordDelimitedMatcher();
         for(String fileName : fileNames) {
-            EpisodeMatch expResult = new EpisodeMatch(1);
+            EpisodeMatch expResult = new EpisodeMatch(1, 1);
             expResult.getEpisodes().add(2);
             expResult.getEpisodes().add(3);
             expResult.getEpisodes().add(4);
-            System.out.println("Testing: " + fileName);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -176,8 +179,7 @@ public class WordDelimitedMatcherTest {
             expResult.getEpisodes().add(3);
             expResult.getEpisodes().add(4);
             expResult.getEpisodes().add(5);
-            System.out.println("Testing: " + fileName);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }

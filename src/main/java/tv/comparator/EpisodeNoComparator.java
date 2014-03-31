@@ -27,45 +27,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package tv.filter;
+package tv.comparator;
 
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-import tv.matcher.EpisodeMatcher;
-import tv.model.Range;
+import java.util.Comparator;
+import tv.model.EpisodeMatch;
 
 /**
  *
  * @author Sam Malone
  */
-public class RangeFilterTest {
+public class EpisodeNoComparator implements Comparator<EpisodeMatch> {
 
-    /**
-     * Test of accept method, of class RangeFilter.
-     */
-    @Test
-    public void testAccept() {
-        Range range = new Range(1, 12);
-        EpisodeMatcher m = new EpisodeMatcher();
-        RangeFilter instance = new RangeFilter(m, range);
-        String[] fileNames = new String[] {
-            "the.league.s01e01.pilot.mkv",
-            "the.league.S01E02.720p.mkv",
-            "the_league_s01e03_1080p.mkv",
-            "the-league-s01e04_480p.mkv",
-            "the league s01e05 spaced.mkv",
-            "the league - s01e06 - hyphon spaced.mkv",
-            "the.league.s01.e07.dot.gap.mkv",
-            "the.league.s01-e08.dash.gap.mkv",
-            "the league - S01xE09 - x separator.mkv",
-            "the.league.110.no.ep.separator.mkv",
-            "the league - 111 - hyphon spaced.mkv",
-            "the league s01e12 - spaced name hyphon.mkv",
-        };
-        for(String name : fileNames) {
-            boolean result = instance.accept(null, name);
-            assertTrue(result);
-        }
+    @Override
+    public int compare(EpisodeMatch thisMatch, EpisodeMatch thatMatch) {
+        int thisStartEpisode = thisMatch.getEpisodesAsRange().getStart();
+        int thatStartEpisode = thatMatch.getEpisodesAsRange().getStart();
+        return Integer.compare(thisStartEpisode, thatStartEpisode);
     }
     
 }

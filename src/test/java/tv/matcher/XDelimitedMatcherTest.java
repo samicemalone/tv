@@ -29,6 +29,8 @@
 
 package tv.matcher;
 
+import tv.matcher.EpisodeFileMatcher;
+import tv.matcher.XDelimitedMatcher;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import tv.model.EpisodeMatch;
@@ -38,6 +40,8 @@ import tv.model.EpisodeMatch;
  * @author Sam Malone
  */
 public class XDelimitedMatcherTest {
+    
+    private final String path = "C:\\TV\\The League\\Season 1\\";
 
     /**
      * Test of match method, of class XDelimitedMatcher.
@@ -53,7 +57,7 @@ public class XDelimitedMatcherTest {
         XDelimitedMatcher instance = new XDelimitedMatcher();
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 2);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -79,7 +83,7 @@ public class XDelimitedMatcherTest {
         for(String fileName : fileNames) {
             EpisodeMatch expResult = new EpisodeMatch(1, 2);
             expResult.getEpisodes().add(3);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }
@@ -107,7 +111,7 @@ public class XDelimitedMatcherTest {
             expResult.getEpisodes().add(3);
             expResult.getEpisodes().add(4);
             expResult.getEpisodes().add(5);
-            EpisodeMatch result = instance.match(fileName);
+            EpisodeMatch result = instance.match(path + fileName, EpisodeFileMatcher.stripCommonTags(fileName));
             assertEquals(expResult.getSeason(), result.getSeason());
             assertEquals(expResult.getEpisodes(), result.getEpisodes());
         }

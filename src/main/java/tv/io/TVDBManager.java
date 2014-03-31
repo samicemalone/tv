@@ -108,7 +108,10 @@ public class TVDBManager extends CSV_IO {
      * @param e Episode to append as a CSV line
      */
     private void appendCSVEpisodeLine(StringBuilder sb, Episode e) {
-        appendCSVLine(sb, e.getShow(), e.getUser(), e.getSeasonNo(), e.getEpisodeNo(), String.valueOf(e.getPlayedDate()));
+        String season = String.valueOf(e.getSeason());
+        String episode = String.valueOf(e.getEpisodesAsRange().getEnd());
+        String playedDate = String.valueOf(e.getPlayedDate());
+        appendCSVLine(sb, e.getShow(), e.getUser(), season, episode, playedDate);
     }
     
     /**
@@ -122,8 +125,8 @@ public class TVDBManager extends CSV_IO {
     private boolean findAndUpdateEpisode(List<Episode> episodes, Episode episode) {
         for(Episode ep : episodes) {
             if(ep.getShow().equals(episode.getShow()) && ep.getUser().equals(episode.getUser())) {
-                ep.setSeasonNo(episode.getSeasonNo());
-                ep.setEpisodeNo(episode.getEpisodeNo());
+                ep.setSeason(episode.getSeason());
+                ep.setEpisodes(episode.getEpisodes());
                 ep.setPlayedDate((int) (System.currentTimeMillis() / 1000));
                 return true;
             }
@@ -185,7 +188,9 @@ public class TVDBManager extends CSV_IO {
     @Override
     protected void handleLine(Matcher m) {
         if(m.find()) {
-            Episode ep = new Episode(m.group(1), m.group(2), m.group(3), m.group(4));
+            int season = Integer.valueOf(m.group(3));
+            int episode = Integer.valueOf(m.group(4));
+            Episode ep = new Episode(m.group(1), m.group(2), season, episode);
             ep.setPlayedDate(Integer.valueOf(m.group(5)));
             if(isFilterUser) {
                 if(ep.getUser().equals(filteredUser)) {

@@ -39,14 +39,14 @@ import tv.model.EpisodeMatch;
  * the.league 1.01 pilot.mkv
  * @author Sam Malone
  */
-public class NoDelimiterMatcher implements EpisodeMatcher.Matcher {
+public class NoDelimiterMatcher implements EpisodeFileMatcher.Matcher {
 
     @Override
-    public EpisodeMatch match(String fileName) {
+    public EpisodeMatch match(String absolutePath, String filteredFileName) {
         String separator = "[_\\-. +]*";
         String regex = new StringBuilder().append("(\\d+)").append(separator).append("(\\d\\d)").toString();
         Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher m = p.matcher(fileName);
+        Matcher m = p.matcher(filteredFileName);
         return m.find() ? new EpisodeMatch(Integer.valueOf(m.group(1)), Integer.valueOf(m.group(2))) : null;
     }
     

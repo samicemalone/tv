@@ -102,7 +102,9 @@ public class TraktDBManager {
                 break;
             case TRAKT_JOURNAL:
                 try {
-                    Episode ep = new Episode(line[0], "", line[1], line[2]);
+                    int season = Integer.parseInt(line[1]);
+                    int episode = Integer.parseInt(line[2]);
+                    Episode ep = new Episode(line[0], "", season, episode);
                     ep.setPlayedDate(Integer.parseInt(line[3]));
                     journalEpisodes.add(ep);
                 } catch (NumberFormatException ex) {}
@@ -193,12 +195,14 @@ public class TraktDBManager {
         CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(traktDBJournal, append), "UTF-8"));
         try {
             for(Episode ep : eps) {
-                writer.writeNext(new String[] {
-                    ep.getShow(),
-                    ep.getSeasonNo(),
-                    ep.getEpisodeNo(),
-                    String.valueOf(ep.getPlayedDate())
-                });
+                for(int episodeNo : ep.getEpisodes()) {
+                    writer.writeNext(new String[] {
+                        ep.getShow(),
+                        String.valueOf(ep.getSeason()),
+                        String.valueOf(episodeNo),
+                        String.valueOf(ep.getPlayedDate())
+                    });
+                }
             }
         } finally {
             writer.close();
