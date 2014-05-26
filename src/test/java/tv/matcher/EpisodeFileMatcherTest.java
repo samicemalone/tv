@@ -29,7 +29,12 @@
 
 package tv.matcher;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -118,7 +123,7 @@ public class EpisodeFileMatcherTest extends FileSystemEnvironment {
     public void testMatchRange() {
         String show = "Scrubs";
         File[] files = MockFileSystem.getFullSeasonEpisodes(show, 1, 1);
-        List<EpisodeMatch> expResult = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> expResult = new ArrayList<>();
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 4));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 5));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 6));
@@ -139,7 +144,7 @@ public class EpisodeFileMatcherTest extends FileSystemEnvironment {
     public void testMatchFrom() {
         String show = "Scrubs";
         File[] files = MockFileSystem.getFullSeasonEpisodes(show, 1, 1);
-        List<EpisodeMatch> expResult = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> expResult = new ArrayList<>();
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 10));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 11));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 12));
@@ -162,5 +167,38 @@ public class EpisodeFileMatcherTest extends FileSystemEnvironment {
         EpisodeMatch result = episodeMatcher.matchLargest(files);
         assertEpisodeMatchEquals(expResult, result);
     }
+    
+//    @Test
+//    public void testing() throws IOException {
+//        BufferedReader br = null;
+//        File source = new File("C:\\TV\\Show Name\\Season 1");
+//        File predb = new File("J:\\Downloads\\", "predb.csv");
+//        EpisodeFileMatcher m = new EpisodeFileMatcher();
+//        try {
+//            FileWriter yes = new FileWriter(new File("J:\\Downloads\\matched.txt"));
+//            FileWriter no = new FileWriter(new File("J:\\Downloads\\nomatch.txt"));
+//            br = new BufferedReader(new InputStreamReader(new FileInputStream(predb), "UTF-8"));
+//            String line;
+//            while((line = br.readLine()) != null) {
+//                System.out.println("Matching: " + line);
+//                EpisodeMatch match = m.match(new File(source, line.concat(".mkv")));
+//                if(match != null) {
+//                    //String filter = EpisodeFileMatcher.stripCommonTags(line.concat(".mkv"));
+//                    yes.write(match.toString() + "#" + line + "\n");
+//                    //System.out.println("Matched: " + match.toString() + " :: " + filter + " :: " + line);
+//                } else {
+//                    no.write(line + "\n");
+//                }
+//            }
+//            yes.close();
+//            no.close();
+//        } catch (IOException ex) {
+//            
+//        } finally {
+//            if(br != null) {
+//                br.close();
+//            }
+//        }
+//    }
     
 }

@@ -201,7 +201,7 @@ public class TVMatcherTest extends FileSystemEnvironment {
     public void testMatchSeasons() {
         String show = "Scrubs";
         File showDir = MockFileSystem.getShowDir(show);
-        List<Season> expResult = new ArrayList<Season>(MockFileSystem.NUM_SEASONS);
+        List<Season> expResult = new ArrayList<>(MockFileSystem.NUM_SEASONS);
         for(int i = 1; i <= MockFileSystem.NUM_SEASONS; i++) {
             expResult.add(new Season(i, MockFileSystem.getSeasonDir(show, i)));
         }
@@ -249,7 +249,7 @@ public class TVMatcherTest extends FileSystemEnvironment {
         String show = "Scrubs";
         int season = 1;
         int episode = 9;
-        List<EpisodeMatch> expResult = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> expResult = new ArrayList<>();
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 9));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 10));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 11));
@@ -269,7 +269,7 @@ public class TVMatcherTest extends FileSystemEnvironment {
     public void testMatchEpisodeRange() throws SeasonNotFoundException {
         String show = "Scrubs";
         EpisodeRange range = new EpisodeRange(1, 10, 2, 2);
-        List<EpisodeMatch> expResult = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> expResult = new ArrayList<>();
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 10));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 11));
         expResult.add(MockFileSystem.getEpisodeMatch(show, 1, 12));

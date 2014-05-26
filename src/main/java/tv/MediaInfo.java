@@ -46,7 +46,7 @@ public class MediaInfo {
     private final List<String> filePaths;
     
     public MediaInfo(File binary) {
-        filePaths = new ArrayList<String>();
+        filePaths = new ArrayList<>();
         executable = binary;
     }
     
@@ -68,7 +68,7 @@ public class MediaInfo {
         if(filePaths.isEmpty()) {
             return 0;
         }
-        List<String> commands = new ArrayList<String>();
+        List<String> commands = new ArrayList<>();
         commands.add(executable.getAbsolutePath());
         commands.add("--Output=Video;%Duration%\\r\\n");
         commands.addAll(filePaths);

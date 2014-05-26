@@ -31,9 +31,9 @@ package tv;
 import java.io.File;
 import java.util.List;
 import tv.exception.SeasonNotFoundException;
-import tv.filter.ExtensionFilter;
 import tv.matcher.TVMatcher;
 import tv.model.Season;
+import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -71,7 +71,7 @@ public class TVScan {
      * @return list of files in season directory. empty array if none or error
      */
     public File[] listFiles(Season season) {
-        File[] list = season.getDir().listFiles(new ExtensionFilter());
+        File[] list = season.getDir().listFiles(new VideoFilter());
         return list == null ? new File[] {} : list;
     }
     

@@ -52,7 +52,7 @@ public class EpisodeMatch extends AbstractEpisode {
     public EpisodeMatch(File file) {
         season = NO_SEASON;
         episodeFile = file;
-        episodes = new ArrayList<Integer>();
+        episodes = new ArrayList<>();
     }
 
     public EpisodeMatch(int episode) {
@@ -70,7 +70,7 @@ public class EpisodeMatch extends AbstractEpisode {
     public EpisodeMatch(File file, int season, int episode) {
         this.episodeFile = file;
         this.season = season;
-        this.episodes = new ArrayList<Integer>();
+        this.episodes = new ArrayList<>();
         this.episodes.add(episode);
     }
 

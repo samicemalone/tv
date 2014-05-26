@@ -51,7 +51,7 @@ public class WriteOnlyPointerMode extends EpisodeMode {
     @Override
     public List<EpisodeMatch> findMatches() throws ExitException {
         String show = TV.ENV.getArguments().getShow();
-        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> matches = new ArrayList<>();
         switch(getMode()) {
             case EpisodeModes.EPSINGLE:
                 int season = TVScan.getSeasonNo(TV.ENV.getArguments().getEpisodes());

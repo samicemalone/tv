@@ -30,8 +30,8 @@ package tv.action;
 
 import java.io.File;
 import tv.exception.ExitException;
-import tv.filter.ExtensionFilter;
 import tv.model.Episode;
+import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -53,7 +53,7 @@ public interface Action {
     /**
      * Extension Filter to be used to accept files based on their extension.
      */
-    public ExtensionFilter FILTER = new ExtensionFilter();
+    public VideoFilter FILTER = new VideoFilter();
     
     /**
      * Execute the Action on the given File list.

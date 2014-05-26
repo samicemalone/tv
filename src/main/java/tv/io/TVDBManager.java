@@ -167,7 +167,7 @@ public class TVDBManager extends CSV_IO {
      * @throws FileNotFoundException If the TV database doesn't exist
      */
     public void readStorage(String user) throws FileNotFoundException {
-        list = new HashMap<String, Episode>();
+        list = new HashMap<>();
         isFilterUser = true;
         filteredUser = user;
         readFile(CSV_COLUMNS);
@@ -180,7 +180,7 @@ public class TVDBManager extends CSV_IO {
      * @throws FileNotFoundException If the TV database doesn't exist
      */
     public List<Episode> readAllStorage() throws FileNotFoundException {
-        episodeList = new ArrayList<Episode>();
+        episodeList = new ArrayList<>();
         readFile(CSV_COLUMNS);
         return episodeList;
     }

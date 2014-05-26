@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import tv.TV;
+import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -77,10 +78,10 @@ public class RandomFilter {
      * @return List of files or empty list
      */
     private static List<File> listFiles(File[] mixedList) {
-        List<File> fileList = new ArrayList<File>();
+        List<File> fileList = new ArrayList<>();
         for(File file : mixedList) {
             if(file.isDirectory()) {
-                fileList.addAll(Arrays.asList(file.listFiles(new ExtensionFilter())));
+                fileList.addAll(Arrays.asList(file.listFiles(new VideoFilter())));
             } else {
                 fileList.add(file);
             }

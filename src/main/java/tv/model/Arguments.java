@@ -63,8 +63,8 @@ public class Arguments {
      * Creates a new instance of the class
      */
     public Arguments() {
-        sourceFolders = new ArrayList<String>();
-        extraFolders = new ArrayList<String>();
+        sourceFolders = new ArrayList<>();
+        extraFolders = new ArrayList<>();
     }
     
     /**

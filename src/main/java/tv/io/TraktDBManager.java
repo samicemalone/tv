@@ -32,12 +32,12 @@ package tv.io;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import tv.TV;
@@ -62,7 +62,7 @@ public class TraktDBManager {
     public TraktDBManager() {
         traktDB = TV.ENV.getDefaultTraktDB();
         traktDBJournal = TV.ENV.getDefaultTraktDBJournal();
-        journalEpisodes = new ArrayList<Episode>();
+        journalEpisodes = new ArrayList<>();
     }
     
     /**
@@ -120,7 +120,7 @@ public class TraktDBManager {
      * doesn't exist
      */
     public List<Episode> readJournal() {
-        journalEpisodes = new ArrayList<Episode>();
+        journalEpisodes = new ArrayList<>();
         try {
             readFile(TRAKT_JOURNAL, traktDBJournal);
         } catch (FileNotFoundException ex) {
@@ -137,11 +137,8 @@ public class TraktDBManager {
      */
     public void appendTVDB(int showId, String show) throws IOException {
         traktDB.createNewFile();
-        CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(traktDB, true), "UTF-8"));
-        try {
+        try (CSVWriter writer = new CSVWriter(Files.newBufferedWriter(traktDB.toPath(), StandardCharsets.UTF_8, StandardOpenOption.APPEND))) {
             writer.writeNext(new String[] { show, String.valueOf(showId) });
-        } finally {
-            writer.close();
         }
     }
     
@@ -153,19 +150,18 @@ public class TraktDBManager {
      * @throws FileNotFoundException if the given file doesn't exist
      */
     private void readFile(int id, File file) throws FileNotFoundException {
-        FileInputStream fis = new FileInputStream(file);
-        try {
-            CSVReader reader = new CSVReader(new InputStreamReader(fis, "UTF-8"));
+        if(!file.exists()) {
+            throw new FileNotFoundException("File not found: " + file);
+        }
+        try (CSVReader reader = new CSVReader(Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))) {
             String[] nextLine;
             boolean isStopReading = false;
-            try {
-                while ((nextLine = reader.readNext()) != null && !isStopReading) {
-                    isStopReading = onReadLine(id, nextLine);
-                }
-            } finally {
-                reader.close();
+            while ((nextLine = reader.readNext()) != null && !isStopReading) {
+                isStopReading = onReadLine(id, nextLine);
             }
-        } catch(IOException ex) {}
+        } catch(IOException ex) {
+            
+        }
     }
     
     /**
@@ -192,8 +188,8 @@ public class TraktDBManager {
      */
     public void writeJournal(List<Episode> eps, boolean append) throws IOException {
         traktDBJournal.createNewFile();
-        CSVWriter writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(traktDBJournal, append), "UTF-8"));
-        try {
+        OpenOption o = append ? StandardOpenOption.APPEND : null;
+        try (CSVWriter writer = new CSVWriter(Files.newBufferedWriter(traktDBJournal.toPath(), StandardCharsets.UTF_8, o))) {
             for(Episode ep : eps) {
                 for(int episodeNo : ep.getEpisodes()) {
                     writer.writeNext(new String[] {
@@ -204,8 +200,6 @@ public class TraktDBManager {
                     });
                 }
             }
-        } finally {
-            writer.close();
         }
     }    
     

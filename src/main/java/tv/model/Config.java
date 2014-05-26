@@ -53,9 +53,9 @@ public class Config {
     private String traktApiKey;
     
     public Config() {
-        sourceDirs = new ArrayList<String>();
-        extraDirs = new ArrayList<String>();
-        playerArguments = new ArrayList<String>();
+        sourceDirs = new ArrayList<>();
+        extraDirs = new ArrayList<>();
+        playerArguments = new ArrayList<>();
     }
 
     /**

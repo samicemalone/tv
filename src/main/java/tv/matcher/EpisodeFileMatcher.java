@@ -134,7 +134,7 @@ public class EpisodeFileMatcher {
      * @return EpisodeMatch list in episode order or empty list if no matches.
      */
     public List<EpisodeMatch> match(File[] files, MatchCondition<EpisodeMatch> condition) {
-        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> matches = new ArrayList<>();
         for(File file : files) {
             EpisodeMatch match = match(file);
             if(match != null && (condition == null || condition.matches(match))) {
@@ -203,7 +203,7 @@ public class EpisodeFileMatcher {
      * @return episode file array
      */
     public static File[] toFileArray(List<EpisodeMatch> list) {
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         for(EpisodeMatch match : list) {
             files.add(match.getEpisodeFile());
         }

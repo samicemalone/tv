@@ -120,9 +120,7 @@ public class TV {
                     ENV.getArguments().getRandomCount() == 0 ? list : RandomFilter.filter(list)
                 );
             }
-        } catch (TraktUnauthorizedException e) {
-            System.err.println(e.getMessage());
-        } catch (ExitException e) {
+        } catch (TraktUnauthorizedException | ExitException e) {
             System.err.println(e.getMessage());
         }
     }

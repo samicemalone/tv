@@ -62,7 +62,7 @@ public class EpisodeRangeMode extends EpisodeMode {
     public List<EpisodeMatch> findMatches() throws ExitException {
         String episodes = TV.ENV.getArguments().getEpisodes();
         String show = TV.ENV.getArguments().getShow();
-        List<EpisodeMatch> list = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> list = new ArrayList<>();
         switch(getMode()) {
             case EpisodeModes.SEASON:
                 list = getTvMatcher().matchSeason(show, TVScan.getSeasonNo(episodes));

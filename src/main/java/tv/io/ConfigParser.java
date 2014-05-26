@@ -30,9 +30,9 @@ package tv.io;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import tv.ExitCode;
 import tv.exception.ParseException;
 import tv.model.Config;
@@ -51,21 +51,15 @@ public class ConfigParser {
      */
     public static Config parse(File configFile) throws ParseException {
         Config c = new Config();
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(configFile), "UTF8"));
+        try (BufferedReader br = Files.newBufferedReader(configFile.toPath(), StandardCharsets.UTF_8)) {
             String line;
-            boolean firstLine = true;
             while((line = br.readLine()) != null) {
-                if(firstLine) {
-                    if(line.startsWith("\uFEFF")) { // remove UTF8 BOM
-                        line = line.substring(1);
-                    }
-                    firstLine = false;
+                if(line.isEmpty() || line.trim().charAt(0) == '#') {
+                    continue;
                 }
                 parseLine(c, line);
             }
-            br.close();
-        } catch(IOException e) {
+        } catch(IOException ex) {
             
         }
         return c;
@@ -79,9 +73,6 @@ public class ConfigParser {
      * @throws ParseException if unable to determine a key and value from the line
      */
     private static void parseLine(Config c, String line) throws ParseException {
-        if(line.isEmpty() || line.trim().charAt(0) == '#') {
-            return;
-        }
         String key, value;
         try {
             int equalsIndex = line.indexOf('=');
@@ -103,34 +94,48 @@ public class ConfigParser {
      * @param value value of config to set
      */
     private static void parseConfig(Config c, String key, String value) {
-        if(key.equals("TVDB_FILE")) {
-            c.setTVDBFile(value);
-        } else if(key.equals("SOURCE")) {
-            c.addSourceFolder(value);
-        } else if(key.equals("MEDIAINFO_BINARY")) {
-            c.setMediainfoBinary(value);
-        } else if(key.equals("LIBRARY_NAME")) {
-            if(LibraryManager.isWindows7()) {
-                c.setLibraryName(value);
-            }
-        } else if(key.equals("PLAYER")) {
-            c.setPlayer(value);
-        } else if(key.equals("PLAYER_EXECUTABLE")) {
-            c.setPlayerExecutable(value);
-        } else if(key.equals("PLAYER_ARGUMENTS")) {
-            c.addPlayerArgument(value);
-        } else if(key.equals("FILES_FROM")) {
-            c.addExtraFolder(value);
-        } else if(key.equals("ENABLE_TRAKT")) {
-            c.setTraktEnabled(value);
-        } else if(key.equals("TRAKT_USERNAME")) {
-            c.setTraktUsername(value);
-        } else if(key.equals("TRAKT_PASSWORD_SHA1")) {
-            c.setTraktPasswordSha1(value);
-        } else if(key.equals("TRAKT_API_KEY")) {
-            c.setTraktApiKey(value);
-        } else if(key.equals("TRAKT_USE_CHECKINS")) {
-            c.setTraktUseCheckins(value);
+        switch(key) {
+            case "TVDB_FILE":
+                c.setTVDBFile(value);
+                break;
+            case "SOURCE":
+                c.addSourceFolder(value);
+                break;
+            case "MEDIAINFO_BINARY":
+                c.setMediainfoBinary(value);
+                break;
+            case "LIBRARY_NAME":
+                if(LibraryManager.isWindows7()) {
+                    c.setLibraryName(value);
+                }
+                break;
+            case "PLAYER":
+                c.setPlayer(value);
+                break;
+            case "PLAYER_EXECUTABLE":
+                c.setPlayerExecutable(value);
+                break;
+            case "PLAYER_ARGUMENTS":
+                c.addPlayerArgument(value);
+                break;
+            case "FILES_FROM":
+                c.addExtraFolder(value);
+                break;
+            case "ENABLE_TRAKT":
+                c.setTraktEnabled(value);
+                break;
+            case "TRAKT_USERNAME":
+                c.setTraktUsername(value);
+                break;
+            case "TRAKT_PASSWORD_SHA1":
+                c.setTraktPasswordSha1(value);
+                break;
+            case "TRAKT_API_KEY":
+                c.setTraktApiKey(value);
+                break;
+            case "TRAKT_USE_CHECKINS":
+                c.setTraktUseCheckins(value);
+                break;
         }
     }
     

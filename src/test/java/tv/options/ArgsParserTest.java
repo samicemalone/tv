@@ -180,7 +180,7 @@ public class ArgsParserTest {
             arg("--library", "TV"), arg("-p", "stdout"), arg("--config", configFile.getAbsolutePath()),
             arg("--trakt"), arg("-r", "2"), arg("-u", "testuser"), arg("-i"), arg("-s")
         };
-        List<String> curArgs = new ArrayList<String>();
+        List<String> curArgs = new ArrayList<>();
         for(int i = 0; i < argsOptions.length; i++) {
             for(int j = 0; j < argsOptions.length; j++) {
                 if(i == j) {

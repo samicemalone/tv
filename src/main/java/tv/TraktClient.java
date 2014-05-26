@@ -40,6 +40,7 @@ import com.jakewharton.trakt.enumerations.Status;
 import com.jakewharton.trakt.services.ShowService;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
@@ -210,7 +211,7 @@ public class TraktClient {
      * @return episodes
      */
     private ShowService.Episodes buildEpisodes(int showId, Episode episode) {
-        List<ShowService.Episodes.Episode> list = new ArrayList<ShowService.Episodes.Episode>();
+        List<ShowService.Episodes.Episode> list = new ArrayList<>();
         for(int curEp : episode.getEpisodes()) {
             ShowService.Episodes.Episode tmpEp = new ShowService.Episodes.Episode(episode.getSeason(), curEp);
             tmpEp.last_played = String.valueOf(episode.getPlayedDate());
@@ -224,8 +225,7 @@ public class TraktClient {
      * @param ep Episode to add
      */
     public void addEpisodeToJournal(Episode ep) {
-        List<Episode> eps = new ArrayList<Episode>(1);
-        eps.add(ep);
+        List<Episode> eps = Arrays.asList(ep);
         try {
             dbManager.appendJournal(eps);
         } catch (IOException ex) {

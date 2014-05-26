@@ -44,11 +44,11 @@ import java.util.List;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import tv.TV;
-import tv.filter.ExtensionFilter;
+import tv.comparator.LastPlayedComparator;
 import tv.io.TVDBManager;
 import tv.model.Episode;
-import tv.comparator.LastPlayedComparator;
 import tv.util.CommandUtil;
+import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -73,7 +73,7 @@ public class TVServer {
                 try {
                     episodeList = io.readAllStorage();
                 } catch (FileNotFoundException ex) {
-                    episodeList = new ArrayList<Episode>();
+                    episodeList = new ArrayList<>();
                 }
                 Socket client = serverSocket.accept();
                 new Thread(new WorkerThread(client)).start();
@@ -84,12 +84,9 @@ public class TVServer {
     }
 
     public void shutdown() {
-        try {
-            Socket s = SocketFactory.getDefault().createSocket(Inet4Address.getByName("127.0.0.1"), SERVER_PORT);
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+        try (Socket s = SocketFactory.getDefault().createSocket(Inet4Address.getByName("127.0.0.1"), SERVER_PORT);
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true)) {
             out.println("shutdown");
-            out.close();
-            s.close();
         } catch (IOException ex) {
             
         }
@@ -113,12 +110,10 @@ public class TVServer {
          */
         private void spawn(String[] cmdArray, PrintWriter stdout) {
             try {
-                BufferedReader br = null;
                 ProcessBuilder pb = new ProcessBuilder(cmdArray);
                 pb.redirectErrorStream(true);
                 Process p = pb.start();
-                try {
-                    br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     String line;
                     boolean hasOutput = false;
                     while((line = br.readLine()) != null) {
@@ -130,84 +125,74 @@ public class TVServer {
                     }
                 } catch (InterruptedException ex) {
 
-                } finally {
-                    if(br != null) {
-                        br.close();
-                    }
                 }
             } catch (IOException e) {
                 
             }
         }
+        
+        private void handleCommand(PrintWriter out, String command) throws IOException, tv.exception.FileNotFoundException {
+            if(command.equals("shutdown")) {
+                isRunning = false;
+                serverSocket.close();
+            }
+            if(command.startsWith("tv ")) {
+                List<String> cmdList = CommandUtil.dequoteArgsToList(command);
+                for(String source : TV.ENV.getArguments().getSourceFolders()) {
+                    cmdList.add("--source");
+                    cmdList.add(source);
+                }
+                String[] cmdArray = CommandUtil.buildJavaCommandString(cmdList);
+                if(cmdArray == null) {
+                    out.println("Unable to determine location of Jar file");
+                } else {
+                    spawn(cmdArray, out);
+                }
+            }
+            if(command.startsWith("get_show_name ")) {
+                File f = new File(command.substring("get_show_name ".length()));
+                if(f.getParent() != null) {
+                    f = new File(f.getParent()).getParentFile();
+                }
+                out.println(f == null ? "" : f.getName());
+            }
+            if(command.equals("list_shows")) {
+                out.println(io.getCSVShows());
+            }
+            if(command.equals("list_stored_eps")) {
+                out.println(io.getCSVEpisodes(episodeList));
+            }
+            if(command.equals("list_recent_eps")) {
+                List<Episode> sortedList = new ArrayList<>(episodeList.size());
+                sortedList.addAll(episodeList);
+                Collections.sort(sortedList, new LastPlayedComparator());
+                out.println(io.getCSVEpisodes(sortedList));
+            }
+            if(command.equals("list_extra_files")) {
+                List<File> files = new ArrayList<>();
+                for(String dir : TV.ENV.getArguments().getExtraFolders()) {
+                    files.addAll(Arrays.asList(new File(dir).listFiles(new VideoFilter())));
+                }
+                for(File file : files) {
+                    out.println(file.getAbsolutePath());
+                }
+            }
+        }
 
         @Override
         public void run() {
-            PrintWriter out = null;
-            BufferedReader r = null;
-            boolean stopRunning = false;
-            try {
-                out = new PrintWriter(client.getOutputStream(), true);
-                r = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                String command = r.readLine();
-                if(command.equals("shutdown")) {
-                    isRunning = false;
-                    serverSocket.close();
-                }
-                if(command.startsWith("tv ")) {
-                    List<String> cmdList = CommandUtil.dequoteArgsToList(command);
-                    for(String source : TV.ENV.getArguments().getSourceFolders()) {
-                        cmdList.add("--source");
-                        cmdList.add(source);
-                    }
-                    String[] cmdArray = CommandUtil.buildJavaCommandString(cmdList);
-                    if(cmdArray == null) {
-                        out.println("Unable to determine location of Jar file");
-                    } else {
-                        spawn(cmdArray, out);
-                    }
-                }
-                if(command.startsWith("get_show_name ")) {
-                    File f = new File(command.substring("get_show_name ".length()));
-                    if(f.getParent() != null) {
-                        f = new File(f.getParent()).getParentFile();
-                    }
-                    out.println(f == null ? "" : f.getName());
-                }
-                if(command.equals("list_shows")) {
-                    out.println(io.getCSVShows());
-                }
-                if(command.equals("list_stored_eps")) {
-                    out.println(io.getCSVEpisodes(episodeList));
-                }
-                if(command.equals("list_recent_eps")) {
-                    List<Episode> sortedList = new ArrayList<Episode>(episodeList.size());
-                    sortedList.addAll(episodeList);
-                    Collections.sort(sortedList, new LastPlayedComparator());
-                    out.println(io.getCSVEpisodes(sortedList));
-                }
-                if(command.equals("list_extra_files")) {
-                    List<File> files = new ArrayList<File>();
-                    for(String dir : TV.ENV.getArguments().getExtraFolders()) {
-                        files.addAll(Arrays.asList(new File(dir).listFiles(new ExtensionFilter())));
-                    }
-                    for(File file : files) {
-                        out.println(file.getAbsolutePath());
-                    }
-                }
-            } catch (IOException ex) {
+            try (PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+                BufferedReader r = new BufferedReader(new InputStreamReader(client.getInputStream()))) {
+                handleCommand(out, r.readLine());
+            } catch(tv.exception.FileNotFoundException ex) { 
+                shutdown();
+            } catch(IOException ex) {
                 System.err.println(ex.getMessage());
-            } catch (tv.exception.FileNotFoundException ex) {
-                stopRunning = true;
             } finally {
                 try {
-                    if(r != null && out != null) {
-                        r.close();
-                        out.close();
-                    }
                     client.close();
-                } catch (IOException ex) {}
-                if(stopRunning) {
-                    shutdown();
+                } catch(IOException ex) {
+                    
                 }
             }
         }

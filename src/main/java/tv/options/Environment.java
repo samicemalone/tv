@@ -28,7 +28,6 @@ package tv.options;
 
 import java.io.File;
 import java.util.List;
-import tv.DirectoryExistsThread;
 import tv.ExitCode;
 import tv.TVScan;
 import tv.exception.ExitException;
@@ -37,6 +36,7 @@ import tv.exception.MissingArgumentException;
 import tv.model.Arguments;
 import tv.model.Config;
 import tv.model.TraktCredentials;
+import uk.co.samicemalone.libtv.thread.DirectoryExistsThread;
 
 /**
  *
@@ -166,12 +166,8 @@ public abstract class Environment {
         if(config.getPlayerArguments().length > 0) {
             args.getPlayerInfo().setPlayerArguments(config.getPlayerArguments());
         }
-        if(!config.getSourceFolders().isEmpty()) {
-            args.getSourceFolders().addAll(config.getSourceFolders());
-        }
-        if(!config.getExtraFolders().isEmpty()) {
-            args.getExtraFolders().addAll(config.getExtraFolders());
-        }
+        args.getSourceFolders().addAll(config.getSourceFolders());
+        args.getExtraFolders().addAll(config.getExtraFolders());
         if(config.isTraktEnabled()) {
             traktCredentials = new TraktCredentials(
                 config.getTraktUsername(),
@@ -196,13 +192,14 @@ public abstract class Environment {
         if(args.isShutDownSet() || args.isVersionSet() || args.isFileSet()) {
             return;
         }
-        List<String> existentSources = DirectoryExistsThread.getExistingDirs(args.getSourceFolders());
+        int TIMEOUT = 2000;
+        List<String> existentSources = DirectoryExistsThread.getExistingDirs(args.getSourceFolders(), TIMEOUT);
         args.getSourceFolders().retainAll(existentSources);
         if(args.getSourceFolders().isEmpty()) {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
         }
         if(args.isServerSet()) {
-            existentSources = DirectoryExistsThread.getExistingDirs(args.getExtraFolders());
+            existentSources = DirectoryExistsThread.getExistingDirs(args.getExtraFolders(), TIMEOUT);
             args.getExtraFolders().retainAll(existentSources);
             return;
         }

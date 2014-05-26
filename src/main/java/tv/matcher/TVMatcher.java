@@ -37,11 +37,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import tv.TVScan;
 import tv.exception.SeasonNotFoundException;
-import tv.filter.DirectoryFilter;
 import tv.model.EpisodeMatch;
 import tv.model.EpisodeRange;
 import tv.model.Range;
 import tv.model.Season;
+import uk.co.samicemalone.libtv.DirectoryFilter;
 
 /**
  *
@@ -109,7 +109,7 @@ public class TVMatcher {
      * @return list of files matched or empty array if none found
      */
     public List<EpisodeMatch> matchSeasonRange(String show, Range range) {
-        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> matches = new ArrayList<>();
         for(Season season : matchSeasons(tvScanner.getShowDirectory(show))) {
             if(season.asInt() >= range.getStart() && season.asInt() <= range.getEnd()) {
                 matches.addAll(episodeMatcher.match(tvScanner.listFiles(season)));
@@ -125,7 +125,7 @@ public class TVMatcher {
      * @return list of files matched or empty array if none found
      */
     public List<EpisodeMatch> matchSeasonsFrom(String show, int season) {
-        List<EpisodeMatch> list = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> list = new ArrayList<>();
         list.addAll(matchSeasonRange(show, Range.maxRange(season)));
         return list;
     }
@@ -136,7 +136,7 @@ public class TVMatcher {
      * @return list of seasons or empty list
      */
     public List<Season> matchSeasons(File showDir) {
-        List<Season> seasons = new ArrayList<Season>();
+        List<Season> seasons = new ArrayList<>();
         for(File season : showDir.listFiles(new DirectoryFilter())) {
             Matcher m = SEASON_PATTERN.matcher(season.getName());
             if(m.find()) {
@@ -196,11 +196,11 @@ public class TVMatcher {
      */
     public List<EpisodeMatch> matchEpisodeRange(String show, EpisodeRange range) throws SeasonNotFoundException {
         if(range.getStartSeason() > range.getEndSeason()) {
-            return new ArrayList<EpisodeMatch>();
+            return new ArrayList<>();
         } else if(range.getStartSeason() == range.getEndSeason()) {
             return episodeMatcher.matchRange(tvScanner.listFiles(show, range.getStartSeason()), range.toRange());
         }
-        List<EpisodeMatch> list = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> list = new ArrayList<>();
         // add episodes from starting season in range
         list.addAll(episodeMatcher.matchFrom(tvScanner.listFiles(show, range.getStartSeason()), range.getStartEpisode()));
         // add full seasons in between range if applicable

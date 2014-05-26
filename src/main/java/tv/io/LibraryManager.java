@@ -97,7 +97,7 @@ public class LibraryManager {
      * @return List of paths of the folders in the given library, or an empty list
      */
     public static List<String> parseLibraryFolders(String libraryName) {
-        List<String> folders = new ArrayList<String>();
+        List<String> folders = new ArrayList<>();
         String libraryPath = getLibraryPath(libraryName);
         if(libraryPath == null) {
             return folders;

@@ -76,7 +76,7 @@ public class SEDelimitedMatcher implements EpisodeFileMatcher.Matcher {
     }
         
     private List<Integer> parseMultiEpisodes(String multiEpisodes) {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         if(multiEpisodes == null || multiEpisodes.isEmpty()) {
             return list;
         }

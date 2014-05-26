@@ -70,7 +70,7 @@ public class PointerMode extends EpisodeMode {
             throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
         }
         String show = TV.ENV.getArguments().getShow();
-        List<EpisodeMatch> matches = new ArrayList<EpisodeMatch>();
+        List<EpisodeMatch> matches = new ArrayList<>();
         switch(getMode()) {
             case EpisodeModes.POINTER:
                 matches.add(m);

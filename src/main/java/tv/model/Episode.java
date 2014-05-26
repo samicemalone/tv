@@ -57,7 +57,7 @@ public class Episode extends AbstractEpisode {
         this.show = show;
         this.user = user;
         this.season = seasonNo;
-        this.episodes = new ArrayList<Integer>();
+        this.episodes = new ArrayList<>();
         this.episodes.add(episode);
     }
 

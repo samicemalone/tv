@@ -80,7 +80,7 @@ public class MockFileSystem {
     }
     
     public static List<EpisodeMatch> getFullSeasonEpisodeMatches(String show, int startSeason, int endSeason) {
-        List<EpisodeMatch> list = new ArrayList<EpisodeMatch>(NUM_EPISODES * (endSeason - startSeason + 1));
+        List<EpisodeMatch> list = new ArrayList<>(NUM_EPISODES * (endSeason - startSeason + 1));
         while(startSeason <= endSeason) {
             for(int i = 1; i <= NUM_EPISODES; i++) {
                 list.add(getEpisodeMatch(show, startSeason, i));
@@ -91,7 +91,7 @@ public class MockFileSystem {
     }
     
     public static File[] getFullSeasonEpisodes(String show, int startSeason, int endSeason) {
-        List<File> list = new ArrayList<File>(NUM_EPISODES * (endSeason - startSeason + 1));
+        List<File> list = new ArrayList<>(NUM_EPISODES * (endSeason - startSeason + 1));
         while(startSeason <= endSeason) {
             list.addAll(Arrays.asList(getSeasonDir(show, startSeason++).listFiles()));
         }
