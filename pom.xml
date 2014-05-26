@@ -43,7 +43,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>tv.TV</mainClass>
+                            <mainClass>uk.co.samicemalone.tv.TV</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
