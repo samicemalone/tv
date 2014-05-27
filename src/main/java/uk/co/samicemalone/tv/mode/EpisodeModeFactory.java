@@ -26,8 +26,8 @@
 
 package uk.co.samicemalone.tv.mode;
 
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
 import uk.co.samicemalone.tv.ExitCode;
-import uk.co.samicemalone.tv.TVScan;
 import uk.co.samicemalone.tv.exception.ExitException;
 
 /**
@@ -36,11 +36,11 @@ import uk.co.samicemalone.tv.exception.ExitException;
  */
 public class EpisodeModeFactory {
     
-    public static EpisodeMode getEpisodeMode(int mode, TVScan scanner) throws ExitException {
+    public static EpisodeMode getEpisodeMode(int mode, TVPath tvPath) throws ExitException {
         switch(mode) {
             case EpisodeModes.POINTER:
             case EpisodeModes.SEASONFROMPOINTER:
-                return new PointerMode(mode, scanner).readCurrentPointer();
+                return new PointerMode(mode, tvPath).readCurrentPointer();
             case EpisodeModes.SEASON:
             case EpisodeModes.SEASONFROMEP:
             case EpisodeModes.EPRANGE:
@@ -48,11 +48,11 @@ public class EpisodeModeFactory {
             case EpisodeModes.SEASONRANGE:
             case EpisodeModes.ALLFROMSEASON:
             case EpisodeModes.LATEST_SEASON:
-                return new EpisodeRangeMode(mode, scanner);
+                return new EpisodeRangeMode(mode, tvPath);
             case EpisodeModes.EPSINGLE:
             case EpisodeModes.PILOT:
             case EpisodeModes.LATEST:
-                return new WriteOnlyPointerMode(mode, scanner);
+                return new WriteOnlyPointerMode(mode, tvPath);
         }
         throw new ExitException("The episode mode given is not valid", ExitCode.EPISODES_NOT_FOUND);
     } 

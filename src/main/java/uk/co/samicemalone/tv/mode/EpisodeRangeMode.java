@@ -29,16 +29,16 @@
 
 package uk.co.samicemalone.tv.mode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.TVScan;
+import uk.co.samicemalone.tv.util.TVUtil;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
-import uk.co.samicemalone.tv.model.EpisodeRange;
-import uk.co.samicemalone.tv.model.Range;
 
 /**
  * EpisodeRangeMode should be used for modes that require matching a range of
@@ -49,49 +49,44 @@ import uk.co.samicemalone.tv.model.Range;
  */
 public class EpisodeRangeMode extends EpisodeMode {
 
-    public EpisodeRangeMode(int mode, TVScan scanner) {
-        super(mode, scanner);
+    public EpisodeRangeMode(int mode, TVPath tvPath) {
+        super(mode, tvPath);
     }
     
-    /**
-     * Build the list of episode Files as specified by the episode mode
-     * @return List of episode Files or empty File array if none found
-     * @throws ExitException if unable to determine the list of files for the given mode
-     */
     @Override
-    public List<EpisodeMatch> findMatches() throws ExitException {
+    public List<EpisodeMatch> findMatches() throws IOException, ExitException {
         String episodes = TV.ENV.getArguments().getEpisodes();
         String show = TV.ENV.getArguments().getShow();
         List<EpisodeMatch> list = new ArrayList<>();
         switch(getMode()) {
             case EpisodeModes.SEASON:
-                list = getTvMatcher().matchSeason(show, TVScan.getSeasonNo(episodes));
+                list = getTVEpisodeMatcher().matchSeason(show, TVUtil.getSeasonNo(episodes));
                 break;
             case EpisodeModes.SEASONFROMEP:
-                int episode = Integer.valueOf(TVScan.getEpisodeNo(episodes));
-                list = getTvMatcher().matchEpisodesFrom(show, TVScan.getSeasonNo(episodes), episode);
+                int episode = Integer.valueOf(TVUtil.getEpisodeNo(episodes));
+                list = getTVEpisodeMatcher().matchEpisodesFrom(show, TVUtil.getSeasonNo(episodes), episode);
                 break;
             case EpisodeModes.EPRANGE:
-                list = getTvMatcher().matchEpisodeRange(show, EpisodeRange.fromArray(episodes.split("-")));
+                list = getTVEpisodeMatcher().matchEpisodeRange(show, TVUtil.getEpisodeRange(episodes));
                 break;
             case EpisodeModes.ALL:
-                list = getTvMatcher().matchAllEpisodes(show);
+                list = getTVEpisodeMatcher().matchAllEpisodes(show);
                 break;
             case EpisodeModes.SEASONRANGE:
-                list = getTvMatcher().matchSeasonRange(show, Range.fromSeason(episodes.split("-")));
+                list = getTVEpisodeMatcher().matchSeasonRange(show, TVUtil.getSeasonRange(episodes));
                 break;
             case EpisodeModes.ALLFROMSEASON:
-                list = getTvMatcher().matchSeasonsFrom(show, TVScan.getSeasonNo(episodes));
+                list = getTVEpisodeMatcher().matchSeasonsFrom(show, TVUtil.getSeasonNo(episodes));
                 break;
             case EpisodeModes.LATEST_SEASON:
-                list = getTvMatcher().matchLargestSeason(show);
+                list = getTVEpisodeMatcher().matchLargestSeason(show);
                 break;
         }
         return list;
     }
     
     @Override
-    public List<EpisodeMatch> findMatchesOrThrow() throws ExitException {
+    public List<EpisodeMatch> findMatchesOrThrow() throws IOException, ExitException {
         List<EpisodeMatch> matches = findMatches();
         if(matches.isEmpty()) {
             switch(getMode()) {
@@ -115,7 +110,7 @@ public class EpisodeRangeMode extends EpisodeMode {
      * Get the new episode pointer to be set
      * @param match episode match
      * @return new episode pointer or null if one should be not be set
-     * @throws tv.exception.ExitException
+     * @throws ExitException
      */
     @Override
     public Episode getNewPointer(EpisodeMatch match) throws ExitException {

@@ -28,15 +28,15 @@ package uk.co.samicemalone.tv.options;
 
 import java.io.File;
 import java.util.List;
+import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
+import uk.co.samicemalone.libtv.thread.DirectoryExistsThread;
 import uk.co.samicemalone.tv.ExitCode;
-import uk.co.samicemalone.tv.TVScan;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
 import uk.co.samicemalone.tv.model.TraktCredentials;
-import uk.co.samicemalone.libtv.thread.DirectoryExistsThread;
 
 /**
  *
@@ -203,7 +203,7 @@ public abstract class Environment {
             args.getExtraFolders().retainAll(existentSources);
             return;
         }
-        if(!new TVScan(args.getSourceFolders()).showExists(args.getShow())) {
+        if(new StandardTVLibrary(args.getSourceFolders()).getSeasonsPath(args.getShow()) == null) {
             throw new FileNotFoundException("Unable to find show: " + args.getShow(), ExitCode.SHOW_NOT_FOUND);
         }
     }

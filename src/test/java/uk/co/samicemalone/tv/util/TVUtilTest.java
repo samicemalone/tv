@@ -27,84 +27,77 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uk.co.samicemalone.tv;
+package uk.co.samicemalone.tv.util;
 
-import java.io.File;
-import org.junit.After;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
+import uk.co.samicemalone.libtv.model.EpisodeNavigator;
+import uk.co.samicemalone.libtv.model.EpisodeRange;
+import uk.co.samicemalone.libtv.model.Range;
+import uk.co.samicemalone.tv.FileSystemEnvironment;
 
 /**
  *
  * @author Sam Malone
  */
-public class TVScanTest extends FileSystemEnvironment {
-    
-    private TVScan tvScanner;
-    
-    @Before
-    public void setUp() {
-        tvScanner = new TVScan(MockFileSystem.getSourceFolders());
-    }
-    
-    @After
-    public void tearDown() {
-        tvScanner = null;
-    }
+public class TVUtilTest extends FileSystemEnvironment {
 
     /**
-     * Test of asInt method, of class TVScan.
+     * Test of asInt method, of class TVUtil.
      */
     @Test
     public void testGetSeasonNo() {
         String ep = "s02e01";
         int expResult = 2;
-        int result = TVScan.getSeasonNo(ep);
+        int result = TVUtil.getSeasonNo(ep);
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of getEpisodeNo method, of class TVScan.
+     * Test of getEpisodeNo method, of class TVUtil.
      */
     @Test
     public void testGetEpisodeNo() {
         String ep = "s02e01";
         String expResult = "01";
-        String result = TVScan.getEpisodeNo(ep);
+        String result = TVUtil.getEpisodeNo(ep);
         assertEquals(expResult, result);
     }
 
     /**
-     * Test of getDirectory method, of class TVScan.
+     * Test of getSeasonRange method, of class TVUtil.
      */
     @Test
-    public void testGetSeasonDirectory() {
-        String show = "Scrubs";
-        int season = 3;
-        File expResult = MockFileSystem.getSeasonDir(show, season);
-        File result = tvScanner.getSeasonDirectory(show, season);
-        assertEquals(expResult, result);
+    public void testGetSeasonRange() {
+        String ep = "s01-s03";
+        Range expResult = new Range(1, 3);
+        Range result = TVUtil.getSeasonRange(ep);
+        assertEquals(expResult.getStart(), result.getStart());
+        assertEquals(expResult.getEnd(), result.getEnd());
     }
 
     /**
-     * Test of showExists method, of class TVScan.
+     * Test of getEpisodeRange method, of class TVUtil.
      */
     @Test
-    public void testShowExists() {
-        boolean expResult = true;
-        boolean result = tvScanner.showExists("Scrubs");
-        assertEquals(expResult, result);
+    public void testGetEpisodeRange() {
+        String ep = "s01e12-s02e04";
+        EpisodeRange expResult = new EpisodeRange(1, 12, 2, 4);
+        EpisodeRange result = TVUtil.getEpisodeRange(ep);
+        assertEquals(expResult.getStartSeason(), result.getStartSeason());
+        assertEquals(expResult.getStartEpisode(), result.getStartEpisode());
+        assertEquals(expResult.getEndSeason(), result.getEndSeason());
+        assertEquals(expResult.getEndEpisode(), result.getEndEpisode());
     }
 
     /**
-     * Test of showExists method, of class TVScan.
+     * Test of getNavigationPointer method, of class TVUtil.
      */
     @Test
-    public void testShowNotExists() {
-        boolean expResult = false;
-        boolean result = tvScanner.showExists("DoesntExist");
-        assertEquals(expResult, result);
+    public void testGetNavigationPointer() {
+        assertEquals(EpisodeNavigator.Pointer.PREV, TVUtil.getNavigationPointer("prev"));
+        assertEquals(EpisodeNavigator.Pointer.CUR, TVUtil.getNavigationPointer("cur"));
+        assertEquals(EpisodeNavigator.Pointer.NEXT, TVUtil.getNavigationPointer("next"));
     }
     
 }

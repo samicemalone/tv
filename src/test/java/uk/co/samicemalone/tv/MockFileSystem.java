@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 
 /**
  * 
@@ -76,7 +76,9 @@ public class MockFileSystem {
     }
     
     public static EpisodeMatch getEpisodeMatch(String show, int season, int episode) {
-        return new EpisodeMatch(getEpisodeFile(show, season, episode), season, episode);
+        EpisodeMatch m = new EpisodeMatch(show, season, episode);
+        m.setEpisodeFile(getEpisodeFile(show, season, episode));
+        return m;
     }
     
     public static List<EpisodeMatch> getFullSeasonEpisodeMatches(String show, int startSeason, int endSeason) {

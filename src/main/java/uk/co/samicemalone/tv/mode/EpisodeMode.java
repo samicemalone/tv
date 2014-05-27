@@ -26,12 +26,13 @@
 
 package uk.co.samicemalone.tv.mode;
 
+import java.io.IOException;
 import java.util.List;
-import uk.co.samicemalone.tv.TVScan;
+import uk.co.samicemalone.libtv.matcher.TVEpisodeMatcher;
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.matcher.TVMatcher;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
 
 /**
  * For episode modes that don't need to use a pointer, see {@link EpisodeRangeMode}.
@@ -42,17 +43,17 @@ import uk.co.samicemalone.tv.model.EpisodeMatch;
 public abstract class EpisodeMode {
     
     private final int mode;
-    private final TVMatcher tvMatcher;
+    private final TVEpisodeMatcher tvEpisodeMatcher;
     
     /**
      * Creates a new EpisodeMode instance
      * @param mode EpisodeModes Episode Mode
-     * @param scanner TV Scanner
+     * @param tvPath TVPath
      * @see EpisodeModes
      */
-    public EpisodeMode(int mode, TVScan scanner) {
+    public EpisodeMode(int mode, TVPath tvPath) {
         this.mode = mode;
-        this.tvMatcher = new TVMatcher(scanner);
+        this.tvEpisodeMatcher = new TVEpisodeMatcher(tvPath);
     }
     
     /**
@@ -65,35 +66,37 @@ public abstract class EpisodeMode {
     }
 
     /**
-     * Get the TVMatcher
-     * @return TVMatcher
+     * Get the TVEpisodeMatcher
+     * @return TVEpisodeMatcher
      */
-    public TVMatcher getTvMatcher() {
-        return tvMatcher;
+    public TVEpisodeMatcher getTVEpisodeMatcher() {
+        return tvEpisodeMatcher;
     }
     
     /**
      * Find the episode files that match the specified episode mode
      * @return List of episode Files or empty list if none found
+     * @throws java.io.IOException if unable to list any directories
      * @throws ExitException if unable to determine the list of episodes to
      * match
      */
-    public abstract List<EpisodeMatch> findMatches() throws ExitException;
+    public abstract List<EpisodeMatch> findMatches() throws IOException, ExitException;
     
     /**
      * Find the episode files that match the specified episode mode or throw
      * an ExitException if no matches are found.
      * @return List of episode Files
+     * @throws java.io.IOException if unable to list any directories
      * @throws ExitException if unable to determine the list of episodes to
      * match or if there are no episode matches
      */
-    public abstract List<EpisodeMatch> findMatchesOrThrow() throws ExitException;
+    public abstract List<EpisodeMatch> findMatchesOrThrow() throws IOException, ExitException;
     
     /**
      * Get the new episode pointer to be set
      * @param match matched episode
      * @return new episode pointer or null if one should be not be set
-     * @throws tv.exception.ExitException if unable to determine the new pointer
+     * @throws ExitException if unable to determine the new pointer
      */
     public abstract Episode getNewPointer(EpisodeMatch match) throws ExitException;
     

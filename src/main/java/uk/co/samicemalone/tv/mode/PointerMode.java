@@ -27,12 +27,15 @@
 package uk.co.samicemalone.tv.mode;
 
 import com.jakewharton.trakt.entities.TvShowProgress;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
+import uk.co.samicemalone.libtv.model.EpisodeNavigator;
 import uk.co.samicemalone.tv.ExitCode;
-import uk.co.samicemalone.tv.NavigableEpisode;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.TVScan;
+import uk.co.samicemalone.tv.util.TVUtil;
 import uk.co.samicemalone.tv.TraktClient;
 import uk.co.samicemalone.tv.exception.CancellationException;
 import uk.co.samicemalone.tv.exception.ExitException;
@@ -41,7 +44,6 @@ import uk.co.samicemalone.tv.exception.TraktException;
 import uk.co.samicemalone.tv.io.TVDBManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
 
 /**
  *
@@ -49,10 +51,13 @@ import uk.co.samicemalone.tv.model.EpisodeMatch;
  */
 public class PointerMode extends EpisodeMode {
     
+    private final EpisodeNavigator episodeNav;
+    
     private Episode currentPointer;
 
-    public PointerMode(int mode, TVScan scanner) {
-        super(mode, scanner);
+    public PointerMode(int mode, TVPath tvPath) {
+        super(mode, tvPath);
+        episodeNav = new EpisodeNavigator(getTVEpisodeMatcher(), tvPath);
     }
     
     public PointerMode readCurrentPointer() throws ExitException {
@@ -62,9 +67,9 @@ public class PointerMode extends EpisodeMode {
     }
     
     @Override
-    public List<EpisodeMatch> findMatches() throws ExitException {
-        String offset = TV.ENV.getArguments().getEpisodes();
-        EpisodeMatch m = new NavigableEpisode(getTvMatcher()).navigate(currentPointer, offset);
+    public List<EpisodeMatch> findMatches() throws IOException, ExitException {
+        EpisodeNavigator.Pointer offset = TVUtil.getNavigationPointer(TV.ENV.getArguments().getEpisodes());
+        EpisodeMatch m = episodeNav.navigate(currentPointer, offset);
         if(m == null) {
             String message = String.format("Unable to find the episode to navigate to. (current = %s)", currentPointer);
             throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
@@ -77,14 +82,14 @@ public class PointerMode extends EpisodeMode {
                 break;
             case EpisodeModes.SEASONFROMPOINTER:
                 int episode = m.getEpisodesAsRange().getStart();
-                matches.addAll(getTvMatcher().matchEpisodesFrom(show, m.getSeason(), episode));
+                matches.addAll(getTVEpisodeMatcher().matchEpisodesFrom(show, m.getSeason(), episode));
                 break;
         }
         return matches;
     }
     
     @Override
-    public List<EpisodeMatch> findMatchesOrThrow() throws ExitException {
+    public List<EpisodeMatch> findMatchesOrThrow() throws IOException, ExitException {
         List<EpisodeMatch> matches = findMatches();
         if(matches.isEmpty()) {
             if(getMode() == EpisodeModes.SEASONFROMPOINTER) {
@@ -98,7 +103,7 @@ public class PointerMode extends EpisodeMode {
     @Override
     public Episode getNewPointer(EpisodeMatch match) throws ExitException {
         Arguments args = TV.ENV.getArguments();
-        return new Episode(args.getShow(), args.getUser(), match);
+        return new Episode(match, args.getShow(), args.getUser());
     }
     
     private Episode getCurrentTraktPointer() throws ExitException {
@@ -108,12 +113,12 @@ public class PointerMode extends EpisodeMode {
             TvShowProgress.NextEpisode next = trakt.getNextEpisode(args.getShow());
             if(next != null) {
                 Episode nextEp = new Episode(args.getShow(), args.getUser(), next.season, next.number);
-                EpisodeMatch m = new NavigableEpisode(getTvMatcher()).navigate(nextEp, "prev");
+                EpisodeMatch m = episodeNav.navigate(nextEp, EpisodeNavigator.Pointer.PREV);
                 if(m == null) {
                     String message = String.format("unable to find the current episode after fetching the trakt pointer (current = %s)", nextEp);
                     throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
                 }
-                return new Episode(args.getShow(), args.getUser(), m);
+                return new Episode(m, args.getShow(), args.getUser());
             }
         } catch (TraktException e) {
             throw new ExitException(e.getMessage(), ExitCode.TRAKT_ERROR);

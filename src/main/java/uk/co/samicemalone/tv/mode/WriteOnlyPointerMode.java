@@ -26,15 +26,17 @@
 
 package uk.co.samicemalone.tv.mode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.TVScan;
+import uk.co.samicemalone.tv.util.TVUtil;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
 
 /**
  * WriteOnlyPointerMode should be used for modes that write an pointer but do
@@ -44,32 +46,32 @@ import uk.co.samicemalone.tv.model.EpisodeMatch;
  */
 public class WriteOnlyPointerMode extends EpisodeMode {
     
-    public WriteOnlyPointerMode(int mode, TVScan scanner) {
-        super(mode, scanner);
+    public WriteOnlyPointerMode(int mode, TVPath tvPath) {
+        super(mode, tvPath);
     }
 
     @Override
-    public List<EpisodeMatch> findMatches() throws ExitException {
+    public List<EpisodeMatch> findMatches() throws IOException, ExitException {
         String show = TV.ENV.getArguments().getShow();
         List<EpisodeMatch> matches = new ArrayList<>();
         switch(getMode()) {
             case EpisodeModes.EPSINGLE:
-                int season = TVScan.getSeasonNo(TV.ENV.getArguments().getEpisodes());
-                int episode = Integer.valueOf(TVScan.getEpisodeNo(TV.ENV.getArguments().getEpisodes()));
-                matches.add(getTvMatcher().matchEpisode(show, season, episode));
+                int season = TVUtil.getSeasonNo(TV.ENV.getArguments().getEpisodes());
+                int episode = Integer.valueOf(TVUtil.getEpisodeNo(TV.ENV.getArguments().getEpisodes()));
+                matches.add(getTVEpisodeMatcher().matchEpisode(show, season, episode));
                 break;
             case EpisodeModes.PILOT:
-                matches.add(getTvMatcher().matchEpisode(show, 1, 1));
+                matches.add(getTVEpisodeMatcher().matchEpisode(show, 1, 1));
                 break;
             case EpisodeModes.LATEST: 
-                matches.add(getTvMatcher().matchLatestEpisode(show));
+                matches.add(getTVEpisodeMatcher().matchLatestEpisode(show));
                 break;
         }
         return matches;
     }
     
     @Override
-    public List<EpisodeMatch> findMatchesOrThrow() throws ExitException {
+    public List<EpisodeMatch> findMatchesOrThrow() throws IOException, ExitException {
         List<EpisodeMatch> matches = findMatches();
         if(matches.isEmpty()) {
             throw new ExitException("Unable to match the episode given", ExitCode.EPISODES_NOT_FOUND);
@@ -80,7 +82,7 @@ public class WriteOnlyPointerMode extends EpisodeMode {
     @Override
     public Episode getNewPointer(EpisodeMatch match) throws ExitException {
         Arguments args = TV.ENV.getArguments();
-        return new Episode(args.getShow(), args.getUser(), match);
+        return new Episode(match, args.getShow(), args.getUser());
     }
     
 }

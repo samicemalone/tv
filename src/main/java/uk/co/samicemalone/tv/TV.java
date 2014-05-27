@@ -29,19 +29,21 @@
 package uk.co.samicemalone.tv;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
+import uk.co.samicemalone.libtv.matcher.path.TVPath;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.action.Action;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.TraktUnauthorizedException;
 import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.ConfigParser;
 import uk.co.samicemalone.tv.io.LibraryManager;
-import uk.co.samicemalone.tv.matcher.EpisodeFileMatcher;
 import uk.co.samicemalone.tv.mode.EpisodeMode;
 import uk.co.samicemalone.tv.mode.EpisodeModeFactory;
 import uk.co.samicemalone.tv.mode.EpisodeModes;
 import uk.co.samicemalone.tv.model.Config;
-import uk.co.samicemalone.tv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.options.ArgsParser;
 import uk.co.samicemalone.tv.options.Environment;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
@@ -109,10 +111,13 @@ public class TV {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
                 trakt.processJournal();
             }
-            TVScan tvScanner = new TVScan(TV.ENV.getArguments().getSourceFolders());
-            EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvScanner);
+            TVPath tvPath = new StandardTVLibrary(TV.ENV.getArguments().getSourceFolders());
+            EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvPath);
             List<EpisodeMatch> matches = episodesMode.findMatchesOrThrow();
-            File[] list = EpisodeFileMatcher.toFileArray(matches);
+            File[] list = new File[matches.size()];
+            for(int i = 0; i < list.length; i++) {
+                list[i] = matches.get(i).getEpisodeFile();
+            }
             if(list.length == 1) {
                 mediaAction.execute(list[0], episodesMode.getNewPointer(matches.get(0)));
             } else {
@@ -120,7 +125,7 @@ public class TV {
                     ENV.getArguments().getRandomCount() == 0 ? list : RandomFilter.filter(list)
                 );
             }
-        } catch (TraktUnauthorizedException | ExitException e) {
+        } catch (IOException | TraktUnauthorizedException | ExitException e) {
             System.err.println(e.getMessage());
         }
     }
