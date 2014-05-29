@@ -11,7 +11,7 @@ This file describes the installation of "tv" on your machine.
  * This application was written in Java. To run the application, a Java virtual
    machine has to be installed. This can be provided via Oracle's Java Runtime 
    Environment (JRE). The minimum JRE version that this application supports is
-   1.6. See: http://java.com/en/download/index.jsp
+   1.7. See: http://java.com/en/download/index.jsp
 
  * Apache Maven is used to build from source.
  
@@ -35,6 +35,7 @@ to edit the configuration file before use. The program, by default, looks for
 the configuration file in the following place:
 
       Linux default:     $HOME/.tv/tv.conf
+        Mac default:     $HOME/.tv/tv.conf
     Windows default:     C:\ProgramData\$USER\tv\tv.conf
 
 You can change the path to the config file via arguments given to the program.
