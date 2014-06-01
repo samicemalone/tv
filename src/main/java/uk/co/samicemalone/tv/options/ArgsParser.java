@@ -36,6 +36,7 @@ import uk.co.samicemalone.tv.action.LengthAction;
 import uk.co.samicemalone.tv.action.ListAction;
 import uk.co.samicemalone.tv.action.MediaPlayerAction;
 import uk.co.samicemalone.tv.action.SizeAction;
+import uk.co.samicemalone.tv.action.TraktMarkAction;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
@@ -187,6 +188,10 @@ public class ArgsParser {
             args.setMediaAction(new SizeAction());
         } else if(flag.equals("--length")) {
             args.setMediaAction(new LengthAction());
+        } else if(flag.equals("--seen")) {
+            args.setMediaAction(new TraktMarkAction(true));
+        } else if(flag.equals("--unseen")) {
+            args.setMediaAction(new TraktMarkAction(false));
         } else if(flag.equals("--trakt")) {
             args.setTraktPointer(true);
         } else {
@@ -253,7 +258,7 @@ public class ArgsParser {
         sb.append("    -i, --ignore      Do not remember the episode. EPISODES can be prev, cur,\n");
         sb.append("                      next, pilot, latest or single episode format.\n");
         sb.append("    --trakt           Use trakt to determine the current episode pointer. For\n");
-        sb.append("                      use with navigable EPISODES e.g. \"next\" or remaning\n");
+        sb.append("                      use with navigable EPISODES e.g. \"next\" or remaining\n");
         sb.append("                      episodes in a season e.g. \"next-\". Trakt must be\n");
         sb.append("                      enabled via config.\n");
         sb.append("    -r, --random [NO] Selects random episode(s) from the EPISODES range given.\n");
@@ -284,6 +289,10 @@ public class ArgsParser {
         sb.append("    --length          This option requires mediainfo to be installed. It\n");
         sb.append("                      adds up the length of each episode matched in EPISODES\n");
         sb.append("                      or FILE and outputs the total in the format hh:mm:ss\n");
+        sb.append("    --seen            Mark the EPISODES/FILE as seen on Trakt. Trakt must be\n");
+        sb.append("                      enabled via config.\n");
+        sb.append("    --unseen          Mark the EPISODES/FILE as unseen on Trakt. Trakt must\n");
+        sb.append("                      be enabled via config.\n");
         sb.append('\n');
         sb.append("MP can be one of the following supported media players:\n");
         sb.append("  vlc\n");

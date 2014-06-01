@@ -27,6 +27,9 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
+import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.util.CommandUtil;
 
@@ -56,31 +59,6 @@ public class ListAction implements Action {
     }
 
     @Override
-    public void execute(File[] list) {
-        list(list);
-    }
-
-    @Override
-    public void execute(File list, Episode pointerEpisode) {
-        execute(new File[] { list });
-    }
-    
-    /**
-     * Prints the list of media files from the given list of files/directories
-     * to stdout.
-     * @param list List of files/directories
-     */
-    private void list(File[] list) {
-        for(File file : list) {
-            if(file.isDirectory()) {
-                list(file.listFiles(FILTER));
-            } else {
-                System.out.println(listPath ? CommandUtil.getCanonicalPath(file) : file.getName());
-            }
-        }
-    }
-
-    @Override
     public int hashCode() {
         return 79 * 5 + (this.listPath ? 1 : 0);
     }
@@ -92,6 +70,19 @@ public class ListAction implements Action {
         }
         final ListAction other = (ListAction) obj;
         return this.listPath == other.listPath;
+    }
+
+    @Override
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+        for(EpisodeMatch episodeMatch : list) {
+            execute(episodeMatch.getEpisodeFile());
+        }
+    }
+
+    @Override
+    public void execute(File file) throws ExitException {
+        String s = listPath ? CommandUtil.getCanonicalPath(file) : file.getName();
+        System.out.println(s);
     }
     
 }

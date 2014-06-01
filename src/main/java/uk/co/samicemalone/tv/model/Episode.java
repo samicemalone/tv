@@ -28,7 +28,6 @@
  */
 package uk.co.samicemalone.tv.model;
 
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 
 /**

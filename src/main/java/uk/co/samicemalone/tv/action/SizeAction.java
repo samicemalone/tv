@@ -27,6 +27,9 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
+import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.util.MediaUtil;
 
@@ -35,32 +38,19 @@ import uk.co.samicemalone.tv.util.MediaUtil;
  * @author Sam Malone
  */
 public class SizeAction implements Action {
-    
-    private long byteCount = 0;
 
     @Override
-    public void execute(File[] list) {
-        size(list);
-        System.out.println(MediaUtil.readableFileSize(byteCount));
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+        long bytes = 0;
+        for(EpisodeMatch m : list) {
+            bytes += m.getEpisodeFile().length();
+        }
+        System.out.println(MediaUtil.readableFileSize(bytes));
     }
 
     @Override
-    public void execute(File list, Episode pointerEpisode) {
-        execute(new File[] { list });
-    } 
-    
-    /**
-     * Calculates the size of the media from the files/directories given in list
-     * @param list List of files/directories
-     */
-    private void size(File[] list) {
-        for(File file : list) {
-            if(file.isDirectory()) {
-                size(file.listFiles(FILTER));
-            } else {
-                byteCount += file.length();
-            }
-        }
-    }    
+    public void execute(File file) throws ExitException {
+        System.out.println(MediaUtil.readableFileSize(file.length()));
+    }
     
 }

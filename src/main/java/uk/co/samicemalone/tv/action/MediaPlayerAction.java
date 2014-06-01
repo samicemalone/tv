@@ -27,14 +27,17 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.TraktClient;
 import uk.co.samicemalone.tv.exception.CancellationException;
+import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.TraktException;
 import uk.co.samicemalone.tv.io.TVDBManager;
 import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.player.MediaPlayer;
 import uk.co.samicemalone.tv.player.MediaPlayerFactory;
+import uk.co.samicemalone.tv.trakt.TraktClient;
 
 /**
  *
@@ -49,21 +52,38 @@ public class MediaPlayerAction implements Action {
     }
 
     @Override
-    public void execute(File[] list) {
+    public int hashCode() {
+        return 47 * 7 + this.action;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final MediaPlayerAction other = (MediaPlayerAction) obj;
+        return this.action == other.action;
+    }
+    
+    private void execute(File[] files) {
         MediaPlayer player = MediaPlayerFactory.parsePlayer(TV.ENV.getArguments().getPlayerInfo());
         switch(action) {
             case Action.ENQUEUE:
-                player.enqueue(list);
+                player.enqueue(files);
                 break;
             default:
-                player.play(list);
+                player.play(files);
         }
     }
 
     @Override
-    public void execute(File list, Episode pointerEpisode) {
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
         if(!TV.ENV.getArguments().isSetOnly()) {
-            execute(new File[] { list });
+            File[] files = new File[list.size()];
+            for(int i = 0; i < list.size(); i++) {
+                files[i] = list.get(i).getEpisodeFile();
+            }
+            execute(files);
         }
         if(pointerEpisode != null && !TV.ENV.getArguments().isIgnoreSet()) {
             new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
@@ -73,7 +93,7 @@ public class MediaPlayerAction implements Action {
                     if(TV.ENV.isTraktUseCheckins()) {
                         trakt.checkinEpisode(pointerEpisode);
                     } else {
-                        trakt.markEpisodeAsSeen(pointerEpisode);
+                        trakt.markEpisodeAs(TraktClient.SEEN, pointerEpisode);
                     }
                 } catch (TraktException ex) {
                     System.err.println(ex.getMessage());
@@ -86,17 +106,8 @@ public class MediaPlayerAction implements Action {
     }
 
     @Override
-    public int hashCode() {
-        return 47 * 7 + this.action;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final MediaPlayerAction other = (MediaPlayerAction) obj;
-        return this.action == other.action;
+    public void execute(File file) throws ExitException {
+        execute(new File[] { file });
     }
     
 }

@@ -27,6 +27,8 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.MediaInfo;
 import uk.co.samicemalone.tv.TV;
@@ -42,34 +44,26 @@ import uk.co.samicemalone.tv.util.MediaUtil;
 public class LengthAction implements Action {
 
     @Override
-    public void execute(File[] list) throws ExitException {
-        if(!TV.ENV.getMediaInfoBinary().exists()) {
-            throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+        MediaInfo mediaInfo = getMediaInfo();
+        for(EpisodeMatch m : list) {
+            mediaInfo.addFile(m.getEpisodeFile().getAbsolutePath());
         }
-        MediaInfo mediaInfo = new MediaInfo(TV.ENV.getMediaInfoBinary());
-        length(mediaInfo, list);
         System.out.println(MediaUtil.readableLength(mediaInfo.getLength()));
     }
 
     @Override
-    public void execute(File list, Episode pointerEpisode) throws ExitException {
-        execute(new File[] { list });
+    public void execute(File file) throws ExitException {
+        MediaInfo mediaInfo = getMediaInfo();
+        mediaInfo.addFile(file.getAbsolutePath());
+        System.out.println(MediaUtil.readableLength(mediaInfo.getLength()));
     }
     
-    /**
-     * Get the total length of the media in the files/directories given in list.
-     * @param mediaInfo MediaInfo instance
-     * @param list List of files/directories
-     * @return Length in seconds. 0 if list is empty.
-     */
-    private void length(MediaInfo mediaInfo, File[] list) {
-        for(File item : list) {
-            if(item.isDirectory()) {
-                length(mediaInfo, item.listFiles(FILTER));
-            } else {
-                mediaInfo.addFile(item.getAbsolutePath());
-            }
+    private MediaInfo getMediaInfo() throws FileNotFoundException {
+        if(!TV.ENV.getMediaInfoBinary().exists()) {
+            throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
         }
+        return new MediaInfo(TV.ENV.getMediaInfoBinary());
     }
     
 }

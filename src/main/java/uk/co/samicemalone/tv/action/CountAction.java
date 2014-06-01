@@ -27,6 +27,9 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
+import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Episode;
 
 /**
@@ -35,32 +38,14 @@ import uk.co.samicemalone.tv.model.Episode;
  */
 public class CountAction implements Action {
 
-    private int count = 0;
-    
     @Override
-    public void execute(File[] list) {
-        count(list);
-        System.out.println(count);
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+        System.out.println(list.size());
     }
 
     @Override
-    public void execute(File list, Episode pointerEpisode) {
-        execute(new File[] { list });
-    }
-    
-    /**
-     * Calculates the number of media files in the given list of
-     * files/directories.
-     * @param list 
-     */
-    private void count(File[] list) {
-        for(File file : list) {
-            if(file.isDirectory()) {
-                count(file.listFiles(FILTER));
-            } else {
-                count++;
-            }
-        }
+    public void execute(File file) throws ExitException {
+        System.out.println(1);
     }
     
 }

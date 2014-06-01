@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uk.co.samicemalone.tv;
+package uk.co.samicemalone.tv.trakt;
 
 import com.jakewharton.trakt.Trakt;
 import com.jakewharton.trakt.entities.CheckinResponse;
@@ -59,6 +59,9 @@ import uk.co.samicemalone.tv.model.TraktCredentials;
  */
 public class TraktClient {
     
+    public static final int SEEN = 0;
+    public static final int UNSEEN = 1;
+    
     private static final int NOT_FOUND = -1;
     private static final int CANCELLED = -2;
     
@@ -75,25 +78,43 @@ public class TraktClient {
     }
     
     /**
-     * Marks an episode as seen.
+     * Marks an episode as seen or unseen.
      * This method will block for user input if show search results have to be
      * retrieved.
-     * @param episode episode to mark as seen
-     * @throws TraktException if an error occurs whilst searching/marking seen
+     * @param markType {@link #SEEN} or {@link #UNSEEN}
+     * @param episode episode to mark as seen/unseen
+     * @throws TraktException if an error occurs whilst searching/marking
      * @throws CancellationException if the user cancels the show search results
      */
-    public void markEpisodeAsSeen(Episode episode) throws TraktException, CancellationException {
+    public void markEpisodeAs(int markType, Episode episode) throws TraktException, CancellationException {
         setEpisodePlayedDate(episode);
         int showId = getShowId(episode.getShow());
+        List<ShowService.Episodes.Episode> list = new ArrayList<>();
+        TraktBuilder.buildMarkableEpisodes(list, episode);
+        markEpisodesAs(markType, new ShowService.Episodes(showId, list));
+    }
+    
+    public void markEpisodesAs(int markType, ShowService.Episodes episodes) throws TraktException {
         try {
-            Response response = trakt.showService().episodeSeen(buildEpisodes(showId, episode));
+            Response response;
+            switch(markType) {
+                case SEEN:
+                    response = trakt.showService().episodeSeen(episodes);
+                    break;
+                case UNSEEN:
+                    response = trakt.showService().episodeUnseen(episodes);
+                    break;
+                default:
+                    throw new TraktException("warning: unknown marking type. must be SEEN or UNSEEN");
+            }
             if(response != null && Status.SUCCESS.equals(response.status)) {
                 return;
             }
         } catch (RetrofitError ex) {
             assertAuthorized(ex);
         }
-        throw new TraktException("warning: trakt: error whilst marking episode as seen");
+        String type = markType == SEEN ? "seen" : "unseen";
+        throw new TraktException("warning: trakt: error whilst marking episode as " + type);
     }
     
     /**
@@ -114,7 +135,7 @@ public class TraktClient {
             Episode copy = new Episode(episode);
             // start episode in range is checked in, so remove it before marking the rest seen
             copy.getEpisodes().remove(0);
-            markEpisodeAsSeen(copy);
+            markEpisodeAs(SEEN, copy);
         }
     }
     
@@ -142,7 +163,7 @@ public class TraktClient {
     
     private void setEpisodePlayedDate(Episode episode) {
         if(episode.getPlayedDate() == 0) {
-            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
+            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000L));
         }
     }
     
@@ -156,7 +177,7 @@ public class TraktClient {
      */
     private boolean checkin(int showId, Episode episode) throws TraktException {
         try {
-            CheckinResponse response = trakt.showService().checkin(buildEpisodeCheckin(showId, episode));
+            CheckinResponse response = trakt.showService().checkin(TraktBuilder.buildEpisodeCheckin(showId, episode));
             if(response == null) {
                 throw new TraktException("warning: trakt: no response from checkin request");
             }
@@ -182,52 +203,14 @@ public class TraktClient {
         }
         throw new TraktException("warning: trakt: error cancelling checkin");
     }
-
-    /**
-     * Build an API compatible ShowCheckin object from the given episode information.
-     * If the episode file contains multiple episodes, only the first episode will
-     * be checked in.
-     * @param showId trakt tvdb show id
-     * @param episode episode to build
-     * @return ShowCheckin
-     */
-    private ShowService.ShowCheckin buildEpisodeCheckin(int showId, Episode episode) {
-        ShowService.ShowCheckin checkin = new ShowService.ShowCheckin(
-            showId,
-            episode.getSeason(),
-            episode.getEpisodesAsRange().getStart(),
-            "Checked in with tv " + Version.VERSION,
-            Version.VERSION,
-            Version.BUILD_DATE
-        );
-        checkin.duration = 5;
-        return checkin;
-    }
-    
-    /**
-     * Build an API compatible episodes object from the given episode information 
-     * @param showId trakt tvdb show id
-     * @param episode episode to build
-     * @return episodes
-     */
-    private ShowService.Episodes buildEpisodes(int showId, Episode episode) {
-        List<ShowService.Episodes.Episode> list = new ArrayList<>();
-        for(int curEp : episode.getEpisodes()) {
-            ShowService.Episodes.Episode tmpEp = new ShowService.Episodes.Episode(episode.getSeason(), curEp);
-            tmpEp.last_played = String.valueOf(episode.getPlayedDate());
-            list.add(tmpEp);
-        }
-        return new ShowService.Episodes(showId, list);
-    }
     
     /**
      * Add (append) the given episode to the journal file
      * @param ep Episode to add
      */
     public void addEpisodeToJournal(Episode ep) {
-        List<Episode> eps = Arrays.asList(ep);
         try {
-            dbManager.appendJournal(eps);
+            dbManager.appendJournal(Arrays.asList(ep));
         } catch (IOException ex) {
             System.err.println("warning: trakt - unable to append to journal");
         }
@@ -238,14 +221,14 @@ public class TraktClient {
      * marking as seen. The journal will be read, and an attempt will be made
      * to mark the episodes as seen. Any successfully marked episodes will be 
      * removed from the journal
-     * @throws tv.exception.TraktUnauthorizedException if credentials unauthorized
+     * @throws TraktUnauthorizedException if credentials unauthorized
      */
     public void processJournal() throws TraktUnauthorizedException {
         List<Episode> eps = dbManager.readJournal();
         int size = eps.size();
         for(Iterator<Episode> it = eps.iterator(); it.hasNext(); ) {
             try {
-                markEpisodeAsSeen(it.next());
+                markEpisodeAs(SEEN, it.next());
                 it.remove();
             } catch (TraktUnauthorizedException ex) {
                 throw ex;
@@ -269,13 +252,13 @@ public class TraktClient {
     
     /**
      * Get the trakt tvdb show id for the given show name.
-     * @param showName
+     * @param showName show name
      * @return trakt tvdb show id
      * @throws TraktException if an error occurs retrieving search results or 
      * a show id cannot be found
      * @throws CancellationException if the user cancelled
      */
-    private int getShowId(String showName) throws TraktException, CancellationException {
+    public int getShowId(String showName) throws TraktException, CancellationException {
         int showId = findShowId(showName);
         if(showId == NOT_FOUND) {
             throw new TraktException("notice: trakt - unable to find any shows that match: " + showName);

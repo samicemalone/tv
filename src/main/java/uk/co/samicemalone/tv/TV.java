@@ -28,7 +28,6 @@
  */
 package uk.co.samicemalone.tv;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
@@ -43,12 +42,15 @@ import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.mode.EpisodeMode;
 import uk.co.samicemalone.tv.mode.EpisodeModeFactory;
 import uk.co.samicemalone.tv.mode.EpisodeModes;
+import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
+import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.options.ArgsParser;
 import uk.co.samicemalone.tv.options.Environment;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
 import uk.co.samicemalone.tv.server.TVServer;
+import uk.co.samicemalone.tv.trakt.TraktClient;
 
 /**
  * Entry point to the application.
@@ -104,27 +106,21 @@ public class TV {
      * Run the TV program using the EPISODES invocation (the default)
      */
     private static void episodesInvocation() {
-        Action mediaAction = ENV.getArguments().getMediaAction();
-        int mode = EpisodeModes.getEpisodesMode(ENV.getArguments().getEpisodes());
+        Arguments args = ENV.getArguments();
+        Action mediaAction = args.getMediaAction();
+        int mode = EpisodeModes.getEpisodesMode(args.getEpisodes());
         try {
             if(TV.ENV.isTraktEnabled()) {
                 TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
                 trakt.processJournal();
             }
-            TVPath tvPath = new StandardTVLibrary(TV.ENV.getArguments().getSourceFolders());
+            TVPath tvPath = new StandardTVLibrary(args.getSourceFolders());
             EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvPath);
             List<EpisodeMatch> matches = episodesMode.findMatchesOrThrow();
-            File[] list = new File[matches.size()];
-            for(int i = 0; i < list.length; i++) {
-                list[i] = matches.get(i).getEpisodeFile();
-            }
-            if(list.length == 1) {
-                mediaAction.execute(list[0], episodesMode.getNewPointer(matches.get(0)));
-            } else {
-                mediaAction.execute(
-                    ENV.getArguments().getRandomCount() == 0 ? list : RandomFilter.filter(list)
-                );
-            }
+            Episode pointer = matches.size() == 1 ? episodesMode.getNewPointer(matches.get(0)) : null;
+            mediaAction.execute(
+                args.getRandomCount() == 0 ? matches : RandomFilter.filter(matches), pointer
+            );
         } catch (IOException | TraktUnauthorizedException | ExitException e) {
             System.err.println(e.getMessage());
         }
@@ -135,7 +131,7 @@ public class TV {
      */
     private static void fileInvocation() {
         try {
-            ENV.getArguments().getMediaAction().execute(ENV.getArguments().getFile(), null);
+            ENV.getArguments().getMediaAction().execute(ENV.getArguments().getFile());
         } catch(ExitException e) {
             System.err.println(e.getMessage());
         }

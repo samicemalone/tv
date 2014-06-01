@@ -35,8 +35,6 @@ import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.libtv.model.EpisodeNavigator;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.util.TVUtil;
-import uk.co.samicemalone.tv.TraktClient;
 import uk.co.samicemalone.tv.exception.CancellationException;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
@@ -44,6 +42,8 @@ import uk.co.samicemalone.tv.exception.TraktException;
 import uk.co.samicemalone.tv.io.TVDBManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.trakt.TraktClient;
+import uk.co.samicemalone.tv.util.TVUtil;
 
 /**
  *

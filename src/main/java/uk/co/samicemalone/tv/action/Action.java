@@ -29,9 +29,10 @@
 package uk.co.samicemalone.tv.action;
 
 import java.io.File;
+import java.util.List;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -51,24 +52,19 @@ public interface Action {
     public final static int LISTPATH = 32;
     
     /**
-     * Extension Filter to be used to accept files based on their extension.
-     */
-    public VideoFilter FILTER = new VideoFilter();
-    
-    /**
-     * Execute the Action on the given File list.
-     * @param list List of episiode Files
-     * @throws ExitException if an error occurs whilst executing the action.
-     */
-    public void execute(File[] list) throws ExitException;
-    
-    /**
-     * Execute the Action with the given File and store the episode pointer given
-     * @param list List of episode Files
+     * Execute the Action on the given EpisodeMatch list and store the episode pointer given
+     * @param list List of episode file matches
      * @param pointerEpisode New Episode pointer to be set. If null, the pointer
      * will be ignored.
      * @throws ExitException if an error occurs whilst executing the action.
      */
-    public void execute(File list, Episode pointerEpisode) throws ExitException;
+    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException;
+    
+    /**
+     * Execute the Action with the given File
+     * @param file file to perform action on
+     * @throws ExitException if an error occurs whilst executing the action.
+     */
+    public void execute(File file) throws ExitException;
     
 }

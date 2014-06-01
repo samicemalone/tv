@@ -26,14 +26,12 @@
 
 package uk.co.samicemalone.tv.filter;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.libtv.VideoFilter;
 
 /**
  *
@@ -47,46 +45,23 @@ public class RandomFilter {
     public static final int ALL = Integer.MAX_VALUE;
     
     /**
-     * Randomises the File list given. If any File in list is a directory,
-     * the contents of each directory will be added to the shuffled list.
-     * No directories will be present in the shuffled list - only regular files.
+     * Filter a list of random elements from the list given. The list given is
+     * not shuffled directly - a temporary list is shuffled instead.
      * The number of files returned is determined from the -r argument. If the
      * random count is larger than the number of files, all the media files will
      * be returned randomised. If the random count is less than 1, it will be 
      * clamped to 1. Otherwise the size of list returned will be equal to RANDOM_COUNT
      * @param list List of files and/or directories to be shuffled
-     * @return Shuffled file list or empty array
+     * @return Shuffled list or empty array
      */
-    public static File[] filter(File[] list) {
-        if(list.length == 0) {
-            return new File[] {};
+    public static List<EpisodeMatch> filter(List<EpisodeMatch> list) {
+        List<EpisodeMatch> tmp = new ArrayList<>(list);
+        if(list.isEmpty()) {
+            return tmp;
         }
-        List<File> tmp = listFiles(list);
-        for(int i = 0; i < 5; i++) {
-            Collections.shuffle(tmp, new Random(System.currentTimeMillis()));
-        }
+        Collections.shuffle(tmp, new Random(System.currentTimeMillis()));
         int randomCount = Math.max(1, TV.ENV.getArguments().getRandomCount());
-        if(randomCount < tmp.size()) {
-            return tmp.subList(0, randomCount).toArray(new File[0]);
-        }
-        return tmp.toArray(new File[0]);
-    }
-    
-    /**
-     * Lists all the files from the mixed list of files and directories recursively
-     * @param mixedList List of files and/or directories
-     * @return List of files or empty list
-     */
-    private static List<File> listFiles(File[] mixedList) {
-        List<File> fileList = new ArrayList<>();
-        for(File file : mixedList) {
-            if(file.isDirectory()) {
-                fileList.addAll(Arrays.asList(file.listFiles(new VideoFilter())));
-            } else {
-                fileList.add(file);
-            }
-        }
-        return fileList;
+        return randomCount < tmp.size() ? tmp.subList(0, randomCount) : tmp;
     }
     
 }
