@@ -67,6 +67,12 @@ OPTIONS
          --size
             Prints the total size of the episodes matched from the EPISODES
             string or FILE.
+         --seen
+            Mark the EPISODES/FILE as seen on Trakt. Trakt must be enabled via
+            config. The episode(s) being marked must exist.
+         --unseen
+            Mark the EPISODES/FILE as unseen on Trakt. Trakt must enabled via
+            config. The episode(s) being marked must exist.
    PLAYER
       The following media players are currently supported:
          vlc (default)
