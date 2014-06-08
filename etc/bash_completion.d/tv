@@ -1,6 +1,6 @@
 _gen_opts() {
     COMPREPLY=( $( compgen -W '--config --enqueue --user --list --list-path --set --ignore --files-from \
-                    --random --count --player --source --library --size --length --file --trakt --seen --uneen \
+                    --random --count --player --source --library --size --length --file --trakt --seen --unseen \
                     --help --version -q -l -u -s -i -r -c -p -f -h -v' -- "$cur" ) )
 }
 
