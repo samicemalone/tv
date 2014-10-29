@@ -159,12 +159,12 @@ public abstract class Environment {
         }
         if(args.getPlayerInfo().getPlayer() == null && config.getPlayer() != null) {
             args.getPlayerInfo().setPlayer(config.getPlayer());
-        }
-        if(config.getPlayerExecutable() != null) {
-            args.getPlayerInfo().setPlayerExecutable(config.getPlayerExecutable());
-        }
-        if(config.getPlayerArguments().length > 0) {
-            args.getPlayerInfo().setPlayerArguments(config.getPlayerArguments());
+            if(config.getPlayerExecutable() != null) {
+                args.getPlayerInfo().setPlayerExecutable(config.getPlayerExecutable());
+            }
+            if(config.getPlayerArguments().length > 0) {
+                args.getPlayerInfo().setPlayerArguments(config.getPlayerArguments());
+            }
         }
         args.getSourceFolders().addAll(config.getSourceFolders());
         args.getExtraFolders().addAll(config.getExtraFolders());

@@ -46,13 +46,12 @@ import org.w3c.dom.NodeList;
 public class LibraryManager {
     
     /**
-     * Check if the current operating system is Windows 7
-     * @return true if the OS is Windows 7, false otherwise
+     * Check if the current operating system supports libraries (Windows 7/8)
+     * @return true if the OS is Windows 7/8, false otherwise
      */
-    public static boolean isWindows7() {
-        String osName = System.getProperty("os.name");
-        String osVersion = System.getProperty("os.version");
-        return "Windows 7".equals(osName) && "6.1".equals(osVersion);
+    public static boolean hasLibrarySupport() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        return "windows 7".equals(osName) || osName.startsWith("windows 8");
     }
     
     /**
@@ -60,12 +59,12 @@ public class LibraryManager {
      * @return  true if OS is windows, false otherwise
      */
     public static boolean isWindows() {
-        return System.getProperty("os.name").startsWith("Windows");
+        return System.getProperty("os.name").toLowerCase().startsWith("windows");
     }
     
     /**
      * Check if the given library name is valid and exists
-     * @param libraryName Windows 7 Libarary Name
+     * @param libraryName Windows 7/8 Library Name
      * @return true if libraryName is valid and exists, false otherwise
      */
     public static boolean isValidLibraryName(String libraryName) {
@@ -74,7 +73,7 @@ public class LibraryManager {
     
     /**
      * Gets the full path the the Windows library-ms file with the given name
-     * @param libraryName Windows 7 Library Name
+     * @param libraryName Windows 7/8 Library Name
      * @return Full path to the given library name or null if invalid/doesn't exist
      */
     private static String getLibraryPath(String libraryName) {
@@ -93,7 +92,7 @@ public class LibraryManager {
     
     /**
      * Gets a list of full paths to the folders that make up the library
-     * @param libraryName Windows 7 Library Name
+     * @param libraryName Windows 7/8 Library Name
      * @return List of paths of the folders in the given library, or an empty list
      */
     public static List<String> parseLibraryFolders(String libraryName) {

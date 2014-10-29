@@ -1,0 +1,3 @@
+#!/bin/bash
+
+zip tv.zip etc/bash_completion.d/tv target/tv.jar INSTALL.txt LICENSE NOTICE README.txt sample.tv.conf UNINSTALL.txt

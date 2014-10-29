@@ -77,7 +77,7 @@ public class ConfigParserTest {
     public void testParseValid() throws Exception {
         writeConfig(getTestAllConfigString());
         Config result = ConfigParser.parse(configFile);
-        assertEquals(result.getLibraryName(), LibraryManager.isWindows7() ? "TV" : null);
+        assertEquals(result.getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
         assertEquals(result.getMediainfoBinary(), "/path/to/mediainfo");
         assertEquals(result.getPlayer(), "stdout");
         assertEquals(result.getPlayerExecutable(), "/path/to/executable");

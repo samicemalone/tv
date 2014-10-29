@@ -105,7 +105,7 @@ public class ConfigParser {
                 c.setMediainfoBinary(value);
                 break;
             case "LIBRARY_NAME":
-                if(LibraryManager.isWindows7()) {
+                if(LibraryManager.hasLibrarySupport()) {
                     c.setLibraryName(value);
                 }
                 break;

@@ -142,7 +142,7 @@ public class ArgsParser {
             return true;
         }
         if(programArgs[curIndex].equals("--library")) {
-            if(LibraryManager.isWindows7()) {
+            if(LibraryManager.hasLibrarySupport()) {
                 args.setLibraryName(programArgs[curIndex+1]);
             }
             return true;
@@ -224,7 +224,7 @@ public class ArgsParser {
             return;
         }
         if(arg.getLibraryName() != null && !LibraryManager.isValidLibraryName(arg.getLibraryName())) {
-            throw new InvalidArgumentException("Windows 7 Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
+            throw new InvalidArgumentException("Windows Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
         }
         if(arg.isServerSet()) {
             return;

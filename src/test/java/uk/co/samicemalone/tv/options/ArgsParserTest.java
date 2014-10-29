@@ -158,7 +158,7 @@ public class ArgsParserTest {
         assertEquals(args.getEpisodes(), "s01");
         assertEquals(args.getMediaAction(), new ListAction());
         assertEquals(MockFileSystem.getSourceFolders(), args.getSourceFolders());
-        assertEquals(args.getLibraryName(), LibraryManager.isWindows7() ? "TV" : null);
+        assertEquals(args.getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
         assertEquals(args.getPlayerInfo(), new PlayerInfo("stdout"));
         assertEquals(args.getConfigPath(), configFile.getAbsolutePath());
         assertEquals(args.getRandomCount(), 2);
@@ -311,7 +311,7 @@ public class ArgsParserTest {
         };
         try {
             ArgsParser.validate(args);
-            if(LibraryManager.isWindows7()) {
+            if(LibraryManager.hasLibrarySupport()) {
                 fail();
             }
         } catch (InvalidArgumentException ex) {}

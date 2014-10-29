@@ -68,7 +68,7 @@ public class WindowsEnvironment extends Environment {
 
     @Override
     public void fromConfig(Config config) {
-        if(getArguments().getLibraryName() == null && config.getLibraryName() != null && LibraryManager.isWindows7()) {
+        if(getArguments().getLibraryName() == null && config.getLibraryName() != null && LibraryManager.hasLibrarySupport()) {
             getArguments().getSourceFolders().addAll(LibraryManager.parseLibraryFolders(config.getLibraryName()));
         }
         super.fromConfig(config);
@@ -76,7 +76,7 @@ public class WindowsEnvironment extends Environment {
 
     @Override
     public void validate() throws ExitException {
-        if(getArguments().getLibraryName() != null && LibraryManager.isWindows7()) {
+        if(getArguments().getLibraryName() != null && LibraryManager.hasLibrarySupport()) {
             getArguments().getSourceFolders().addAll(LibraryManager.parseLibraryFolders(getArguments().getLibraryName()));
         }
         super.validate();

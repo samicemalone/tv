@@ -96,7 +96,7 @@ public class EnvironmentTest extends FileSystemEnvironment {
         ));
         env.setArguments(args);
         env.fromConfig(ConfigParser.parse(configFile));
-        assertEquals(env.getArguments().getLibraryName(), LibraryManager.isWindows7() ? "TV" : null);
+        assertEquals(env.getArguments().getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
         assertEquals(env.getArguments().getPlayerInfo().getPlayer(), "stdout");
     }
 
