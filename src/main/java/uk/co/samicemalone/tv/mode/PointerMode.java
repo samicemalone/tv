@@ -26,10 +26,13 @@
 
 package uk.co.samicemalone.tv.mode;
 
-import com.jakewharton.trakt.entities.TvShowProgress;
+import com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import retrofit.RetrofitError;
 import uk.co.samicemalone.libtv.matcher.path.TVPath;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.libtv.model.EpisodeNavigator;
@@ -107,20 +110,20 @@ public class PointerMode extends EpisodeMode {
     }
     
     private Episode getCurrentTraktPointer() throws ExitException {
-        TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
+        TraktClient trakt = new TraktClient();
         Arguments args = TV.ENV.getArguments();
         try {
-            TvShowProgress.NextEpisode next = trakt.getNextEpisode(args.getShow());
+            trakt.authenticate(TV.ENV.getTraktAuthFile());
+            Episode next = trakt.getNextEpisode(args.getShow());
             if(next != null) {
-                Episode nextEp = new Episode(args.getShow(), args.getUser(), next.season, next.number);
-                EpisodeMatch m = episodeNav.navigate(nextEp, EpisodeNavigator.Pointer.PREV);
+                EpisodeMatch m = episodeNav.navigate(next, EpisodeNavigator.Pointer.PREV);
                 if(m == null) {
-                    String message = String.format("unable to find the current episode after fetching the trakt pointer (current = %s)", nextEp);
+                    String message = String.format("unable to find the current episode after fetching the trakt pointer (current = %s)", next);
                     throw new ExitException(message, ExitCode.EPISODES_NOT_FOUND);
                 }
                 return new Episode(m, args.getShow(), args.getUser());
             }
-        } catch (TraktException e) {
+        } catch (TraktException | OAuthSystemException | OAuthProblemException | OAuthUnauthorizedException | RetrofitError e) {
             throw new ExitException(e.getMessage(), ExitCode.TRAKT_ERROR);
         } catch (CancellationException e) {
             throw new ExitException("exiting: user cancelled whilst choosing the matching show search result.", ExitCode.SHOW_INPUT_REQUIRED);

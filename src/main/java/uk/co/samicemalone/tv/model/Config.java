@@ -48,9 +48,7 @@ public class Config {
     
     private boolean isTraktEnabled;
     private boolean isTraktUseCheckins;
-    private String traktUsername;
-    private String traktPasswordSha1;
-    private String traktApiKey;
+    private String traktAuthFile;
     
     public Config() {
         sourceDirs = new ArrayList<>();
@@ -171,28 +169,12 @@ public class Config {
         isTraktUseCheckins = "true".equals(useCheckins);
     }
 
-    public String getTraktApiKey() {
-        return traktApiKey;
-    }
-    
-    public void setTraktApiKey(String traktApiKey) {
-        this.traktApiKey = traktApiKey;
+    public String getTraktAuthFile() {
+        return traktAuthFile;
     }
 
-    public String getTraktPasswordSha1() {
-        return traktPasswordSha1;
-    }
-
-    public void setTraktPasswordSha1(String traktPasswordSha1) {
-        this.traktPasswordSha1 = traktPasswordSha1;
-    }
-
-    public String getTraktUsername() {
-        return traktUsername;
-    }
-
-    public void setTraktUsername(String traktUsername) {
-        this.traktUsername = traktUsername;
+    public void setTraktAuthFile(String traktAuthFile) {
+        this.traktAuthFile = traktAuthFile;
     }
     
 }

@@ -124,14 +124,8 @@ public class ConfigParser {
             case "ENABLE_TRAKT":
                 c.setTraktEnabled(value);
                 break;
-            case "TRAKT_USERNAME":
-                c.setTraktUsername(value);
-                break;
-            case "TRAKT_PASSWORD_SHA1":
-                c.setTraktPasswordSha1(value);
-                break;
-            case "TRAKT_API_KEY":
-                c.setTraktApiKey(value);
+            case "TRAKT_AUTH_FILE":
+                c.setTraktAuthFile(value);
                 break;
             case "TRAKT_USE_CHECKINS":
                 c.setTraktUseCheckins(value);

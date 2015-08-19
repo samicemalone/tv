@@ -29,10 +29,13 @@
 
 package uk.co.samicemalone.tv.action;
 
-import com.jakewharton.trakt.services.ShowService;
+import com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import retrofit.RetrofitError;
 import uk.co.samicemalone.libtv.matcher.TVMatcher;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.libtv.model.SeasonsMap;
@@ -43,8 +46,8 @@ import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.TraktException;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.trakt.TraktBuilder;
 import uk.co.samicemalone.tv.trakt.TraktClient;
+import uk.co.samicemalone.tv.trakt.TraktSyncBuilder;
 
 /**
  *
@@ -68,29 +71,13 @@ public class TraktMarkAction implements Action {
         } else if(!TV.ENV.isTraktEnabled()) {
             throw new InvalidArgumentException("Trakt is disabled. Enable it via config before you can mark as seen/unseen", ExitCode.TRAKT_ERROR);
         }
-        TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
-        SeasonsMap seasons = new SeasonsMap(list);
-        int lastPlayed = (int) (System.currentTimeMillis() / 1000L);
+        TraktClient trakt = new TraktClient();
         int markType = isMarkAsSeen ? TraktClient.SEEN : TraktClient.UNSEEN;
-        EpisodeMatch cur = null;
         try {
+            trakt.authenticate(TV.ENV.getTraktAuthFile());
             int showId = trakt.getShowId(TV.ENV.getArguments().getShow());
-            for(int season : seasons.getSeasons()) {
-                List<ShowService.Episodes.Episode> apiList = new ArrayList<>();
-                for(EpisodeMatch m : seasons.getSeasonEpisodes(season)) {
-                    cur = m;
-                    TraktBuilder.buildMarkableEpisodes(apiList, m, lastPlayed);
-                    trakt.markEpisodesAs(markType, new ShowService.Episodes(showId, apiList));
-                }
-            }
-        } catch(TraktException ex) {
-            System.err.println(ex.getMessage());
-            if(isMarkAsSeen && cur != null) {
-                Episode e = new Episode(cur, TV.ENV.getArguments().getShow(), "");
-                e.setPlayedDate(lastPlayed);
-                trakt.addEpisodeToJournal(e);
-            }
-        } catch(CancellationException ex) {
+            trakt.markEpisodesAs(markType, TraktSyncBuilder.buildSyncItemsForShow(list, showId));
+        } catch (TraktException | OAuthSystemException | OAuthProblemException | OAuthUnauthorizedException | RetrofitError | CancellationException ex) {
             System.err.println(ex.getMessage());
         }
     }
@@ -103,11 +90,12 @@ public class TraktMarkAction implements Action {
         } else if(!TV.ENV.isTraktEnabled()) {
             throw new InvalidArgumentException("Trakt is disabled. Enable it via config before you can mark as seen/unseen", ExitCode.TRAKT_ERROR);
         }
-        TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
         Episode episode = new Episode(m, m.getShow(), TV.ENV.getArguments().getUser());
+        TraktClient trakt = new TraktClient();
         try {
+            trakt.authenticate(TV.ENV.getTraktAuthFile());
             trakt.markEpisodeAs(isMarkAsSeen ? TraktClient.SEEN : TraktClient.UNSEEN, episode);
-        } catch (TraktException ex) {
+        } catch (TraktException | OAuthSystemException | OAuthProblemException | OAuthUnauthorizedException | RetrofitError ex) {
             System.err.println(ex.getMessage());
             if(isMarkAsSeen) {
                 trakt.addEpisodeToJournal(episode);

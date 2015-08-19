@@ -36,7 +36,6 @@ import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
-import uk.co.samicemalone.tv.model.TraktCredentials;
 
 /**
  *
@@ -46,8 +45,9 @@ public abstract class Environment {
     
     private File tvdb;
     private File mediainfo;
+    private File traktAuthFile;
     private Arguments args;
-    private TraktCredentials traktCredentials;
+    private boolean isTraktEnabled;
     private boolean isTraktUseCheckins;
     
     /**
@@ -81,6 +81,12 @@ public abstract class Environment {
     public abstract File getDefaultTraktDBJournal();
     
     /**
+     * Get the default Trakt auth file containing the access and refresh tokens
+     * @return default Trakt auth file
+     */
+    public abstract File getDefaultTraktAuthFile();
+    
+    /**
      * Get the arguments for this Environment
      * @return arguments or null if none set
      */
@@ -111,6 +117,14 @@ public abstract class Environment {
     public final File getMediaInfoBinary() {
         return mediainfo == null ? getDefaultMediaInfoBinary() : mediainfo;
     }
+    
+    /**
+     * Get the Trakt Auth File
+     * @return Trakt auth file if set or the default File otherwise
+     */
+    public final File getTraktAuthFile() {
+        return traktAuthFile == null ? getDefaultTraktAuthFile() : traktAuthFile;
+    }
 
     /**
      * Get the Config file.
@@ -125,7 +139,7 @@ public abstract class Environment {
      * @return true if enabled, false otherwise
      */
     public boolean isTraktEnabled() {
-        return traktCredentials != null;
+        return isTraktEnabled;
     }
     
     /**
@@ -136,15 +150,6 @@ public abstract class Environment {
     public boolean isTraktUseCheckins() {
         return isTraktUseCheckins;
     }
-    
-    /**
-     * Get the Trakt user credentials
-     * @return Trakt user credentials or null if not set/enabled
-     */
-    public TraktCredentials getTraktCredentials() {
-        return traktCredentials;
-    }
-
     
     /**
      * Apply the values from the Config file to this Environment
@@ -168,12 +173,10 @@ public abstract class Environment {
         }
         args.getSourceFolders().addAll(config.getSourceFolders());
         args.getExtraFolders().addAll(config.getExtraFolders());
-        if(config.isTraktEnabled()) {
-            traktCredentials = new TraktCredentials(
-                config.getTraktUsername(),
-                config.getTraktPasswordSha1(),
-                config.getTraktApiKey()
-            );
+        if(isTraktEnabled = config.isTraktEnabled()) {
+            if(config.getTraktAuthFile() != null) {
+                traktAuthFile = new File(config.getTraktAuthFile());
+            }
             isTraktUseCheckins = config.isTraktUseCheckins();
         }
     }

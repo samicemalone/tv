@@ -34,7 +34,7 @@ package uk.co.samicemalone.tv;
  */
 public class Version {
     
-    public static final String VERSION = "1.3.0";
-    public static final String BUILD_DATE = "June 08 2014";
+    public static final String VERSION = "1.4.0";
+    public static final String BUILD_DATE = "May 17 2015";
     
 }

@@ -82,11 +82,9 @@ public class ConfigParserTest {
         assertEquals(result.getPlayer(), "stdout");
         assertEquals(result.getPlayerExecutable(), "/path/to/executable");
         assertEquals(result.getTVDBFile(), "/path/to/tvdb.csv");
-        assertEquals(result.getTraktApiKey(), "ab12");
+        assertEquals(result.getTraktAuthFile(), "/path/to/trakt.auth");
         assertEquals(result.isTraktEnabled(), true);
-        assertEquals(result.getTraktPasswordSha1(), "pass");
         assertEquals(result.isTraktUseCheckins(), true);
-        assertEquals(result.getTraktUsername(), "user");
         assertArrayEquals(result.getPlayerArguments(), arg("--arg", "val"));
         assertEquals(result.getExtraFolders(), Arrays.asList(arg("/path/to/extra")));
         assertEquals(result.getSourceFolders(), Arrays.asList(arg("/path/to/source1", "/path/to/source2")));
@@ -126,9 +124,7 @@ public class ConfigParserTest {
         sb.append("PLAYER_ARGUMENTS=val\n");
         sb.append("FILES_FROM=/path/to/extra\n");
         sb.append("ENABLE_TRAKT=true\n");
-        sb.append("TRAKT_USERNAME=user\n");
-        sb.append("TRAKT_PASSWORD_SHA1=pass\n");
-        sb.append("TRAKT_API_KEY=ab12\n");
+        sb.append("TRAKT_AUTH_FILE=/path/to/trakt.auth\n");
         sb.append("TRAKT_USE_CHECKINS=true\n");
         return sb.toString();
     }

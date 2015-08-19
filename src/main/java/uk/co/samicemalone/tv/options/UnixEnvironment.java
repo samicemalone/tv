@@ -63,4 +63,9 @@ public class UnixEnvironment extends Environment {
         return new File(System.getProperty("user.home") + "/.tv/traktdb-journal.csv");
     }
     
+    @Override
+    public File getDefaultTraktAuthFile() {
+        return new File(System.getProperty("user.home") + "/.tv/trakt.auth");
+    }
+    
 }

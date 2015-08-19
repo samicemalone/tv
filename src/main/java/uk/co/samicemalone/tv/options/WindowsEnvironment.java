@@ -67,6 +67,11 @@ public class WindowsEnvironment extends Environment {
     }
 
     @Override
+    public File getDefaultTraktAuthFile() {
+        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\trakt.auth");
+    }
+
+    @Override
     public void fromConfig(Config config) {
         if(getArguments().getLibraryName() == null && config.getLibraryName() != null && LibraryManager.hasLibrarySupport()) {
             getArguments().getSourceFolders().addAll(LibraryManager.parseLibraryFolders(config.getLibraryName()));

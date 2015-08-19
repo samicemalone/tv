@@ -29,29 +29,33 @@
 
 package uk.co.samicemalone.tv.trakt;
 
-import com.jakewharton.trakt.Trakt;
-import com.jakewharton.trakt.entities.CheckinResponse;
-import com.jakewharton.trakt.entities.Response;
-import com.jakewharton.trakt.entities.TvShow;
-import com.jakewharton.trakt.entities.TvShowProgress;
-import com.jakewharton.trakt.enumerations.Extended2;
-import com.jakewharton.trakt.enumerations.SortType;
-import com.jakewharton.trakt.enumerations.Status;
-import com.jakewharton.trakt.services.ShowService;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
+
+import com.uwetrottmann.trakt.v2.TraktV2;
+import com.uwetrottmann.trakt.v2.entities.BaseShow;
+import com.uwetrottmann.trakt.v2.entities.EpisodeCheckin;
+import com.uwetrottmann.trakt.v2.entities.EpisodeCheckinResponse;
+import com.uwetrottmann.trakt.v2.entities.SearchResult;
+import com.uwetrottmann.trakt.v2.entities.SyncItems;
+import com.uwetrottmann.trakt.v2.entities.SyncResponse;
+import com.uwetrottmann.trakt.v2.enums.Extended;
+import com.uwetrottmann.trakt.v2.enums.Type;
+import com.uwetrottmann.trakt.v2.exceptions.CheckinInProgressException;
+import com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException;
+import java.io.File;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import retrofit.RetrofitError;
+import retrofit.client.Response;
+import uk.co.samicemalone.tv.TV;
 import uk.co.samicemalone.tv.exception.CancellationException;
 import uk.co.samicemalone.tv.exception.TraktException;
-import uk.co.samicemalone.tv.exception.TraktUnauthorizedException;
+import uk.co.samicemalone.tv.io.TraktAuthTokenReader;
 import uk.co.samicemalone.tv.io.TraktDBManager;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.model.TraktCredentials;
+import uk.co.samicemalone.tv.model.TraktAuthToken;
 
 /**
  *
@@ -59,22 +63,66 @@ import uk.co.samicemalone.tv.model.TraktCredentials;
  */
 public class TraktClient {
     
+    /**
+     * Length the token is valid for in milliseconds (3 months / 90 days)
+     */
+    public static final long TOKEN_VALID_FOR = 1000 * 60 * 60 * 24 * 90;
+    
     public static final int SEEN = 0;
     public static final int UNSEEN = 1;
     
     private static final int NOT_FOUND = -1;
     private static final int CANCELLED = -2;
     
-    private final Trakt trakt;
-    private final TraktCredentials credentials;
+    private static final String CLIENT_ID = "c9513988f293fcea34f80aa61f9bf7114965fbdf7d7c70ba1be0b3b2b720c245";
+    private static final String CLIENT_SECRET = "841b510a2402a009e17b65693d384a2c43b82392ef4be76337f20ac9d3da5314";
+    
+    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+        
+    private final TraktV2 trakt;
     private final TraktDBManager dbManager;
+    
+    private TraktAuthToken token;
 
-    public TraktClient(TraktCredentials credentials) {
-        this.credentials = credentials;
-        trakt = new Trakt();
-        trakt.setAuthentication(credentials.getUsername(), credentials.getPasswordSha1());
-        trakt.setApiKey(credentials.getApiKey());
+    public TraktClient(TraktAuthToken token) {
+        trakt = new TraktV2();
+//        trakt.setIsDebug(true);
+        trakt.setApiKey(CLIENT_ID);
         dbManager = new TraktDBManager();
+        setAuthToken(token);
+    }
+
+    public TraktClient() {
+        this(null);
+    }
+    
+    public final void setAuthToken(TraktAuthToken token) {
+        this.token = token;
+        if(token != null) {
+           trakt.setAccessToken(token.getAccessToken());
+        }
+    }
+    
+    public TraktAuthToken authenticate(File traktAuthFile) throws OAuthSystemException, OAuthProblemException {
+        TraktAuthToken token = TraktAuthTokenReader.read(traktAuthFile);
+        try {
+            if(token != null) {
+                if(!token.isValid(TOKEN_VALID_FOR)) {
+                    token = new TraktAuthToken(TraktV2.refreshAccessToken(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, token.getRefreshToken()));
+                    TraktAuthTokenReader.write(token, traktAuthFile);
+                }
+            } else {
+                String authCode = TraktUI.promptForPINCode();
+                if(authCode != null) {
+                    token = new TraktAuthToken(TraktV2.getAccessToken(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, authCode));
+                    TraktAuthTokenReader.write(token, traktAuthFile);
+                }
+            }
+        } catch(IOException ex) {
+            System.err.println("Unable to store the trakt auth file");
+        }
+        setAuthToken(token);
+        return token;
     }
     
     /**
@@ -85,36 +133,30 @@ public class TraktClient {
      * @param episode episode to mark as seen/unseen
      * @throws TraktException if an error occurs whilst searching/marking
      * @throws CancellationException if the user cancels the show search results
+     * @throws com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException
      */
-    public void markEpisodeAs(int markType, Episode episode) throws TraktException, CancellationException {
+    public void markEpisodeAs(int markType, Episode episode) throws TraktException, CancellationException, OAuthUnauthorizedException {
         setEpisodePlayedDate(episode);
-        int showId = getShowId(episode.getShow());
-        List<ShowService.Episodes.Episode> list = new ArrayList<>();
-        TraktBuilder.buildMarkableEpisodes(list, episode);
-        markEpisodesAs(markType, new ShowService.Episodes(showId, list));
+        episode.setShowId(getShowId(episode.getShow()));
+        markEpisodesAs(markType, TraktSyncBuilder.buildSyncItems(Arrays.asList(episode)));
     }
     
-    public void markEpisodesAs(int markType, ShowService.Episodes episodes) throws TraktException {
-        try {
-            Response response;
-            switch(markType) {
-                case SEEN:
-                    response = trakt.showService().episodeSeen(episodes);
-                    break;
-                case UNSEEN:
-                    response = trakt.showService().episodeUnseen(episodes);
-                    break;
-                default:
-                    throw new TraktException("warning: unknown marking type. must be SEEN or UNSEEN");
-            }
-            if(response != null && Status.SUCCESS.equals(response.status)) {
-                return;
-            }
-        } catch (RetrofitError ex) {
-            assertAuthorized(ex);
+    public void markEpisodesAs(int markType, SyncItems episodes) throws TraktException, OAuthUnauthorizedException {
+        SyncResponse response;
+        switch(markType) {
+            case SEEN:
+                response = trakt.sync().addItemsToWatchedHistory(episodes);
+                break;
+            case UNSEEN:
+                response = trakt.sync().deleteItemsFromWatchedHistory(episodes);
+                break;
+            default:
+                throw new TraktException("warning: unknown marking type. must be SEEN or UNSEEN");
         }
-        String type = markType == SEEN ? "seen" : "unseen";
-        throw new TraktException("warning: trakt: error whilst marking episode as " + type);
+        if(response == null) {
+            String type = markType == SEEN ? "seen" : "unseen";
+            throw new TraktException("warning: trakt: error whilst marking episode as " + type);
+        }
     }
     
     /**
@@ -123,8 +165,9 @@ public class TraktClient {
      * @param episode episode to check in
      * @throws TraktException 
      * @throws CancellationException if an error occurs whilst checking in
+     * @throws com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException
      */
-    public void checkinEpisode(Episode episode) throws TraktException, CancellationException {
+    public void checkinEpisode(Episode episode) throws TraktException, CancellationException, OAuthUnauthorizedException {
         setEpisodePlayedDate(episode);
         int showId = getShowId(episode.getShow());
         if(!checkin(showId, episode)) {
@@ -145,18 +188,18 @@ public class TraktClient {
      * @return next episode or null if there is no next episode
      * @throws TraktException if unable to fetch the watched episodes progress
      * @throws CancellationException if the user cancels if prompted for a show choice
+     * @throws com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException
      */
-    public TvShowProgress.NextEpisode getNextEpisode(String show) throws TraktException, CancellationException {
-        int showId = getShowId(show);
-        try {
-            List<TvShowProgress> progress = trakt.userService().progressWatched(
-                credentials.getUsername(), String.valueOf(showId), SortType.TITLE, Extended2.NORMAL
-            );
-            if(progress != null) {
-                return progress.get(0).next_episode;
-            }
-        } catch (RetrofitError re) {
-            assertAuthorized(re);
+    public Episode getNextEpisode(String show) throws TraktException, CancellationException, OAuthUnauthorizedException {
+        BaseShow progress = trakt.shows().watchedProgress(
+            String.valueOf(getShowId(show)),
+            false,
+            false,
+            Extended.DEFAULT_MIN
+        );
+        if(progress != null && progress.next_episode != null) {
+            com.uwetrottmann.trakt.v2.entities.Episode e = progress.next_episode;
+            return new Episode(show, TV.ENV.getArguments().getUser(), e.season, e.number);
         }
         throw new TraktException("warning: trakt: unable to fetch the watched episodes progress");
     }
@@ -175,33 +218,31 @@ public class TraktClient {
      * @throws TraktException if no response is received from trakt or if an
      * error occurs whilst checking in
      */
-    private boolean checkin(int showId, Episode episode) throws TraktException {
+    private boolean checkin(int showId, Episode episode) throws TraktException, OAuthUnauthorizedException {
+        EpisodeCheckin checkin = TraktSyncBuilder.buildEpisodeCheckin(showId, episode);
+        EpisodeCheckinResponse response;
         try {
-            CheckinResponse response = trakt.showService().checkin(TraktBuilder.buildEpisodeCheckin(showId, episode));
+            response = trakt.checkin().checkin(checkin);
             if(response == null) {
                 throw new TraktException("warning: trakt: no response from checkin request");
             }
-            return Status.SUCCESS.equals(response.status);
-        } catch (RetrofitError ex) {
-            assertAuthorized(ex);
+        } catch (CheckinInProgressException ex) {
+            System.err.println("trakt: warning: unable to check in as another item is already checked in");
+            return false;
         }
-        throw new TraktException("warning: trakt: error whilst checking in episode");
+        return true;
     }
     
     /**
      * Cancel the current trakt checkin
      * @throws TraktException if an error occurs cancelling a checkin
+     * @throws com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException
      */
-    public void cancelCheckin() throws TraktException {
-        try {
-            Response response = trakt.showService().cancelcheckin();
-            if(response != null && Status.SUCCESS.equals(response.status)) {
-                return;
-            }
-        } catch (RetrofitError ex) {
-            assertAuthorized(ex);
+    public void cancelCheckin() throws TraktException, OAuthUnauthorizedException {
+        Response response = trakt.checkin().deleteActiveCheckin();
+        if(response == null || response.getStatus() != 204) {
+           throw new TraktException("warning: trakt: error cancelling checkin");
         }
-        throw new TraktException("warning: trakt: error cancelling checkin");
     }
     
     /**
@@ -221,32 +262,20 @@ public class TraktClient {
      * marking as seen. The journal will be read, and an attempt will be made
      * to mark the episodes as seen. Any successfully marked episodes will be 
      * removed from the journal
-     * @throws TraktUnauthorizedException if credentials unauthorized
+     * @throws OAuthUnauthorizedException if credentials unauthorized
+     * @throws uk.co.samicemalone.tv.exception.CancellationException
      */
-    public void processJournal() throws TraktUnauthorizedException {
+    public void processJournal() throws OAuthUnauthorizedException, CancellationException {
         List<Episode> eps = dbManager.readJournal();
-        int size = eps.size();
-        for(Iterator<Episode> it = eps.iterator(); it.hasNext(); ) {
-            try {
-                markEpisodeAs(SEEN, it.next());
-                it.remove();
-            } catch (TraktUnauthorizedException ex) {
-                throw ex;
-            } catch (TraktException ex) {
-                System.err.println("warning: trakt: unable to mark journaled episodes as seen");
-                break;
-            } catch (CancellationException ex) {
-                
+        try {
+            for (Episode ep : eps) {
+                ep.setShowId(getShowId(ep.getShow()));
             }
-        }
-        if(eps.isEmpty()) {
+            SyncItems sync = TraktSyncBuilder.buildSyncItems(eps);
+            trakt.sync().addItemsToWatchedHistory(sync);
             dbManager.removeJournal();
-        } else if(eps.size() != size) {
-            try {
-                dbManager.writeJournal(eps, false);
-            } catch (IOException ex) {
-                System.err.println("warning: trakt: unable to write new journal");
-            }
+        } catch(TraktException ex) {
+            
         }
     }
     
@@ -284,14 +313,14 @@ public class TraktClient {
         if(showId != -1) {
             return showId;
         }
-        List<TvShow> shows = searchShow(showName);
+        List<SearchResult> shows = searchShow(showName);
         if(shows != null && !shows.isEmpty()) {
-            displayShowSearchResults(showName, shows);
-            int choice = readShowChoiceFromStdin(1, shows.size(), 0);
+            TraktUI.displayShowSearchResults(showName, shows);
+            int choice = TraktUI.readShowChoiceFromStdin(1, shows.size(), 0);
             if(choice == 0) {
                 return CANCELLED;
             }
-            int tvdbId = shows.get(choice - 1).tvdb_id;
+            int tvdbId = shows.get(choice - 1).show.ids.tvdb;
             try {
                 dbManager.appendTVDB(tvdbId, showName);
             } catch (IOException ex) {
@@ -302,65 +331,11 @@ public class TraktClient {
         return NOT_FOUND;
     }
     
-    /**
-     * Assert that the retrofit error given was not caused by unauthorized credentials
-     * @param re retrofit error
-     * @throws TraktUnauthorizedException if credentials are not authorized
-     */
-    private void assertAuthorized(RetrofitError re) throws TraktUnauthorizedException {
-        retrofit.client.Response r = re.getResponse();
-        if(r != null && r.getStatus() == 401) {
-            throw new TraktUnauthorizedException(r.getReason(), re);
-        }
-    }
-    
-    private List<TvShow> searchShow(String showName) throws TraktException {
+    private List<SearchResult> searchShow(String showName) throws TraktException {
         try {
-            return trakt.searchService().shows(showName, 10);
+            return trakt.search().textQuery(showName, Type.SHOW, null, 1, 10);
         } catch(RetrofitError e) {
-            assertAuthorized(e);
             throw new TraktException("warning: trakt: error whilst searching: " + showName);
-        }
-    }
-    
-    /**
-     * Display the list of tv show search results with a 1 based index id 
-     * displayed with it.
-     * @param query search query
-     * @param shows list of shows to display
-     */
-    private void displayShowSearchResults(String query, List<TvShow> shows) {
-        if(shows.isEmpty()) {
-            System.out.println("No results found for " + query);
-        } else {
-            System.out.println("Search results for " + query);
-            for(int i = 0; i < shows.size(); i++) {
-                System.out.format(" %1$2s) %2$s\n", String.valueOf(i+1), shows.get(i).title);
-            }
-        }
-    }
-    
-    /**
-     * Reads the users show choice from stdin.
-     * @param minValue Minimum value to accept
-     * @param maxValue Maximum value to accept
-     * @param cancel Value to cancel/abort
-     * @return users input between minValue and maxValue or cancel if the user
-     * cancelled
-     */
-    private int readShowChoiceFromStdin(int minValue, int maxValue, int cancel) {
-        System.out.format("Enter the id that matches the show or %d to cancel: \n", cancel);
-        Scanner s = new Scanner(System.in);
-        while (true) {
-            try {
-                int i = s.nextInt();
-                if(i == cancel) {
-                    return cancel;
-                } else if(i >= minValue && i <= maxValue) {
-                    return i;
-                }
-            } catch (InputMismatchException ex) {}
-            System.out.format("Enter a value between %d and %d: \n", minValue, maxValue);
         }
     }
     

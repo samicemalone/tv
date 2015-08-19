@@ -36,6 +36,7 @@ import uk.co.samicemalone.libtv.model.EpisodeMatch;
  */
 public class Episode extends EpisodeMatch {
     
+    private int showId;
     private int playedDate;
     private String user = "";
     
@@ -89,6 +90,14 @@ public class Episode extends EpisodeMatch {
      */
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public int getShowId() {
+        return showId;
+    }
+
+    public void setShowId(int showId) {
+        this.showId = showId;
     }
     
     @Override

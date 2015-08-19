@@ -28,14 +28,12 @@
  */
 package uk.co.samicemalone.tv;
 
-import java.io.IOException;
 import java.util.List;
 import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
 import uk.co.samicemalone.libtv.matcher.path.TVPath;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.action.Action;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.exception.TraktUnauthorizedException;
 import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.ConfigParser;
 import uk.co.samicemalone.tv.io.LibraryManager;
@@ -110,10 +108,6 @@ public class TV {
         Action mediaAction = args.getMediaAction();
         int mode = EpisodeModes.getEpisodesMode(args.getEpisodes());
         try {
-            if(TV.ENV.isTraktEnabled()) {
-                TraktClient trakt = new TraktClient(TV.ENV.getTraktCredentials());
-                trakt.processJournal();
-            }
             TVPath tvPath = new StandardTVLibrary(args.getSourceFolders());
             EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvPath);
             List<EpisodeMatch> matches = episodesMode.findMatchesOrThrow();
@@ -121,8 +115,14 @@ public class TV {
             mediaAction.execute(
                 args.getRandomCount() == 0 ? matches : RandomFilter.filter(matches), pointer
             );
-        } catch (IOException | TraktUnauthorizedException | ExitException e) {
-            System.err.println(e.getMessage());
+            if(TV.ENV.isTraktEnabled()) {
+                TraktClient trakt = new TraktClient();
+                if(trakt.authenticate(TV.ENV.getTraktAuthFile()) != null) {
+                   trakt.processJournal();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("trakt: warning: " + e.getMessage());
         }
     }
     
