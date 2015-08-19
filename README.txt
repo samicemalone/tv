@@ -189,6 +189,11 @@ FILES
          to tv.conf and edited to match your specifications. This file contains
          comments describing each variable. You can specify the path to the
          config file with the --config command.
+      trakt.auth
+         When using trakt integration, your access token will be stored here.
+      traktdb.csv
+         When using trakt integration, this file is used to store a list of
+         show names with their trakt reference.
 
    Default Directories
       Windows C:\ProgramData\$USER\tv\
