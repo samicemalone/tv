@@ -28,7 +28,8 @@
  */
 package uk.co.samicemalone.tv.trakt;
 
-import com.uwetrottmann.trakt.v2.entities.SearchResult;
+import com.uwetrottmann.trakt5.entities.SearchResult;
+
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -40,7 +41,7 @@ import java.util.Scanner;
 public class TraktUI {
     
     private static final String PIN_AUTH_URL = "https://trakt.tv/pin/2007";
-    
+
     public static String promptForPINCode() {
         System.out.format("Please visit the following URL to authorize access to Trakt\n\n%s\n\n", PIN_AUTH_URL);
         System.out.println("Enter the Trakt authorization code or leave blank to cancel:");
@@ -62,7 +63,7 @@ public class TraktUI {
      * @return users input between minValue and maxValue or cancel if the user
      * cancelled
      */
-    public static int readShowChoiceFromStdin(int minValue, int maxValue, int cancel) {
+    private static int readShowChoiceFromStdin(int minValue, int maxValue, int cancel) {
         System.out.format("Enter the id that matches the show or %d to cancel: \n", cancel);
         Scanner s = new Scanner(System.in);
         while (true) {
@@ -85,15 +86,28 @@ public class TraktUI {
      * @param query search query
      * @param shows list of shows to display
      */
-    public static void displayShowSearchResults(String query, List<SearchResult> shows) {
+    private static void displayShowSearchResults(String query, List<SearchResult> shows) {
         if(shows.isEmpty()) {
             System.out.println("No results found for " + query);
         } else {
             System.out.println("Search results for " + query);
             for(int i = 0; i < shows.size(); i++) {
-                System.out.format(" %1$2s) %2$s\n", String.valueOf(i+1), shows.get(i).show.title);
+                SearchResult result = shows.get(i);
+                System.out.format(" %1$2s) [%2$s] %3$s\n", String.valueOf(i+1), result.show.year, result.show.title);
             }
         }
+    }
+
+    public static SearchResult readShowSearchResult(String showName, List<SearchResult> shows) {
+        if(shows != null && !shows.isEmpty()) {
+            TraktUI.displayShowSearchResults(showName, shows);
+            int choice = TraktUI.readShowChoiceFromStdin(1, shows.size(), 0);
+            if(choice == 0) {
+                return null;
+            }
+            return shows.get(choice - 1);
+        }
+        return null;
     }
     
 }

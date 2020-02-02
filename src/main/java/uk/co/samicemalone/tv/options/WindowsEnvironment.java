@@ -26,10 +26,11 @@
 
 package uk.co.samicemalone.tv.options;
 
-import java.io.File;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Config;
+
+import java.io.File;
 
 /**
  *
@@ -42,8 +43,8 @@ public class WindowsEnvironment extends Environment {
     }
 
     @Override
-    public File getDefaultTVDB() {
-        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.csv");
+    public String getDefaultTVDB() {
+        return "C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.sqlite";
     }
 
     @Override
@@ -54,16 +55,6 @@ public class WindowsEnvironment extends Environment {
     @Override
     public File getDefaultConfig() {
         return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tv.conf");
-    }
-
-    @Override
-    public File getDefaultTraktDB() {
-        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\traktdb.csv");
-    }
-
-    @Override
-    public File getDefaultTraktDBJournal() {
-        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\traktdb-journal.csv");
     }
 
     @Override

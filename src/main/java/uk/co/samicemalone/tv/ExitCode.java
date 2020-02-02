@@ -57,4 +57,5 @@ public class ExitCode {
     public final static int MISSING_ARGUMENT = 21; // argument is required with an option
     public final static int UNEXPECTED_ARGUMENT = 22; // unexpected argument given
     public final static int TRAKT_ERROR = 23; // trakt error
+    public final static int TVDB_ERROR = 24; // trakt error
 }

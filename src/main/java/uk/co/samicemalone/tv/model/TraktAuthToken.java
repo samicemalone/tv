@@ -6,13 +6,18 @@
 
 package uk.co.samicemalone.tv.model;
 
-import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
+import com.uwetrottmann.trakt5.entities.AccessToken;
 
 /**
  *
  * @author Sam Malone
  */
 public class TraktAuthToken {
+
+    /**
+     * Length the token is valid for in milliseconds (3 months / 90 days)
+     */
+    private static final long DEFAULT_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 90;
     
     private String accessToken;
     private String refreshToken;
@@ -26,10 +31,10 @@ public class TraktAuthToken {
         this.expiresIn = expiresIn;
     }
 
-    public TraktAuthToken(OAuthAccessTokenResponse r) {
-        accessToken = r.getAccessToken();
-        refreshToken = r.getRefreshToken();
-        expiresIn = r.getExpiresIn();
+    public TraktAuthToken(AccessToken t) {
+        accessToken = t.access_token;
+        refreshToken = t.refresh_token;
+        expiresIn = t.expires_in;
         createdAt = System.currentTimeMillis();
     }
     
@@ -65,10 +70,15 @@ public class TraktAuthToken {
         this.expiresIn = expiresIn;
     }
     
-    public boolean isValid(long tokenValidity) {
-        return createdAt + tokenValidity > System.currentTimeMillis();
-
+    public boolean hasExpired() {
+        return createdAt + DEFAULT_TOKEN_VALIDITY < System.currentTimeMillis();
     }
-    
+
+    public boolean isRefreshRequired(int thresholdPercent) {
+        long elapsed = System.currentTimeMillis() - createdAt;
+        long progress = elapsed / DEFAULT_TOKEN_VALIDITY;
+        long threshold = DEFAULT_TOKEN_VALIDITY * (thresholdPercent / 100);
+        return !hasExpired() && progress > threshold;
+    }
     
 }

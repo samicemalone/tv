@@ -29,19 +29,22 @@
 
 package uk.co.samicemalone.tv.io;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.co.samicemalone.tv.exception.ParseException;
 import uk.co.samicemalone.tv.model.Config;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -71,7 +74,6 @@ public class ConfigParserTest {
 
     /**
      * Test of parse method, of class ConfigParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseValid() throws Exception {
@@ -81,18 +83,16 @@ public class ConfigParserTest {
         assertEquals(result.getMediainfoBinary(), "/path/to/mediainfo");
         assertEquals(result.getPlayer(), "stdout");
         assertEquals(result.getPlayerExecutable(), "/path/to/executable");
-        assertEquals(result.getTVDBFile(), "/path/to/tvdb.csv");
+        assertEquals(result.getTVDBFile(), "/path/to/tvdb.sqlite");
         assertEquals(result.getTraktAuthFile(), "/path/to/trakt.auth");
-        assertEquals(result.isTraktEnabled(), true);
-        assertEquals(result.isTraktUseCheckins(), true);
+        assertTrue(result.isTraktEnabled());
+        assertTrue(result.isTraktUseCheckins());
         assertArrayEquals(result.getPlayerArguments(), arg("--arg", "val"));
-        assertEquals(result.getExtraFolders(), Arrays.asList(arg("/path/to/extra")));
         assertEquals(result.getSourceFolders(), Arrays.asList(arg("/path/to/source1", "/path/to/source2")));
     }
     
     /**
      * Test of parse method, of class ConfigParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseInvalid() throws Exception {
@@ -113,7 +113,7 @@ public class ConfigParserTest {
         sb.append("# comment line\n");
         sb.append("  # indented comment line\n");
         sb.append('\n');
-        sb.append("TVDB_FILE=/path/to/tvdb.csv\n");
+        sb.append("TVDB_FILE=/path/to/tvdb.sqlite\n");
         sb.append("SOURCE=/path/to/source1\n");
         sb.append("SOURCE=/path/to/source2\n");
         sb.append("\tMEDIAINFO_BINARY=/path/to/mediainfo\n");
@@ -122,7 +122,6 @@ public class ConfigParserTest {
         sb.append("PLAYER_EXECUTABLE=/path/to/executable\n");
         sb.append("PLAYER_ARGUMENTS=--arg\n");
         sb.append("PLAYER_ARGUMENTS=val\n");
-        sb.append("FILES_FROM=/path/to/extra\n");
         sb.append("ENABLE_TRAKT=true\n");
         sb.append("TRAKT_AUTH_FILE=/path/to/trakt.auth\n");
         sb.append("TRAKT_USE_CHECKINS=true\n");

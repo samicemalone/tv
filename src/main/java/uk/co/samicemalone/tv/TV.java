@@ -28,34 +28,29 @@
  */
 package uk.co.samicemalone.tv;
 
-import java.util.List;
-import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
-import uk.co.samicemalone.libtv.matcher.path.TVPath;
-import uk.co.samicemalone.libtv.model.EpisodeMatch;
-import uk.co.samicemalone.tv.action.Action;
+import com.j256.ormlite.logger.LocalLog;
+import uk.co.samicemalone.tv.action.FileAction;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.ConfigParser;
 import uk.co.samicemalone.tv.io.LibraryManager;
-import uk.co.samicemalone.tv.mode.EpisodeMode;
-import uk.co.samicemalone.tv.mode.EpisodeModeFactory;
-import uk.co.samicemalone.tv.mode.EpisodeModes;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
-import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.options.ArgsParser;
 import uk.co.samicemalone.tv.options.Environment;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
-import uk.co.samicemalone.tv.server.TVServer;
-import uk.co.samicemalone.tv.trakt.TraktClient;
+import uk.co.samicemalone.tv.tvdb.TVDatabase;
+import uk.co.samicemalone.tv.tvdb.model.Show;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Entry point to the application.
  * The command line arguments can take various forms/invocations.
  * The default invocation is when TVSHOW EPISODES arguments are given.
  * The file invocation is used when the --file argument is given.
- * Other invocations can be used such as --daemon, --kill, --help etc...
  * @author Sam Malone
  */
 public class TV {
@@ -66,10 +61,11 @@ public class TV {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "INFO");
         ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         try {
             ENV.setArguments(ArgsParser.parse(args));
-            if(ENV.getArguments() == null) {
+            if(ENV.getArguments().isHelpSet()) {
                 System.out.println(ArgsParser.getHelpMessage());
                 System.exit(ExitCode.SUCCESS);
             }
@@ -81,48 +77,32 @@ public class TV {
             System.err.println(ex.getMessage());
             System.exit(ex.getExitCode());
         }
+
         if(ENV.getArguments().isVersionSet()) {
             System.out.println(Version.VERSION);
-            return;
-        }
-        if(ENV.getArguments().isServerSet()) {
-            new TVServer().start();
-            return;
-        }
-        if(ENV.getArguments().isShutDownSet()) {
-            new TVServer().shutdown();
-            return;
-        }
-        if(ENV.getArguments().isFileSet()) {
+        } else if(ENV.getArguments().isFileSet()) {
             fileInvocation();
-            return;
+        } else {
+            episodesInvocation();
         }
-        episodesInvocation();
     }
-    
+
     /**
      * Run the TV program using the EPISODES invocation (the default)
      */
     private static void episodesInvocation() {
         Arguments args = ENV.getArguments();
-        Action mediaAction = args.getMediaAction();
-        int mode = EpisodeModes.getEpisodesMode(args.getEpisodes());
+        Application app = new Application(new TVDatabase());
+
         try {
-            TVPath tvPath = new StandardTVLibrary(args.getSourceFolders());
-            EpisodeMode episodesMode = EpisodeModeFactory.getEpisodeMode(mode, tvPath);
-            List<EpisodeMatch> matches = episodesMode.findMatchesOrThrow();
-            Episode pointer = matches.size() == 1 ? episodesMode.getNewPointer(matches.get(0)) : null;
-            mediaAction.execute(
-                args.getRandomCount() == 0 ? matches : RandomFilter.filter(matches), pointer
-            );
-            if(TV.ENV.isTraktEnabled()) {
-                TraktClient trakt = new TraktClient();
-                if(trakt.authenticate(TV.ENV.getTraktAuthFile()) != null) {
-                   trakt.processJournal();
-                }
-            }
+            app.run(args);
+        } catch (SQLException | IOException e) {
+            System.err.format("[db] [%s] %s\n", e.getClass(), e.getMessage());
+        } catch (ExitException e) {
+            System.err.format("[warning] [%s] %s\n", e.getClass(), e.getMessage());
         } catch (Exception e) {
-            System.err.println("trakt: warning: " + e.getMessage());
+            System.err.format("[error] [%s] %s\n", e.getClass(), e.getMessage());
+            e.printStackTrace();
         }
     }
     
@@ -130,8 +110,21 @@ public class TV {
      * Run the TV program using the FILE invocation (using --file)
      */
     private static void fileInvocation() {
+        List<FileAction> actions = FileAction.defaultFileActions();
+        Arguments args = ENV.getArguments();
+
+        FileAction action = null;
+        for(FileAction a : actions) {
+            if(a.isAction(args.getMediaAction())) {
+                action = a;
+                break;
+            }
+        }
         try {
-            ENV.getArguments().getMediaAction().execute(ENV.getArguments().getFile());
+            if(action == null) {
+                throw new ExitException("[action] invalid action type", ExitCode.UNEXPECTED_ARGUMENT);
+            }
+            action.execute(args.getFile());
         } catch(ExitException e) {
             System.err.println(e.getMessage());
         }

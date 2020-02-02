@@ -29,14 +29,9 @@
 
 package uk.co.samicemalone.tv.options;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
 import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.co.samicemalone.tv.FileSystemEnvironment;
 import uk.co.samicemalone.tv.MockFileSystem;
@@ -44,6 +39,13 @@ import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.ConfigParser;
 import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -55,7 +57,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
     public TemporaryFolder folder = new TemporaryFolder();
     
     private File configFile;
-    private File extrasDir;
     private Environment env;
     
     public EnvironmentTest() {
@@ -64,14 +65,11 @@ public class EnvironmentTest extends FileSystemEnvironment {
     @Before
     public void setUp() throws IOException {
         configFile = folder.newFile("tv.conf");
-        extrasDir = folder.newFolder("extras");
-        new File(extrasDir, "extra.avi").createNewFile();
         env = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
     }
 
     /**
      * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateSourcesArgs() throws Exception {
@@ -86,7 +84,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
 
     /**
      * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateEnvironmentArgsPrecedence() throws Exception {
@@ -102,7 +99,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
 
     /**
      * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateEnvironmentConfig() throws Exception {
@@ -117,7 +113,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
 
     /**
      * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateInvalidEnvironmentConfig() throws Exception {
@@ -133,7 +128,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
     
     /**
      * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateInvalidEnvironmentArgs() throws Exception {
@@ -152,22 +146,6 @@ public class EnvironmentTest extends FileSystemEnvironment {
         }
     }
 
-    /**
-     * Test of validate method, of class Environment.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testValidateExtrasArgs() throws Exception {
-        Arguments args = ArgsParser.parse(arg(
-            "-d", "--source", MockFileSystem.getSourceFolders().get(0),
-            "--files-from", extrasDir.getAbsolutePath()
-        ));
-        env.setArguments(args);
-        env.validate();
-        assertEquals(args.getSourceFolders(), MockFileSystem.getSourceFolders());
-        assertEquals(args.getExtraFolders(), Arrays.asList(extrasDir.getAbsolutePath()));
-    }
-    
     private void writeConfig(String config) throws IOException {
         FileWriter w = new FileWriter(configFile);
         w.write(config);

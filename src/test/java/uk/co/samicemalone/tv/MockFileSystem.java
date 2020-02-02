@@ -91,7 +91,23 @@ public class MockFileSystem {
        }
         return list;
     }
-    
+
+    public static List<EpisodeMatch> getRemainingSeasonEpisodeMatches(String show, int season, int startEpisode) {
+        List<EpisodeMatch> list = new ArrayList<>();
+        for(int i = startEpisode; i <= NUM_EPISODES; i++) {
+            list.add(getEpisodeMatch(show, season, i));
+        }
+        return list;
+    }
+
+    public static List<EpisodeMatch> getEpisodeRangeMatches(String show, int season, int startEpisode, int endEpisode) {
+        List<EpisodeMatch> list = new ArrayList<>();
+        for(int i = startEpisode; i <= endEpisode; i++) {
+            list.add(getEpisodeMatch(show, season, i));
+        }
+        return list;
+    }
+
     public static File[] getFullSeasonEpisodes(String show, int startSeason, int endSeason) {
         List<File> list = new ArrayList<>(NUM_EPISODES * (endSeason - startSeason + 1));
         while(startSeason <= endSeason) {

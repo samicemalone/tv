@@ -29,19 +29,8 @@
 
 package uk.co.samicemalone.tv.options;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -49,11 +38,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.co.samicemalone.tv.MockFileSystem;
 import uk.co.samicemalone.tv.action.Action;
-import uk.co.samicemalone.tv.action.CountAction;
-import uk.co.samicemalone.tv.action.LengthAction;
-import uk.co.samicemalone.tv.action.ListAction;
 import uk.co.samicemalone.tv.action.MediaPlayerAction;
-import uk.co.samicemalone.tv.action.SizeAction;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
@@ -61,6 +46,19 @@ import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.PlayerInfo;
+import uk.co.samicemalone.tv.plugin.PointerPlugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -96,18 +94,15 @@ public class ArgsParserTest {
 
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseSingleAction() throws Exception {
-        assertNull(ArgsParser.parse(arg("-h")));
-        assertTrue(ArgsParser.parse(arg("-k")).isShutDownSet());
+        assertTrue(ArgsParser.parse(arg("-h")).isHelpSet());
         assertTrue(ArgsParser.parse(arg("-v")).isVersionSet());
     }
     
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseInvalidArgs() throws Exception {
@@ -140,7 +135,6 @@ public class ArgsParserTest {
     
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseEpisodes() throws Exception {
@@ -156,7 +150,7 @@ public class ArgsParserTest {
     private void assertEpisodeTestDataValid(Arguments args) throws AssertionError {
         assertEquals(args.getShow(), "Scrubs");
         assertEquals(args.getEpisodes(), "s01");
-        assertEquals(args.getMediaAction(), new ListAction());
+        assertEquals(args.getMediaAction(), Action.LIST);
         assertEquals(MockFileSystem.getSourceFolders(), args.getSourceFolders());
         assertEquals(args.getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
         assertEquals(args.getPlayerInfo(), new PlayerInfo("stdout"));
@@ -170,7 +164,6 @@ public class ArgsParserTest {
     
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseEpisodesArgOrder() throws Exception {
@@ -193,9 +186,7 @@ public class ArgsParserTest {
             curArgs.clear();
         }
         for(String[] argArray : argsOptions) {
-            for(String arg : argArray) {
-                curArgs.addAll(Arrays.asList(arg));
-            }
+            curArgs.addAll(Arrays.asList(argArray));
         }
         curArgs.add(tvShowEpisodes[0]);
         curArgs.add(tvShowEpisodes[1]);
@@ -204,55 +195,33 @@ public class ArgsParserTest {
     
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseRandomCount() throws Exception {
         assertEquals(0, ArgsParser.parse(arg("Scrubs", "s$")).getRandomCount());
         assertEquals(1, ArgsParser.parse(arg("Scrubs", "s$", "-r")).getRandomCount());
         assertEquals(5, ArgsParser.parse(arg("Scrubs", "s$", "-r", "5")).getRandomCount());
+        assertEquals(1, ArgsParser.parse(arg("Scrubs", "s$", "-r", "-l")).getRandomCount());
+        assertEquals(1, ArgsParser.parse(arg("Scrubs", "s$", "-r", "1", "-q")).getRandomCount());
         assertEquals(RandomFilter.ALL, ArgsParser.parse(arg("Scrubs", "s$", "-r", "all")).getRandomCount());
     }
-    
+
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testParseServer() throws Exception {
-        File extraDir = folder.newFolder("extra");
-        List<String> extraFolders = Arrays.asList(new String[] { extraDir.getAbsolutePath() });
-        Arguments args = ArgsParser.parse(arg(
-            "-d", "--files-from", extraDir.getAbsolutePath(),
-            "--source", MockFileSystem.getSourceFolders().get(0), "--library",
-            "TV", "-p", "stdout", "--config", configFile.getAbsolutePath()
-        ));
-        assertTrue(args.isServerSet());
-        assertEquals(extraFolders, args.getExtraFolders());
-        assertEquals(MockFileSystem.getSourceFolders(), args.getSourceFolders());
-        assertEquals(args.getLibraryName(), "TV");
-        assertEquals(args.getPlayerInfo(), new PlayerInfo("stdout"));
-        assertEquals(args.getConfigPath(), configFile.getAbsolutePath());
-    }
-    
-    /**
-     * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseAction() throws Exception {
-        assertEquals(ArgsParser.parse(arg("Scrubs", "s$")).getMediaAction(), new MediaPlayerAction(Action.PLAY));
-        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "-q")).getMediaAction(), new MediaPlayerAction(Action.ENQUEUE));
-        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "-l")).getMediaAction(), new ListAction());
-        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "--list-path")).getMediaAction(), new ListAction(true));
-        assertThat(ArgsParser.parse(arg("Scrubs", "s$", "-c")).getMediaAction(), instanceOf(CountAction.class));
-        assertThat(ArgsParser.parse(arg("Scrubs", "s$", "--size")).getMediaAction(), instanceOf(SizeAction.class));
-        assertThat(ArgsParser.parse(arg("Scrubs", "s$", "--length")).getMediaAction(), instanceOf(LengthAction.class));
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$")).getMediaAction(), Action.PLAY);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "-q")).getMediaAction(), Action.ENQUEUE);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "-l")).getMediaAction(), Action.LIST);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "--list-path")).getMediaAction(), Action.LIST_PATH);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "-c")).getMediaAction(), Action.COUNT);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "--size")).getMediaAction(), Action.SIZE);
+        assertEquals(ArgsParser.parse(arg("Scrubs", "s$", "--length")).getMediaAction(), Action.LENGTH);
     }
     
     /**
      * Test of parse method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testParseFile() throws Exception {
@@ -262,7 +231,7 @@ public class ArgsParserTest {
             "--config", configFile.getAbsolutePath()
         ));
         assertTrue(args.isFileSet());
-        assertEquals(args.getMediaAction(), new MediaPlayerAction(Action.ENQUEUE));
+        assertEquals(args.getMediaAction(), Action.ENQUEUE);
         assertEquals(args.getPlayerInfo(), new PlayerInfo("stdout"));
         assertEquals(args.getConfigPath(), configFile.getAbsolutePath());
     }
@@ -273,7 +242,6 @@ public class ArgsParserTest {
 
     /**
      * Test of validate method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidate() throws Exception {
@@ -288,7 +256,6 @@ public class ArgsParserTest {
             "--config", configFile.getAbsolutePath()
         ));
         ArgsParser.validate(args);
-        ArgsParser.validate(ArgsParser.parse(arg("-k")));
         ArgsParser.validate(ArgsParser.parse(arg("-v")));
         // non existing shows should still be valid because a config is not yet
         // applied. shows will be validated by the environment instead
@@ -297,7 +264,6 @@ public class ArgsParserTest {
     
     /**
      * Test of validate method, of class ArgsParser.
-     * @throws java.lang.Exception
      */
     @Test
     public void testValidateInvalidArgs() throws Exception {
@@ -306,7 +272,8 @@ public class ArgsParserTest {
             "--config", configFile.getAbsolutePath()
         ));
         String[][] argsArray = new String[][] {
-            arg("Scrubs", "-r", "-l"), arg("s01", "-u"),
+            arg(),
+            arg("Scrubs", "s01", "--fake-argument"),
             arg("Scrubs", "pilot", "-i", "-s")
         };
         try {
@@ -316,7 +283,7 @@ public class ArgsParserTest {
             }
         } catch (InvalidArgumentException ex) {}
         for(String[] arg : argsArray) {
-            assertArgumentsInvalid(ArgsParser.parse(arg));
+            assertArgumentsInvalid(arg);
         }
         argsArray = new String[][] {
             arg("Scrubs", "s01", "-l", "--config", "invalidConfigPath"),
@@ -331,13 +298,14 @@ public class ArgsParserTest {
         }
     }
     
-    private void assertArgumentsInvalid(Arguments args) throws AssertionError {
+    private void assertArgumentsInvalid(String[] args) throws AssertionError {
         try {
-            ArgsParser.validate(args);
-            fail();
-        } catch (InvalidArgumentException ex) {
+            ArgsParser.validate(ArgsParser.parse(args));
+            fail("Expected validation to fail");
+        } catch (InvalidArgumentException | MissingArgumentException ex) {
+            // Success
         } catch (FileNotFoundException ex) {
-            fail();
+            fail("Expected InvalidArgumentException");
         }
     }
     

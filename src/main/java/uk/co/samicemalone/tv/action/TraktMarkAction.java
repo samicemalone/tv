@@ -29,25 +29,20 @@
 
 package uk.co.samicemalone.tv.action;
 
-import com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
-import retrofit.RetrofitError;
-import uk.co.samicemalone.libtv.matcher.TVMatcher;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
-import uk.co.samicemalone.libtv.model.SeasonsMap;
 import uk.co.samicemalone.tv.ExitCode;
-import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.exception.CancellationException;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.TraktException;
 import uk.co.samicemalone.tv.model.Episode;
-import uk.co.samicemalone.tv.trakt.TraktClient;
-import uk.co.samicemalone.tv.trakt.TraktSyncBuilder;
+import uk.co.samicemalone.tv.plugin.TraktPlugin;
+import uk.co.samicemalone.tv.tvdb.model.Show;
+import uk.co.samicemalone.tv.tvdb.model.TraktShowProgressQueue;
+
+import java.time.Instant;
+import java.util.List;
+
+import static uk.co.samicemalone.tv.TV.ENV;
 
 /**
  *
@@ -57,52 +52,37 @@ public class TraktMarkAction implements Action {
     
     /** if true, mark as seen, otherwise mark unseen **/
     private final boolean isMarkAsSeen;
+    private final TraktPlugin traktPlugin;
 
-    public TraktMarkAction(boolean isMarkAsSeen) {
-        this.isMarkAsSeen = isMarkAsSeen;
+    public TraktMarkAction(TraktPlugin traktPlugin, int markAction) {
+        this.traktPlugin = traktPlugin;
+        this.isMarkAsSeen = markAction == Action.SEEN;
     }
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
-        if(isMarkAsSeen && TV.ENV.getArguments().isIgnoreSet()) {
+    public boolean isAction(int action) {
+        return action == Action.SEEN || action == Action.UNSEEN;
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
+        if(isMarkAsSeen && ENV.getArguments().isIgnoreSet()) {
             throw new InvalidArgumentException("--seen action and -i flag cannot be set together", ExitCode.UNEXPECTED_ARGUMENT);
-        } else if(!isMarkAsSeen && TV.ENV.getArguments().isSetOnly()) {
+        } else if(!isMarkAsSeen && ENV.getArguments().isSetOnly()) {
             throw new InvalidArgumentException("--unseen action and -s flag cannot be set together", ExitCode.UNEXPECTED_ARGUMENT);
-        } else if(!TV.ENV.isTraktEnabled()) {
+        } else if(!ENV.isTraktEnabled()) {
             throw new InvalidArgumentException("Trakt is disabled. Enable it via config before you can mark as seen/unseen", ExitCode.TRAKT_ERROR);
         }
-        TraktClient trakt = new TraktClient();
-        int markType = isMarkAsSeen ? TraktClient.SEEN : TraktClient.UNSEEN;
+
         try {
-            trakt.authenticate(TV.ENV.getTraktAuthFile());
-            int showId = trakt.getShowId(TV.ENV.getArguments().getShow());
-            trakt.markEpisodesAs(markType, TraktSyncBuilder.buildSyncItemsForShow(list, showId));
-        } catch (TraktException | OAuthSystemException | OAuthProblemException | OAuthUnauthorizedException | RetrofitError | CancellationException ex) {
+            String tag = ENV.getArguments().getUser();
+            for (EpisodeMatch episodeMatch : list) {
+                Episode e = new Episode(episodeMatch, show.getName(), tag).setWatchedAt(Instant.now());
+                String markType = isMarkAsSeen ? TraktShowProgressQueue.SEEN : TraktShowProgressQueue.UNSEEN;
+                traktPlugin.addEpisodeToQueue(show, e, markType);
+            }
+        } catch (TraktException ex) {
             System.err.println(ex.getMessage());
         }
     }
-
-    @Override
-    public void execute(File file) throws ExitException {
-        EpisodeMatch m = new TVMatcher().matchElement(file.toPath(), TVMatcher.MatchElement.ALL);
-        if(m == null) {
-            throw new ExitException("Unable to match show, season or episodes from " + file, ExitCode.PARSE_EPISODES_FAILED);
-        } else if(!TV.ENV.isTraktEnabled()) {
-            throw new InvalidArgumentException("Trakt is disabled. Enable it via config before you can mark as seen/unseen", ExitCode.TRAKT_ERROR);
-        }
-        Episode episode = new Episode(m, m.getShow(), TV.ENV.getArguments().getUser());
-        TraktClient trakt = new TraktClient();
-        try {
-            trakt.authenticate(TV.ENV.getTraktAuthFile());
-            trakt.markEpisodeAs(isMarkAsSeen ? TraktClient.SEEN : TraktClient.UNSEEN, episode);
-        } catch (TraktException | OAuthSystemException | OAuthProblemException | OAuthUnauthorizedException | RetrofitError ex) {
-            System.err.println(ex.getMessage());
-            if(isMarkAsSeen) {
-                trakt.addEpisodeToJournal(episode);
-            }
-        } catch (CancellationException ex) {
-
-        }
-    }    
-    
 }

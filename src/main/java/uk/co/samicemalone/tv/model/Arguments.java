@@ -28,12 +28,12 @@
  */
 package uk.co.samicemalone.tv.model;
 
+import uk.co.samicemalone.tv.action.Action;
+import uk.co.samicemalone.tv.util.CygwinUtil;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import uk.co.samicemalone.tv.action.Action;
-import uk.co.samicemalone.tv.action.MediaPlayerAction;
-import uk.co.samicemalone.tv.util.CygwinUtil;
 
 /**
  *
@@ -41,7 +41,7 @@ import uk.co.samicemalone.tv.util.CygwinUtil;
  */
 public class Arguments {
     
-    private Action mediaAction = new MediaPlayerAction(Action.PLAY);
+    private int mediaAction = Action.PLAY;
     private int randomCount = 0;
     private String USER = "";
     private String EPISODES;
@@ -51,20 +51,17 @@ public class Arguments {
     private String LIBRARY;
     private PlayerInfo PLAYER = new PlayerInfo();
     private final List<String> sourceFolders;
-    private final List<String> extraFolders;
-    private boolean isSetOnly = false;
+    private boolean isHelpSet = false;
     private boolean isIgnoreSet = false;
-    private boolean isServerSet = false;
-    private boolean isShutDownSet = false;
-    private boolean isVersionSet = false;
+    private boolean isSetOnly = false;
     private boolean isTraktPointerSet = false;
-    
+    private boolean isVersionSet = false;
+
     /**
      * Creates a new instance of the class
      */
     public Arguments() {
         sourceFolders = new ArrayList<>();
-        extraFolders = new ArrayList<>();
     }
     
     /**
@@ -81,24 +78,6 @@ public class Arguments {
      */
     public List<String> getSourceFolders() {
         return sourceFolders;
-    }
-    
-    /**
-     * Adds an extra folder to be used to list media files when invoked as
-     * a daemon
-     * @param folder full path
-     */
-    public void addExtraFolder(String folder) {
-        extraFolders.add(folder);
-    }
-    
-    /**
-     * Gets a list of the extra folders specified with the --files-from option
-     * @return list of extra folders to list whilst invoked as daemon, or empty
-     * list
-     */
-    public List<String> getExtraFolders() {
-        return extraFolders;
     }
 
     /**
@@ -134,38 +113,6 @@ public class Arguments {
      */
     public void setLibraryName(String libraryName) {
         LIBRARY = libraryName;
-    }
-    
-    /**
-     * Check if the shut down flag is set
-     * @return true if the flag is set, false otherwise
-     */
-    public boolean isShutDownSet() {
-        return isShutDownSet;
-    }
-    
-    /**
-     * Sets the shut down flag
-     * @param b 
-     */
-    public void setShutDown(boolean b) {
-        isShutDownSet = b;
-    }
-    
-    /**
-     * Check if the server daemon flag is set
-     * @return true if the flag is set, false otherwise
-     */
-    public boolean isServerSet() {
-        return isServerSet;
-    }
-    
-    /**
-     * Set the server daemon flag
-     * @param server 
-     */
-    public void setServer(boolean server) {
-        isServerSet = server;
     }
     
     /**
@@ -267,7 +214,15 @@ public class Arguments {
     public void setIgnore(boolean setIgnore) {
         this.isIgnoreSet = setIgnore;
     }
-    
+
+    public boolean isHelpSet() {
+        return isHelpSet;
+    }
+
+    public void setIsHelpSet(boolean isHelpSet) {
+        this.isHelpSet = isHelpSet;
+    }
+
     /**
      * Sets the episode string argument
      * @param EPISODES Episode string
@@ -297,16 +252,16 @@ public class Arguments {
      * @param action media action
      * @see Action
      */
-    public void setMediaAction(Action action) {
+    public void setMediaAction(int action) {
         mediaAction = action;
     }
-    
+
     /**
      * Gets the media action
      * @return media action
      * @see Action
      */
-    public Action getMediaAction() {
+    public int getMediaAction() {
         return mediaAction;
     }
     

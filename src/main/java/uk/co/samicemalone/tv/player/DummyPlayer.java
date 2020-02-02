@@ -39,14 +39,14 @@ public class DummyPlayer extends MediaPlayer {
     @Override
     public void play(File[] list) {
         for(File file : list) {
-            System.out.println("PLAY: " + file.getName());
+            System.out.println("[PLAY] " + file.getName());
         }
     }
 
     @Override
     public void enqueue(File[] list) {
         for(File file : list) {
-            System.out.println("ENQUEUE: " + file.getName());
+            System.out.println("[ENQUEUE] " + file.getName());
         }
     }
 

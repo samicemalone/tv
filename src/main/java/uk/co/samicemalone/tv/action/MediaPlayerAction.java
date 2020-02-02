@@ -26,30 +26,23 @@
 
 package uk.co.samicemalone.tv.action;
 
-import com.uwetrottmann.trakt.v2.exceptions.OAuthUnauthorizedException;
-import java.io.File;
-import java.util.List;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
-import retrofit.RetrofitError;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.exception.CancellationException;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.exception.TraktException;
-import uk.co.samicemalone.tv.io.TVDBManager;
-import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.player.MediaPlayer;
 import uk.co.samicemalone.tv.player.MediaPlayerFactory;
-import uk.co.samicemalone.tv.trakt.TraktClient;
+import uk.co.samicemalone.tv.tvdb.model.Show;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
-public class MediaPlayerAction implements Action {
+public class MediaPlayerAction implements Action, FileAction {
     
-    private int action = Action.PLAY;
+    private int action;
 
     public MediaPlayerAction(int action) {
         this.action = action;
@@ -81,7 +74,12 @@ public class MediaPlayerAction implements Action {
     }
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+    public boolean isAction(int action) {
+        return this.action == action;
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
         if(!TV.ENV.getArguments().isSetOnly()) {
             File[] files = new File[list.size()];
             for(int i = 0; i < list.size(); i++) {
@@ -89,33 +87,10 @@ public class MediaPlayerAction implements Action {
             }
             execute(files);
         }
-        if(pointerEpisode != null && !TV.ENV.getArguments().isIgnoreSet()) {
-            new TVDBManager(TV.ENV.getTVDB()).writeStorage(pointerEpisode);
-            if(TV.ENV.isTraktEnabled()) {
-                TraktClient trakt = new TraktClient();
-                try {
-                    trakt.authenticate(TV.ENV.getTraktAuthFile());
-                    if(TV.ENV.isTraktUseCheckins()) {
-                        trakt.checkinEpisode(pointerEpisode);
-                    } else {
-                        trakt.markEpisodeAs(TraktClient.SEEN, pointerEpisode);
-                    }
-                } catch (
-                    TraktException | OAuthUnauthorizedException | OAuthSystemException | 
-                    OAuthProblemException | RetrofitError ex
-                ) {
-                    System.err.println(ex.getMessage());
-                    trakt.addEpisodeToJournal(pointerEpisode);
-                } catch (CancellationException ex) {
-                    
-                }
-            }
-        }
     }
 
     @Override
     public void execute(File file) throws ExitException {
-        execute(new File[] { file });
+        execute(new File[] {file});
     }
-    
 }

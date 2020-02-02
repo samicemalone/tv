@@ -28,22 +28,18 @@
  */
 package uk.co.samicemalone.tv.options;
 
-import java.io.File;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.action.Action;
-import uk.co.samicemalone.tv.action.CountAction;
-import uk.co.samicemalone.tv.action.LengthAction;
-import uk.co.samicemalone.tv.action.ListAction;
-import uk.co.samicemalone.tv.action.MediaPlayerAction;
-import uk.co.samicemalone.tv.action.SizeAction;
-import uk.co.samicemalone.tv.action.TraktMarkAction;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.LibraryManager;
-import uk.co.samicemalone.tv.mode.EpisodeModes;
 import uk.co.samicemalone.tv.model.Arguments;
+import uk.co.samicemalone.tv.selector.EpisodeSelector;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -53,48 +49,46 @@ public class ArgsParser {
     
     /**
      * Attempts to parse the given program arguments.
-     * See {@link #validate(tv.model.Arguments) for validation.
+     * See {@link #validate(Arguments) for validation.
      * @param args program arguments
      * @return Parsed Arguments instance or null if the help flag is set
      * @throws MissingArgumentException if there is an argument missing
      * @throws InvalidArgumentException if an unexpected argument is given
      */
     public static Arguments parse(String[] args) throws MissingArgumentException, InvalidArgumentException {
-        Arguments arg = new Arguments();
-        boolean isArg = false;
+        Arguments arguments = new Arguments();
         for(String curArg : args) {
             if(curArg.equals("-h") || curArg.equals("--help")) {
-                return null;
-            }
-            if(curArg.equals("-k") || curArg.equals("--kill")) {
-                arg.setShutDown(true);
-                return arg;
+                arguments.setIsHelpSet(true);
+                return arguments;
             }
             if(curArg.equals("-v") || curArg.equals("--version")) {
-                arg.setVersion(true);
-                return arg;
+                arguments.setVersion(true);
+                return arguments;
             }
         }
+
+        boolean isArg = false;
         for(int i = 0; i < args.length; i++) {
             if(isArg) {
                 isArg = false;
                 continue;
             }
             try {
-                isArg = parseOption(arg, args, i);
+                isArg = parseOption(arguments, args, i);
             } catch (IndexOutOfBoundsException ex) {
                 throw new MissingArgumentException(args[i]);
             }
         }
-        if(!arg.isServerSet() && !arg.isFileSet()) {
-            if(arg.getShow() == null) {
+        if(!arguments.isFileSet()) {
+            if(arguments.getShow() == null) {
                 throw new MissingArgumentException("The SHOW input is required", ExitCode.SHOW_INPUT_REQUIRED);
             }
-            if(arg.getEpisodes() == null) {
+            if(arguments.getEpisodes() == null) {
                 throw new MissingArgumentException("The EPISODES input is required", ExitCode.EPISODE_INPUT_REQUIRED);
             }
         }
-        return arg;
+        return arguments;
     }
     
     /**
@@ -137,10 +131,6 @@ public class ArgsParser {
             args.addSourceFolder(programArgs[curIndex+1]);
             return true;
         }
-        if(programArgs[curIndex].equals("--files-from")) {
-            args.addExtraFolder(programArgs[curIndex+1]);
-            return true;
-        }
         if(programArgs[curIndex].equals("--library")) {
             if(LibraryManager.hasLibrarySupport()) {
                 args.setLibraryName(programArgs[curIndex+1]);
@@ -170,32 +160,47 @@ public class ArgsParser {
      * @return true if the flag was parsed, false if not
      */
     private static boolean parseFlag(Arguments args, String flag) {
-        if(flag.equals("-d") || flag.equals("--daemon")) {
-            args.setServer(true);
-        } else if(flag.equals("--enqueue") || flag.equals("-q")) {
-            args.setMediaAction(new MediaPlayerAction(Action.ENQUEUE));
-        } else if(flag.equals("--count") || flag.equals("-c")) {
-            args.setMediaAction(new CountAction());
-        } else if(flag.equals("--set") || flag.equals("-s")) {
-            args.setIsSetOnly(true);
-        } else if(flag.equals("--ignore") || flag.equals("-i")) {
-            args.setIgnore(true);
-        } else if(flag.equals("--list") || flag.equals("-l")) {
-            args.setMediaAction(new ListAction());
-        } else if(flag.equals("--list-path")) {
-            args.setMediaAction(new ListAction(true));
-        } else if(flag.equals("--size")) {
-            args.setMediaAction(new SizeAction());
-        } else if(flag.equals("--length")) {
-            args.setMediaAction(new LengthAction());
-        } else if(flag.equals("--seen")) {
-            args.setMediaAction(new TraktMarkAction(true));
-        } else if(flag.equals("--unseen")) {
-            args.setMediaAction(new TraktMarkAction(false));
-        } else if(flag.equals("--trakt")) {
-            args.setTraktPointer(true);
-        } else {
-            return false;
+        switch (flag) {
+            case "--enqueue":
+            case "-q":
+                args.setMediaAction(Action.ENQUEUE);
+                break;
+            case "--count":
+            case "-c":
+                args.setMediaAction(Action.COUNT);
+                break;
+            case "--set":
+            case "-s":
+                args.setIsSetOnly(true);
+                break;
+            case "--ignore":
+            case "-i":
+                args.setIgnore(true);
+                break;
+            case "--list":
+            case "-l":
+                args.setMediaAction(Action.LIST);
+                break;
+            case "--list-path":
+                args.setMediaAction(Action.LIST_PATH);
+                break;
+            case "--size":
+                args.setMediaAction(Action.SIZE);
+                break;
+            case "--length":
+                args.setMediaAction(Action.LENGTH);
+                break;
+            case "--seen":
+                args.setMediaAction(Action.SEEN);
+                break;
+            case "--unseen":
+                args.setMediaAction(Action.UNSEEN);
+                break;
+            case "--trakt":
+                args.setTraktPointer(true);
+                break;
+            default:
+                return false;
         }
         return true;
     }
@@ -210,7 +215,7 @@ public class ArgsParser {
      * library name
      */
     public static void validate(Arguments arg) throws FileNotFoundException, InvalidArgumentException {
-        if(arg.isShutDownSet() || arg.isVersionSet()) {
+        if(arg.isVersionSet()) {
             return;
         }
         if(arg.getConfigPath() != null && !new File(arg.getConfigPath()).exists()) {
@@ -226,15 +231,13 @@ public class ArgsParser {
         if(arg.getLibraryName() != null && !LibraryManager.isValidLibraryName(arg.getLibraryName())) {
             throw new InvalidArgumentException("Windows Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
         }
-        if(arg.isServerSet()) {
-            return;
-        }
         if(arg.isSetOnly() && arg.isIgnoreSet()) {
             throw new InvalidArgumentException("-s and -i flags cannot be set together", ExitCode.UNEXPECTED_ARGUMENT);
         }
-        if(!EpisodeModes.episodesValid(arg.getEpisodes())) {
-            throw new InvalidArgumentException("Unable to parse the episodes given: " + arg.getEpisodes(), ExitCode.PARSE_EPISODES_FAILED);
-        }
+//        List<EpisodeSelector> selectors = EpisodeSelector.defaultSelectors(null);
+//        if(selectors.stream().noneMatch(s -> arg.getEpisodes().matches(s.getSelector()))) {
+//            throw new InvalidArgumentException("Unable to parse the episodes given: " + arg.getEpisodes(), ExitCode.PARSE_EPISODES_FAILED);
+//        }
     }
     
     /**
@@ -246,9 +249,6 @@ public class ArgsParser {
         sb.append("Usage: tv TVSHOW EPISODES [ACTION] [-hvsi] [--source DIR]... [--library NAME]\n");
         sb.append("          [-r [NO]] [-p MP] [-u USER] [--trakt] [--config CONFIG]\n");
         sb.append("       tv -f FILE [ACTION] [-p MP] [--config CONFIG]\n");
-        sb.append("       tv -d [--source DIR]... [--library NAME] [-p MP] [--config CONFIG]\n");
-        sb.append("             [--files-from DIR]...\n");
-        sb.append("       tv -k\n");
         sb.append('\n');
         sb.append("    -u, --user USER   To be used when EPISODES is either prev, cur, next.\n");
         sb.append("                      To set your episode pointer you have to play a single\n");
@@ -268,14 +268,9 @@ public class ArgsParser {
         sb.append("                      EPISODES can be any format that isn't pointer syntax\n");
         sb.append("    -p, --player MP   Sets the media player to use. Default is \"vlc\"\n");
         sb.append("    --config CONFIG   Sets the config file to use\n");
-        sb.append("    --files-from DIR  When invoked in daemon mode (-d), DIR will be used to\n");
-        sb.append("                      list the media files when requested by the daemon command\n");
-        sb.append("                      list_extra_files. DIR will not be searched recursively\n");
         sb.append("    --source DIR      TV source folder. You can use this option multiple times\n");
         sb.append("    --library NAME    Windows 7 Library NAME will be used to determine sources\n");
         sb.append("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue\n");
-        sb.append("    -d, --daemon      Listens for requests on port 5768\n");
-        sb.append("    -k, --kill        Kills the listening daemon\n");
         sb.append("    -h, --help        This help message will be printed then exit.\n");
         sb.append("    -v, --version     This version will be printed then exit.\n");
         sb.append('\n');

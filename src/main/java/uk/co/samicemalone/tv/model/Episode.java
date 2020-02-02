@@ -30,15 +30,16 @@ package uk.co.samicemalone.tv.model;
 
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 
+import java.time.Instant;
+
 /**
  *
  * @author Sam Malone
  */
 public class Episode extends EpisodeMatch {
     
-    private int showId;
-    private int playedDate;
-    private String user = "";
+    private Instant watchedAt;
+    private String user;
     
     public Episode(EpisodeMatch episodeMatch, String show, String user) {
         super(episodeMatch);
@@ -64,16 +65,17 @@ public class Episode extends EpisodeMatch {
      * Gets the date that the episode was played/stored
      * @return unix timestamp or 0 if not set
      */
-    public int getPlayedDate() {
-        return playedDate;
+    public Instant getWatchedAt() {
+        return watchedAt;
     }
 
     /**
-     * Sets the date that the episode was played/stored
-     * @param date unix timestamp
+     * Sets the date that the episode was watched
+     * @param watchedAt instant
      */
-    public void setPlayedDate(int date) {
-        this.playedDate = date;
+    public Episode setWatchedAt(Instant watchedAt) {
+        this.watchedAt = watchedAt;
+        return this;
     }
 
     /**
@@ -88,16 +90,9 @@ public class Episode extends EpisodeMatch {
      * Sets the user to which this Episode refers
      * @param user
      */
-    public void setUser(String user) {
+    public Episode setUser(String user) {
         this.user = user;
-    }
-
-    public int getShowId() {
-        return showId;
-    }
-
-    public void setShowId(int showId) {
-        this.showId = showId;
+        return this;
     }
     
     @Override

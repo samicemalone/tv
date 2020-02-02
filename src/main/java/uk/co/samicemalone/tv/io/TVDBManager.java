@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2013, Sam Malone. All rights reserved.
- * 
+ *
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -13,7 +13,7 @@
  *  - Neither the name of Sam Malone nor the names of its contributors may be
  *    used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -21,40 +21,42 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
 package uk.co.samicemalone.tv.io;
 
+import uk.co.samicemalone.tv.TV;
+import uk.co.samicemalone.tv.model.Episode;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.model.Episode;
 
 /**
  *
  * @author Sam Malone
  */
 public class TVDBManager extends CSV_IO {
-    
+
     private Map<String, Episode> list;
     private List<Episode> episodeList;
     private String filteredUser;
     private boolean isFilterUser;
-    
+
     private final static int CSV_COLUMNS = 5;
-    
+
     public TVDBManager(File tvdb) {
         super(tvdb);
     }
-    
+
     /**
      * Checks if the tv database contains the episode information given show
      * @param show TV Show
@@ -63,7 +65,7 @@ public class TVDBManager extends CSV_IO {
     public boolean containsEpisodeData(String show) {
         return list.containsKey(show);
     }
-    
+
     /**
      * Gets the episode information for the given show
      * @param show TV Show
@@ -72,7 +74,7 @@ public class TVDBManager extends CSV_IO {
     public Episode getEpisode(String show) {
         return list.get(show);
     }
-    
+
     /**
      * Gets the list of shows from the TV Database as a CSV formatted string
      * @return CSV formatted show list
@@ -86,11 +88,11 @@ public class TVDBManager extends CSV_IO {
         }
         return sb.substring(0, sb.length()-1);
     }
-    
+
     /**
      * Gets the list of episodes from the TV Database as a CSV formatted string
      * @param eps CSV formatted episode list
-     * @return 
+     * @return
      */
     public String getCSVEpisodes(List<Episode> eps) {
         StringBuilder sb = new StringBuilder();
@@ -99,7 +101,7 @@ public class TVDBManager extends CSV_IO {
         }
         return sb.toString();
     }
-    
+
     /**
      * Wrapper around {@link #appendCSVLine(java.lang.StringBuilder, java.lang.String...)}.
      * Appends a CSV formatted line with the values from the episode given in the order:
@@ -110,10 +112,10 @@ public class TVDBManager extends CSV_IO {
     private void appendCSVEpisodeLine(StringBuilder sb, Episode e) {
         String season = String.valueOf(e.getSeason());
         String episode = String.valueOf(e.getEpisodesAsRange().getEnd());
-        String playedDate = String.valueOf(e.getPlayedDate());
+        String playedDate = String.valueOf(e.getWatchedAt());
         appendCSVLine(sb, e.getShow(), e.getUser(), season, episode, playedDate);
     }
-    
+
     /**
      * Find an episode in the episode list that matches the show and user given. 
      * If a match is found, the episode will be updated with the new season,
@@ -127,13 +129,13 @@ public class TVDBManager extends CSV_IO {
             if(ep.getShow().equals(episode.getShow()) && ep.getUser().equals(episode.getUser())) {
                 ep.setSeason(episode.getSeason());
                 ep.setEpisodes(episode.getEpisodes());
-                ep.setPlayedDate((int) (System.currentTimeMillis() / 1000));
+                ep.setWatchedAt(Instant.now());
                 return true;
             }
         }
         return false;
     }
-    
+
     /**
      * Writes the given episode information to the TV Database.
      * Will attempt to create the parent directory for the TVDB if
@@ -155,12 +157,12 @@ public class TVDBManager extends CSV_IO {
             }
         } catch(FileNotFoundException ex) {} // ignored because file will be created
         if(!found) {
-            episode.setPlayedDate((int) (System.currentTimeMillis() / 1000));
+            episode.setWatchedAt(Instant.now());
             appendCSVEpisodeLine(sb, episode);
         }
         writeFile(sb.toString());
     }
-    
+
     /**
      * Reads the TV Database information for the given user
      * @param user User
@@ -173,7 +175,7 @@ public class TVDBManager extends CSV_IO {
         readFile(CSV_COLUMNS);
         isFilterUser = false;
     }
-    
+
     /**
      * Reads the TV Database information for all users
      * @return List of episode information, empty list if exists but no eps
@@ -188,10 +190,10 @@ public class TVDBManager extends CSV_IO {
     @Override
     protected void handleLine(Matcher m) {
         if(m.find()) {
-            int season = Integer.valueOf(m.group(3));
-            int episode = Integer.valueOf(m.group(4));
+            int season = Integer.parseInt(m.group(3));
+            int episode = Integer.parseInt(m.group(4));
             Episode ep = new Episode(m.group(1), m.group(2), season, episode);
-            ep.setPlayedDate(Integer.valueOf(m.group(5)));
+            ep.setWatchedAt(Instant.ofEpochSecond(Integer.parseInt(m.group(5))));
             if(isFilterUser) {
                 if(ep.getUser().equals(filteredUser)) {
                     list.put(m.group(1), ep);
@@ -201,5 +203,5 @@ public class TVDBManager extends CSV_IO {
             }
         }
     }
-    
+
 }

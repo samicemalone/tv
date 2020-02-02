@@ -78,8 +78,6 @@ public class TraktAuthTokenReader {
         p.setProperty("expires_in", String.valueOf(token.getExpiresIn()));
         try (BufferedWriter bw = Files.newBufferedWriter(authTokenFile.toPath(), Charset.defaultCharset())) {
             p.store(bw, null);
-        } catch(IOException ex) {
-            throw ex;
         }
     }
     

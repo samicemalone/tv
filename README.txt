@@ -83,20 +83,9 @@ OPTIONS
       Sets CONFIG as the configuration file to use. For the default 
       configuration file see the FILES section.
 
-   -d, --daemon
-      This is an experimental feature. Starts in daemon mode and listens on
-      port 5768 for commands.
-
    -f FILE, --file FILE
       Plays FILE from the filesystem. Can be used with -q to enqueue instead of
       play.
-
-   --files-from DIR
-      Set a directory DIR that contains media files but does not follow the
-      standard /Show Name/Season x/FILE directory structure. The media files in
-      DIR will only be available in daemon mode (-d). The files can be listed
-      with the command "list_extra_files". See the DAEMON COMMANDS section for 
-      more information. DIR will not be searched recursively.
 
    -h, --help
       The help message will be output and the program will exit.
@@ -106,10 +95,6 @@ OPTIONS
       pointer, this flag will perform the given action but not save the pointer.
       E.g. When used with pilot, latest, next, s02e01 etc..., the pointer will
       stay the same.
-
-   -k, --kill
-      This is an experimental feature. When a tv daemon is already running,
-      this flag will shut the daemon down.
 
    --library NAME
       This option only works on Windows 7. It adds each directory that library
@@ -153,34 +138,14 @@ OPTIONS
    -v, --version
       The program version will be printed and the program will exit.
 
-DAEMON COMMANDS
-   The listening daemon can accept the following commands:
-      list_shows           Gets the list of shows. Double quoted, one show per
-                           line.
-      list_recent_eps      Gets the stored episodes (tvdb), ordered by last 
-                           played, in csv format. New line if none. Fields
-                           terminated by , enclosed by "
-      list_stored_eps      Gets the stored episodes (tvdb) in csv format. New
-                           line if none. Fields terminated by , enclosed by "
-      list_extra_files     Gets the list of video files from any of the extra 
-                           folders containing media, but not under the 
-                           /showname/season/FILE structure. One path per line.
-      get_show_name FILE   Get show name of FILE. Assumes /showname/parent/FILE
-      shutdown             Shuts down the daemon
-      tv TVARGS            Run tv command with same usage as in the SYNOPSIS.
-			
 FILES
    The directory structure required for the episodes to be found is as follows:
          SOURCE/TVSHOW/Season x/
       OR SOURCE/TVSHOW/Series x/
 
    The following files are used by tv:
-      tvdb.csv
-         This file stores the pointers for the TV shows. It is created as needed
-         by the application. The number of CSV fields changed in version 1.2.
-         Before v1.2, there were 4 fields: Show, User, Season No, Episode No.
-         v1.2 and higher uses 5 fields. The extra field is the date that the
-         episode was played.
+      tvdb.sqlite
+         This is the TV SQLite database.
       tv.conf
          This is the default file name of the configuration file. This file does
          not exist by default. See sample.tv.conf for usage.
@@ -191,9 +156,6 @@ FILES
          config file with the --config command.
       trakt.auth
          When using trakt integration, your access token will be stored here.
-      traktdb.csv
-         When using trakt integration, this file is used to store a list of
-         show names with their trakt reference.
 
    Default Directories
       Windows C:\ProgramData\$USER\tv\

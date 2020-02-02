@@ -26,28 +26,27 @@
 
 package uk.co.samicemalone.tv.action;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.tvdb.model.Show;
 import uk.co.samicemalone.tv.util.CommandUtil;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
-public class ListAction implements Action {
+public class ListAction implements Action, FileAction {
     
-    private boolean listPath;
+    private boolean isListPath;
 
     /**
-     * Creates a new instance of ListAction
-     * @param listPath if true, the full file paths will be listed otherwise only
-     * file names will be listed
+     * @param action Action
      */
-    public ListAction(boolean listPath) {
-        this.listPath = listPath;
+    public ListAction(int action) {
+        isListPath = action == Action.LIST_PATH;
     }
     
     /**
@@ -55,12 +54,12 @@ public class ListAction implements Action {
      * names
      */
     public ListAction() {
-        this(false);
+        this(Action.LIST);
     }
 
     @Override
     public int hashCode() {
-        return 79 * 5 + (this.listPath ? 1 : 0);
+        return 79 * 5 + (this.isListPath ? 1 : 0);
     }
 
     @Override
@@ -69,20 +68,25 @@ public class ListAction implements Action {
             return false;
         }
         final ListAction other = (ListAction) obj;
-        return this.listPath == other.listPath;
+        return this.isListPath == other.isListPath;
     }
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+    public boolean isAction(int action) {
+        return action == Action.LIST || action == Action.LIST_PATH;
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
         for(EpisodeMatch episodeMatch : list) {
-            execute(episodeMatch.getEpisodeFile());
+            File episodeFile = episodeMatch.getEpisodeFile();
+            String s = isListPath ? CommandUtil.getCanonicalPath(episodeFile) : episodeFile.getName();
+            System.out.println(s);
         }
     }
 
     @Override
     public void execute(File file) throws ExitException {
-        String s = listPath ? CommandUtil.getCanonicalPath(file) : file.getName();
-        System.out.println(s);
+        System.out.println(isListPath ? CommandUtil.getCanonicalPath(file) : file.getName());
     }
-    
 }

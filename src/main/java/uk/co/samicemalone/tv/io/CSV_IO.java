@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2013, Sam Malone. All rights reserved.
- * 
+ *
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  *  - Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *  - Redistributions in binary form must reproduce the above copyright notice,
@@ -13,7 +13,7 @@
  *  - Neither the name of Sam Malone nor the names of its contributors may be
  *    used to endorse or promote products derived from this software without
  *    specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -21,7 +21,7 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
@@ -43,13 +43,13 @@ import java.util.regex.Pattern;
  * @author Sam Malone
  */
 public abstract class CSV_IO {
-    
+
     protected File CSV_FILE;
-    
+
     public CSV_IO(File csv) {
         CSV_FILE = csv;
     }
-   
+
     /**
      * Reads the CSV file line by line and executes the handleLine method per line. 
      * @param CSVFieldCount Total Fields in CSV file
@@ -71,16 +71,16 @@ public abstract class CSV_IO {
                 r.close();
             }
         } catch(IOException ex) {
-            
+
         }
     }
-    
+
     /**
      * This method is called when a line has been read
      * @param m Matcher for the CSV fields
      */
     abstract protected void handleLine(Matcher m);
-    
+
     /**
      * Gets the Pattern for matching against the CSV line
      * @param fields Number of CSV fields
@@ -93,8 +93,8 @@ public abstract class CSV_IO {
         }
         sb.append("\"(.*?)\"");
         return Pattern.compile(sb.toString());
-    }    
-    
+    }
+
     /**
      * Writes the given string to CSV_FILE
      * @param toWrite String to write to CSV_FILE
@@ -114,7 +114,7 @@ public abstract class CSV_IO {
             System.err.println(ex);
         }
     }
-    
+
     /**
      * Appends double quotes round the given string toWrap
      * @param sb StringBuilder to append to
@@ -125,11 +125,11 @@ public abstract class CSV_IO {
         sb.append(toWrap);
         sb.append('\"');
     }
-    
+
     /**
      * Appends a CSV formatted line with the given CSV fields
      * @param sb
-     * @param fields 
+     * @param fields
      */
     protected static void appendCSVLine(StringBuilder sb, String... fields) {
         for(int i = 0; i < fields.length - 1; i++) {
@@ -139,5 +139,5 @@ public abstract class CSV_IO {
         wrapQuotes(sb, fields[fields.length-1]);
         sb.append('\n');
     }
-        
+
 }

@@ -26,20 +26,26 @@
 
 package uk.co.samicemalone.tv.action;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.tvdb.model.Show;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
-public class CountAction implements Action {
+public class CountAction implements Action, FileAction {
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
+    public boolean isAction(int action) {
+        return action == Action.COUNT;
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
         System.out.println(list.size());
     }
 
@@ -47,5 +53,4 @@ public class CountAction implements Action {
     public void execute(File file) throws ExitException {
         System.out.println(1);
     }
-    
 }

@@ -26,25 +26,28 @@
 
 package uk.co.samicemalone.tv.action;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.tvdb.model.Show;
 import uk.co.samicemalone.tv.util.MediaUtil;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
-public class SizeAction implements Action {
+public class SizeAction implements Action, FileAction {
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
-        long bytes = 0;
-        for(EpisodeMatch m : list) {
-            bytes += m.getEpisodeFile().length();
-        }
+    public boolean isAction(int action) {
+        return action == Action.SIZE;
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
+        long bytes = list.stream().map((m) -> m.getEpisodeFile().length()).reduce(0L, Long::sum);
         System.out.println(MediaUtil.readableFileSize(bytes));
     }
 
@@ -52,5 +55,4 @@ public class SizeAction implements Action {
     public void execute(File file) throws ExitException {
         System.out.println(MediaUtil.readableFileSize(file.length()));
     }
-    
 }

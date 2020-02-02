@@ -28,23 +28,27 @@
  */
 package uk.co.samicemalone.tv.trakt;
 
-import com.uwetrottmann.trakt.v2.entities.EpisodeCheckin;
-import com.uwetrottmann.trakt.v2.entities.Show;
-import com.uwetrottmann.trakt.v2.entities.ShowIds;
-import com.uwetrottmann.trakt.v2.entities.SyncEpisode;
-import com.uwetrottmann.trakt.v2.entities.SyncItems;
-import com.uwetrottmann.trakt.v2.entities.SyncSeason;
-import com.uwetrottmann.trakt.v2.entities.SyncShow;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import org.joda.time.DateTime;
+import com.uwetrottmann.trakt5.entities.EpisodeCheckin;
+import com.uwetrottmann.trakt5.entities.Show;
+import com.uwetrottmann.trakt5.entities.ShowIds;
+import com.uwetrottmann.trakt5.entities.SyncEpisode;
+import com.uwetrottmann.trakt5.entities.SyncItems;
+import com.uwetrottmann.trakt5.entities.SyncSeason;
+import com.uwetrottmann.trakt5.entities.SyncShow;
+import org.threeten.bp.Instant;
+import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.ZoneId;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.libtv.model.TVMap;
-import uk.co.samicemalone.tv.TV;
 import uk.co.samicemalone.tv.Version;
 import uk.co.samicemalone.tv.model.Episode;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -52,36 +56,31 @@ import uk.co.samicemalone.tv.model.Episode;
  */
 public class TraktSyncBuilder {
     
-    public static SyncItems buildSyncItems(List<Episode> episodes) {
+    public static SyncItems buildSyncItems(Collection<uk.co.samicemalone.tv.tvdb.model.Show> shows, List<Episode> episodes) {
+        Map<String, uk.co.samicemalone.tv.tvdb.model.Show> showMap = new HashMap<>();
+        shows.forEach(show -> showMap.put(show.getName(), show));
         SyncItems sync = new SyncItems();
         TVMap tvMap = buildMap(episodes);
         List<SyncShow> syncShows = new ArrayList<>();
+
         for (String show : tvMap.getShows()) {
-            SyncShow syncShow = new SyncShow().id(ShowIds.tvdb(getShowId(tvMap, show)));
+            SyncShow syncShow = new SyncShow().id(ShowIds.tvdb(showMap.get(show).getTVDBId()));
             List<SyncSeason> syncSeasons = new ArrayList<>();
+
             for (Integer season : tvMap.getSeasons(show)) {
                 Set<EpisodeMatch> seasonMap = tvMap.getSeasonEpisodes(show, season);
                 SyncSeason syncSeason = new SyncSeason()
                     .number(season)
                     .episodes(getEpisodes(seasonMap));
+
                 syncSeasons.add(syncSeason);
             }
+
             syncShow.seasons = syncSeasons;
             syncShows.add(syncShow);
         }
         sync.shows = syncShows;
         return sync;
-    }
-    
-    public static SyncItems buildSyncItemsForShow(List<EpisodeMatch> matches, int showId) {
-        List<Episode> episodes = new ArrayList<>();
-        for (EpisodeMatch match : matches) {
-            Episode e = new Episode(match, match.getShow(), TV.ENV.getArguments().getUser());
-            e.setPlayedDate((int) (System.currentTimeMillis() / 1000L));
-            e.setShowId(showId);
-            episodes.add(e);
-        }
-        return buildSyncItems(episodes);
     }
     
     public static EpisodeCheckin buildEpisodeCheckin(int showId, Episode episode) {
@@ -91,24 +90,19 @@ public class TraktSyncBuilder {
         SyncEpisode se = new SyncEpisode()
             .season(episode.getSeason())
             .number(episode.getEpisode())
-            .watchedAt(new DateTime(episode.getPlayedDate() * 1000L));
+            .watchedAt(OffsetDateTime.ofInstant(Instant.ofEpochMilli(episode.getWatchedAt().toEpochMilli()), ZoneId.systemDefault()));
         return new EpisodeCheckin.Builder(se, Version.VERSION, Version.BUILD_DATE)
             .message("Checked in with tv " + Version.VERSION)
             .show(show)
             .build();
     }
-    
-    private static int getShowId(TVMap tvMap, String show) {
-        int season = tvMap.getSeasons(show).stream().findAny().get();
-        int episode = tvMap.getSeasonEpisodes(show, season).stream().findAny().get().getEpisode();
-        return ((Episode) tvMap.getEpisode(show, season, episode)).getShowId();
-    }
-    
+
     private static List<SyncEpisode> getEpisodes(Set<EpisodeMatch> episodes) {
         List<SyncEpisode> syncEpisodes = new ArrayList<>();
         for (EpisodeMatch episode : episodes) {
             for (Integer episodeNo : episode.getEpisodes()) {
-                DateTime watchedAt = new DateTime(((Episode) episode).getPlayedDate() * 1000L);
+                java.time.Instant watchedAtTimestamp = ((Episode) episode).getWatchedAt();
+                OffsetDateTime watchedAt = OffsetDateTime.ofInstant(Instant.ofEpochMilli(watchedAtTimestamp.toEpochMilli()), ZoneId.systemDefault());
                 syncEpisodes.add(new SyncEpisode().number(episodeNo).watchedAt(watchedAt));
             }
         }
@@ -117,9 +111,7 @@ public class TraktSyncBuilder {
     
     private static TVMap buildMap(Collection<Episode> episodes) {
         TVMap map = new TVMap();
-        for (Episode episode : episodes) {
-            map.addEpisode(episode);
-        }
+        episodes.forEach(map::addEpisode);
         return map;
     }
     

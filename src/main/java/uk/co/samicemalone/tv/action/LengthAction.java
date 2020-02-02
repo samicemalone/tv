@@ -26,29 +26,40 @@
 
 package uk.co.samicemalone.tv.action;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.ExitCode;
 import uk.co.samicemalone.tv.MediaInfo;
 import uk.co.samicemalone.tv.TV;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
-import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.tvdb.model.Show;
 import uk.co.samicemalone.tv.util.MediaUtil;
+
+import java.io.File;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
-public class LengthAction implements Action {
+public class LengthAction implements Action, FileAction {
 
     @Override
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException {
-        MediaInfo mediaInfo = getMediaInfo();
-        for(EpisodeMatch m : list) {
-            mediaInfo.addFile(m.getEpisodeFile().getAbsolutePath());
+    public boolean isAction(int action) {
+        return action == Action.LENGTH;
+    }
+
+    private MediaInfo getMediaInfo() throws FileNotFoundException {
+        if(!TV.ENV.getMediaInfoBinary().exists()) {
+            throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
         }
+        return new MediaInfo(TV.ENV.getMediaInfoBinary());
+    }
+
+    @Override
+    public void execute(Show show, List<EpisodeMatch> list) throws ExitException {
+        MediaInfo mediaInfo = getMediaInfo();
+        list.forEach(m -> mediaInfo.addFile(m.getEpisodeFile().getAbsolutePath()));
         System.out.println(MediaUtil.readableLength(mediaInfo.getLength()));
     }
 
@@ -58,12 +69,4 @@ public class LengthAction implements Action {
         mediaInfo.addFile(file.getAbsolutePath());
         System.out.println(MediaUtil.readableLength(mediaInfo.getLength()));
     }
-    
-    private MediaInfo getMediaInfo() throws FileNotFoundException {
-        if(!TV.ENV.getMediaInfoBinary().exists()) {
-            throw new FileNotFoundException("The MediaInfo binary could not be found", ExitCode.FILE_NOT_FOUND);
-        }
-        return new MediaInfo(TV.ENV.getMediaInfoBinary());
-    }
-    
 }

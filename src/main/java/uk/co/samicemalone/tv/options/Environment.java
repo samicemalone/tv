@@ -26,8 +26,6 @@
 
 package uk.co.samicemalone.tv.options;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.matcher.path.StandardTVLibrary;
 import uk.co.samicemalone.libtv.thread.DirectoryExistsThread;
 import uk.co.samicemalone.tv.ExitCode;
@@ -37,13 +35,16 @@ import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
 
+import java.io.File;
+import java.util.List;
+
 /**
  *
  * @author Sam Malone
  */
 public abstract class Environment {
     
-    private File tvdb;
+    private String tvdb;
     private File mediainfo;
     private File traktAuthFile;
     private Arguments args;
@@ -54,7 +55,7 @@ public abstract class Environment {
      * Get the default TVDB file
      * @return default TVDB file
      */
-    public abstract File getDefaultTVDB();
+    public abstract String getDefaultTVDB();
     
     /**
      * Get the default MediaInfo binary file
@@ -67,18 +68,6 @@ public abstract class Environment {
      * @return default config file
      */
     public abstract File getDefaultConfig();
-    
-    /**
-     * Get the default TraktDB file
-     * @return default TraktDB file
-     */
-    public abstract File getDefaultTraktDB();
-    
-    /**
-     * Get the default TraktDB journal file
-     * @return default TraktDB journal file
-     */
-    public abstract File getDefaultTraktDBJournal();
     
     /**
      * Get the default Trakt auth file containing the access and refresh tokens
@@ -106,8 +95,12 @@ public abstract class Environment {
      * Get the TVDB file
      * @return TVDB file if set or the default TVDB file otherwise
      */
-    public final File getTVDB() {
+    public final String getTVDB() {
         return tvdb == null ? getDefaultTVDB() : tvdb;
+    }
+
+    public final void setTVDB(String tvdb) {
+        this.tvdb = tvdb;
     }
 
     /**
@@ -141,7 +134,14 @@ public abstract class Environment {
     public boolean isTraktEnabled() {
         return isTraktEnabled;
     }
-    
+
+    /**
+     * Set whether Trakt integration is enabled
+     */
+    public void setTraktEnabled(boolean isTraktEnabled) {
+        this.isTraktEnabled = isTraktEnabled;
+    }
+
     /**
      * Check whether Trakt check-ins should be used instead of marking an episode
      * as seen.
@@ -157,7 +157,7 @@ public abstract class Environment {
      */
     public void fromConfig(Config config) {
         if(config.getTVDBFile() != null) {
-            tvdb = new File(config.getTVDBFile());
+            tvdb = config.getTVDBFile();
         }
         if(config.getMediainfoBinary() != null) {
             mediainfo = new File(config.getMediainfoBinary());
@@ -172,7 +172,6 @@ public abstract class Environment {
             }
         }
         args.getSourceFolders().addAll(config.getSourceFolders());
-        args.getExtraFolders().addAll(config.getExtraFolders());
         if(isTraktEnabled = config.isTraktEnabled()) {
             if(config.getTraktAuthFile() != null) {
                 traktAuthFile = new File(config.getTraktAuthFile());
@@ -192,7 +191,7 @@ public abstract class Environment {
      * be found.
      */
     public void validate() throws ExitException {
-        if(args.isShutDownSet() || args.isVersionSet() || args.isFileSet()) {
+        if(args.isVersionSet() || args.isFileSet()) {
             return;
         }
         int TIMEOUT = 2000;
@@ -200,11 +199,6 @@ public abstract class Environment {
         args.getSourceFolders().retainAll(existentSources);
         if(args.getSourceFolders().isEmpty()) {
             throw new MissingArgumentException("The --source or --library input is required", ExitCode.SOURCE_DIR_NOT_FOUND);
-        }
-        if(args.isServerSet()) {
-            existentSources = DirectoryExistsThread.getExistingDirs(args.getExtraFolders(), TIMEOUT);
-            args.getExtraFolders().retainAll(existentSources);
-            return;
         }
         if(new StandardTVLibrary(args.getSourceFolders()).getSeasonsPath(args.getShow()) == null) {
             throw new FileNotFoundException("Unable to find show: " + args.getShow(), ExitCode.SHOW_NOT_FOUND);

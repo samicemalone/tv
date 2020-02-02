@@ -41,7 +41,6 @@ public class Config {
     private String playerExecutable;
     private final List<String> playerArguments;
     private final List<String> sourceDirs;
-    private final List<String> extraDirs;
     private String libraryName;
     private String mediainfoBinary;
     private String tvdbFile;
@@ -52,7 +51,6 @@ public class Config {
     
     public Config() {
         sourceDirs = new ArrayList<>();
-        extraDirs = new ArrayList<>();
         playerArguments = new ArrayList<>();
     }
 
@@ -66,18 +64,6 @@ public class Config {
 
     public void setPlayer(String player) {
         this.player = player;
-    }
-
-    /**
-     * Gets a list of the extra folders given in the config
-     * @return list of extra folders or empty list
-     */
-    public List<String> getExtraFolders() {
-        return extraDirs;
-    }
-
-    public void addExtraFolder(String extraDir) {
-        extraDirs.add(extraDir);
     }
 
     /**

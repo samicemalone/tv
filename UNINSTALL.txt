@@ -11,7 +11,7 @@ This file describes how to uninstall "tv" from your machine.
 The tv.jar file needs to be removed from the directory it was installed to.
 
 The program may have created a database containing the pointer to where a user
-is upto with their shows. The default location for the tvdb.csv file can be
+is upto with their shows. The default location for the tvdb.sqlite file can be
 found in the FILES section in README.txt. This file can be removed if you do
 not wish to store it. If you have changed the path to the TV database file,
 then this file can be removed.

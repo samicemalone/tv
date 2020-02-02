@@ -28,43 +28,49 @@
  */
 package uk.co.samicemalone.tv.action;
 
-import java.io.File;
-import java.util.List;
 import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.exception.ExitException;
-import uk.co.samicemalone.tv.model.Episode;
+import uk.co.samicemalone.tv.tvdb.model.Show;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
  * @author Sam Malone
  */
 public interface Action {
+    static List<Action> defaultActions() {
+        return Arrays.asList(
+            new MediaPlayerAction(Action.PLAY),
+            new MediaPlayerAction(Action.ENQUEUE),
+            new ListAction(),
+            new ListAction(Action.LIST_PATH),
+            new CountAction(),
+            new SizeAction(),
+            new LengthAction()
+        );
+    }
         
-    public final static int PLAY = 1;
-    public final static int ENQUEUE = 2;
-    public final static int LIST = 3;
-    public final static int COUNT = 4;
-    public final static int SIZE = 5;
-    public final static int LENGTH = 6;
-    
-    // bit flags
-    public final static int RANDOM = 16;
-    public final static int LISTPATH = 32;
-    
+    int PLAY = 1;
+    int ENQUEUE = 2;
+    int LIST = 3;
+    int LIST_PATH = 4;
+    int COUNT = 5;
+    int SIZE = 6;
+    int LENGTH = 7;
+    int SEEN = 8;
+    int UNSEEN = 9;
+
+    boolean isAction(int action);
+
     /**
-     * Execute the Action on the given EpisodeMatch list and store the episode pointer given
+     * Execute the Action on the given EpisodeMatch list
+     *
+     * @param show
      * @param list List of episode file matches
-     * @param pointerEpisode New Episode pointer to be set. If null, the pointer
-     * will be ignored.
      * @throws ExitException if an error occurs whilst executing the action.
      */
-    public void execute(List<EpisodeMatch> list, Episode pointerEpisode) throws ExitException;
-    
-    /**
-     * Execute the Action with the given File
-     * @param file file to perform action on
-     * @throws ExitException if an error occurs whilst executing the action.
-     */
-    public void execute(File file) throws ExitException;
+    void execute(Show show, List<EpisodeMatch> list) throws ExitException;
     
 }

@@ -28,16 +28,17 @@
  */
 package uk.co.samicemalone.tv.io;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -50,8 +51,7 @@ public class LibraryManager {
      * @return true if the OS is Windows 7/8, false otherwise
      */
     public static boolean hasLibrarySupport() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return "windows 7".equals(osName) || osName.startsWith("windows 8");
+        return System.getProperty("os.name").toLowerCase().startsWith("windows");
     }
     
     /**

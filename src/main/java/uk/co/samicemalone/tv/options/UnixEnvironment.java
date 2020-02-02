@@ -39,8 +39,8 @@ public class UnixEnvironment extends Environment {
     }
 
     @Override
-    public File getDefaultTVDB() {
-        return new File(System.getProperty("user.home") + "/.tv/tvdb.csv");
+    public String getDefaultTVDB() {
+        return System.getProperty("user.home") + "/.tv/tvdb.sqlite";
     }
 
     @Override
@@ -53,16 +53,6 @@ public class UnixEnvironment extends Environment {
         return new File(System.getProperty("user.home") + "/.tv/tv.conf");
     }
 
-    @Override
-    public File getDefaultTraktDB() {
-        return new File(System.getProperty("user.home") + "/.tv/traktdb.csv");
-    }
-    
-    @Override
-    public File getDefaultTraktDBJournal() {
-        return new File(System.getProperty("user.home") + "/.tv/traktdb-journal.csv");
-    }
-    
     @Override
     public File getDefaultTraktAuthFile() {
         return new File(System.getProperty("user.home") + "/.tv/trakt.auth");

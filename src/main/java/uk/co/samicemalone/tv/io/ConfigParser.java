@@ -28,14 +28,15 @@
  */
 package uk.co.samicemalone.tv.io;
 
+import uk.co.samicemalone.tv.ExitCode;
+import uk.co.samicemalone.tv.exception.ParseException;
+import uk.co.samicemalone.tv.model.Config;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import uk.co.samicemalone.tv.ExitCode;
-import uk.co.samicemalone.tv.exception.ParseException;
-import uk.co.samicemalone.tv.model.Config;
 
 /**
  *
@@ -117,9 +118,6 @@ public class ConfigParser {
                 break;
             case "PLAYER_ARGUMENTS":
                 c.addPlayerArgument(value);
-                break;
-            case "FILES_FROM":
-                c.addExtraFolder(value);
                 break;
             case "ENABLE_TRAKT":
                 c.setTraktEnabled(value);
