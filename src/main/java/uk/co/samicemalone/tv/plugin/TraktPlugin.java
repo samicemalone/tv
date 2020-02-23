@@ -113,7 +113,7 @@ public class TraktPlugin implements Plugin, CurrentProgressProvider, ActionListe
                     queueEpisodes.add(episode);
                     logger.info("[trakt] marking {} as seen {}", episode, item.getMarkType());
                     trakt.syncWatchedProgress(showMapById.values(), queueEpisodes);
-                    logger.info("[tvdb] deleting {} from the progress queue", episode);
+                    logger.debug("[tvdb] deleting {} from the progress queue", episode);
                     dao.delete(queue);
                 }
             }
@@ -135,7 +135,7 @@ public class TraktPlugin implements Plugin, CurrentProgressProvider, ActionListe
 
             TableUtils.createTableIfNotExists(source, TraktShowProgressQueue.class);
         } catch (SQLException e) {
-            System.err.println("[tvdb] unable to create trakt show progress queue table");
+            logger.error("[tvdb] unable to create trakt show progress queue table");
             ENV.setTraktEnabled(false);
             return;
         }
@@ -185,10 +185,10 @@ public class TraktPlugin implements Plugin, CurrentProgressProvider, ActionListe
             Episode progressEpisode = progressSelector.getNewProgress(matches.get(0));
             try {
                 if (ENV.isTraktUseCheckins()) {
-                    logger.info("[trakt] checking in " + progressEpisode);
+                    logger.debug("[trakt] checking in " + progressEpisode);
                     trakt.checkinEpisode(show, progressEpisode);
                 } else {
-                    logger.info("[trakt] marking {} as {}", progressEpisode, TraktShowProgressQueue.SEEN);
+                    logger.debug("[trakt] marking {} as {}", progressEpisode, TraktShowProgressQueue.SEEN);
                     trakt.markEpisodeAs(show, progressEpisode, TraktClient.SEEN);
                 }
             } catch (TraktException ex) {

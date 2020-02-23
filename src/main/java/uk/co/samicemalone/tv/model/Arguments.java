@@ -103,16 +103,16 @@ public class Arguments {
      * Get the name of the Windows library
      * @return name of the Windows library or null if none set
      */
-    public String getLibraryName() {
+    public String getLibraryPath() {
         return LIBRARY;
     }
     
     /**
      * Set the name of the Windows library
-     * @param libraryName Windows library name
+     * @param libraryPath Windows library name
      */
-    public void setLibraryName(String libraryName) {
-        LIBRARY = libraryName;
+    public void setLibraryPath(String libraryPath) {
+        LIBRARY = libraryPath;
     }
     
     /**

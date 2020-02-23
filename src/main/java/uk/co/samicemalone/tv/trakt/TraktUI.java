@@ -28,6 +28,7 @@
  */
 package uk.co.samicemalone.tv.trakt;
 
+import com.uwetrottmann.trakt5.entities.DeviceCode;
 import com.uwetrottmann.trakt5.entities.SearchResult;
 
 import java.util.InputMismatchException;
@@ -40,19 +41,16 @@ import java.util.Scanner;
  */
 public class TraktUI {
     
-    private static final String PIN_AUTH_URL = "https://trakt.tv/pin/2007";
-
-    public static String promptForPINCode() {
-        System.out.format("Please visit the following URL to authorize access to Trakt\n\n%s\n\n", PIN_AUTH_URL);
-        System.out.println("Enter the Trakt authorization code or leave blank to cancel:");
+    public static void promptForDeviceCodeConfirmation(DeviceCode deviceCode) {
+        System.out.format("Please visit the following URL to authorize access to Trakt\n\n  %s\n\n", deviceCode.verification_url);
+        System.out.format("Enter the following app authorization code: %s\n\n", deviceCode.user_code);
+        System.out.println("Press Enter to when the app has been authorized.");
         Scanner s = new Scanner(System.in);
         try {
-            String line = s.nextLine();
-            return line.isEmpty() ? null : line;
+            s.nextLine();
         } catch(Exception e) {
             
         }
-        return null;
     }
     
     /**

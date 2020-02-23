@@ -34,12 +34,14 @@ import com.j256.ormlite.logger.LoggerFactory;
 import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.AccessToken;
 import com.uwetrottmann.trakt5.entities.BaseShow;
+import com.uwetrottmann.trakt5.entities.DeviceCode;
 import com.uwetrottmann.trakt5.entities.EpisodeCheckin;
 import com.uwetrottmann.trakt5.entities.EpisodeCheckinResponse;
 import com.uwetrottmann.trakt5.entities.SearchResult;
 import com.uwetrottmann.trakt5.entities.SyncItems;
 import com.uwetrottmann.trakt5.entities.SyncResponse;
 import com.uwetrottmann.trakt5.entities.TraktError;
+import com.uwetrottmann.trakt5.enums.ProgressLastActivity;
 import retrofit2.Call;
 import retrofit2.Response;
 import uk.co.samicemalone.tv.exception.TraktException;
@@ -98,10 +100,16 @@ public class TraktClient {
         Response<AccessToken> response = null;
         try {
             if(token == null || token.hasExpired()) {
-                String authCode = TraktUI.promptForPINCode();
-                if(authCode != null) {
-                    logger.debug("[trakt] exchanging auth code for access token");
-                    response = trakt.exchangeCodeForAccessToken(authCode);
+                logger.debug("[trakt] token missing or expired - generating new device code...");
+                Response<DeviceCode> deviceCodeResponse = trakt.generateDeviceCode();
+                DeviceCode code = deviceCodeResponse.body();
+                if(deviceCodeResponse.isSuccessful() && code != null) {
+                    TraktUI.promptForDeviceCodeConfirmation(code);
+
+                    logger.debug("[trakt] exchanging device code for access token");
+                    response = trakt.exchangeDeviceCodeForAccessToken(code.device_code);
+                } else {
+                    logger.error("[trakt] failed to generate device code");
                 }
             } else if(token.isRefreshRequired(60)) {
                 logger.info("[trakt] refreshing access token");
@@ -200,6 +208,8 @@ public class TraktClient {
                 String.valueOf(show.getTVDBId()),
                 false,
                 false,
+                false,
+                ProgressLastActivity.WATCHED,
                 null
             ));
         } catch (IOException e) {

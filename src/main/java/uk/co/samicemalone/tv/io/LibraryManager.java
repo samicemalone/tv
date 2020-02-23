@@ -45,15 +45,7 @@ import java.util.List;
  * @author Sam Malone
  */
 public class LibraryManager {
-    
-    /**
-     * Check if the current operating system supports libraries (Windows 7/8)
-     * @return true if the OS is Windows 7/8, false otherwise
-     */
-    public static boolean hasLibrarySupport() {
-        return System.getProperty("os.name").toLowerCase().startsWith("windows");
-    }
-    
+
     /**
      * Check if the current operating system is running Windows
      * @return  true if OS is windows, false otherwise
@@ -64,40 +56,20 @@ public class LibraryManager {
     
     /**
      * Check if the given library name is valid and exists
-     * @param libraryName Windows 7/8 Library Name
-     * @return true if libraryName is valid and exists, false otherwise
+     * @param libraryPath Path to .library-ms file
+     * @return true if libraryPath exists, false otherwise
      */
-    public static boolean isValidLibraryName(String libraryName) {
-        return getLibraryPath(libraryName) != null;
-    }
-    
-    /**
-     * Gets the full path the the Windows library-ms file with the given name
-     * @param libraryName Windows 7/8 Library Name
-     * @return Full path to the given library name or null if invalid/doesn't exist
-     */
-    private static String getLibraryPath(String libraryName) {
-        String path = null;
-        try {
-            path = System.getenv("APPDATA");
-            path = path +  "\\Microsoft\\Windows\\Libraries\\" + libraryName + ".library-ms";
-            if(!new File(path).exists()) {
-                return null;
-            }
-        } catch (Exception e) {
-            
-        }
-        return path;
+    public static boolean isValidLibraryPath(String libraryPath) {
+        return new File(libraryPath).exists();
     }
     
     /**
      * Gets a list of full paths to the folders that make up the library
-     * @param libraryName Windows 7/8 Library Name
+     * @param libraryPath Windows 7/8 Library Name
      * @return List of paths of the folders in the given library, or an empty list
      */
-    public static List<String> parseLibraryFolders(String libraryName) {
+    public static List<String> parseLibraryFolders(String libraryPath) {
         List<String> folders = new ArrayList<>();
-        String libraryPath = getLibraryPath(libraryName);
         if(libraryPath == null) {
             return folders;
         }

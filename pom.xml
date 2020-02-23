@@ -12,7 +12,8 @@
     <dependency>
       <groupId>com.uwetrottmann.trakt5</groupId>
       <artifactId>trakt-java</artifactId>
-      <version>6.0.1-SNAPSHOT</version>
+      <!-- https://github.com/samicemalone/trakt-java/tree/tv -->
+      <version>6.4.1-TV-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>uk.co.samicemalone</groupId>

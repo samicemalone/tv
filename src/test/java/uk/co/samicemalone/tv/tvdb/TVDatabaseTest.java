@@ -22,29 +22,33 @@ public class TVDatabaseTest extends AbstractTVDatabaseTest {
 
     @Test
     public void getShowByName() throws SQLException {
-        String showName = "The Walking Dead";
-        Show show = new Show(showName);
-        assertNull(tvdb.getShowByName(showName));
-        tvdb.createOrUpdateShow(show);
-        Show actualShow = tvdb.getShowByName(showName);
-        assertEquals(showName, actualShow.getName());
+        String[] shows = new String[] {"The Walking Dead", "It's Always Sunny In Philadelphia"};
+        for (String showName : shows) {
+            Show show = new Show(showName);
+            assertNull(tvdb.getShowByName(showName));
+            tvdb.createOrUpdateShow(show);
+            Show actualShow = tvdb.getShowByName(showName);
+            assertEquals(showName, actualShow.getName());
+        }
     }
 
     @Test
     public void setShowProgress() throws SQLException {
-        String showName = "The Walking Dead";
-        Show show = new Show(showName);
-        Instant watchedAt = Instant.now();
-        tvdb.createOrUpdateShow(show);
-        ShowProgress expectedProgress = new ShowProgress(show, "", 1, 1);
-        Episode episode = new Episode(show.getName(), "", 3, 2);
-        episode.setWatchedAt(watchedAt);
-        tvdb.setShowProgress(expectedProgress, episode);
-        ShowProgress actualProgress = tvdb.getShowProgress(show, "");
-        assertNotNull(actualProgress);
-        assertEquals(3, actualProgress.getSeason());
-        assertEquals(2, actualProgress.getEpisode());
-        assertEquals(watchedAt.getEpochSecond(), actualProgress.getWatchedAt().toInstant().getEpochSecond());
+        String[] shows = new String[] {"The Walking Dead", "It's Always Sunny In Philadelphia"};
+        for (String showName : shows) {
+            Show show = new Show(showName);
+            Instant watchedAt = Instant.now();
+            tvdb.createOrUpdateShow(show);
+            ShowProgress expectedProgress = new ShowProgress(show, "", 1, 1);
+            Episode episode = new Episode(show.getName(), "", 3, 2);
+            episode.setWatchedAt(watchedAt);
+            tvdb.setShowProgress(expectedProgress, episode);
+            ShowProgress actualProgress = tvdb.getShowProgress(show, "");
+            assertNotNull(actualProgress);
+            assertEquals(3, actualProgress.getSeason());
+            assertEquals(2, actualProgress.getEpisode());
+            assertEquals(watchedAt.getEpochSecond(), actualProgress.getWatchedAt().toInstant().getEpochSecond());
+        }
     }
 
     @Test

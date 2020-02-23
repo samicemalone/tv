@@ -43,7 +43,7 @@ import uk.co.samicemalone.libtv.model.EpisodeMatch;
 public class MockFileSystem {
     
     private final static String[] shows = new String[] {
-        "Scrubs", "Friends", "Modern Family"
+        "Scrubs", "Friends", "Modern Family", "It's Always Sunny In Philadelphia"
     };
     
     private final static File MOCK_ROOT = new File("mockroot_tv");

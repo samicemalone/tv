@@ -132,9 +132,7 @@ public class ArgsParser {
             return true;
         }
         if(programArgs[curIndex].equals("--library")) {
-            if(LibraryManager.hasLibrarySupport()) {
-                args.setLibraryName(programArgs[curIndex+1]);
-            }
+            args.setLibraryPath(programArgs[curIndex+1]);
             return true;
         }
         if(programArgs[curIndex].equals("--user") || programArgs[curIndex].equals("-u")) {
@@ -228,8 +226,8 @@ public class ArgsParser {
             }
             return;
         }
-        if(arg.getLibraryName() != null && !LibraryManager.isValidLibraryName(arg.getLibraryName())) {
-            throw new InvalidArgumentException("Windows Library name is invalid", ExitCode.LIBRARY_NOT_FOUND);
+        if(arg.getLibraryPath() != null && !LibraryManager.isValidLibraryPath(arg.getLibraryPath())) {
+            throw new InvalidArgumentException("Windows Library path is invalid", ExitCode.LIBRARY_NOT_FOUND);
         }
         if(arg.isSetOnly() && arg.isIgnoreSet()) {
             throw new InvalidArgumentException("-s and -i flags cannot be set together", ExitCode.UNEXPECTED_ARGUMENT);
@@ -269,7 +267,7 @@ public class ArgsParser {
         sb.append("    -p, --player MP   Sets the media player to use. Default is \"vlc\"\n");
         sb.append("    --config CONFIG   Sets the config file to use\n");
         sb.append("    --source DIR      TV source folder. You can use this option multiple times\n");
-        sb.append("    --library NAME    Windows 7 Library NAME will be used to determine sources\n");
+        sb.append("    --library PATH    Windows 7+ Library PATH will be used to determine sources\n");
         sb.append("    -f, --file FILE   Plays FILE from the filesystem. Can use -q to enqueue\n");
         sb.append("    -h, --help        This help message will be printed then exit.\n");
         sb.append("    -v, --version     This version will be printed then exit.\n");
@@ -315,7 +313,7 @@ public class ArgsParser {
         sb.append("with an asterisk (*) will modify the pointer.\n");
         sb.append('\n');
         sb.append("Examples:      tv Scrubs pilot --source 'D:\\TV'\n");
-        sb.append("               tv Scrubs s01 --library TV\n");
+        sb.append("               tv Scrubs s01 --library ./TV.library-ms\n");
         sb.append("               tv Scrubs all -r --source 'D:\\TV' --source 'E:\\Path\\TV'\n");
         sb.append("               tv Scrubs s02e05- --config ~/.tv/tv.conf\n");
         sb.append("               tv Scrubs next --source 'D:\\TV'\n");

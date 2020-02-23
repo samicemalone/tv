@@ -48,10 +48,8 @@ public class TVDatabase {
 
     public Show getShowByName(String showName) throws SQLException {
         QueryBuilder<Show, Integer> qb = showDao.queryBuilder();
-        SelectArg showArg = new SelectArg();
-        qb.where().eq("name", showArg);
+        qb.where().eq("name", new SelectArg(showName));
         PreparedQuery<Show> query = qb.prepare();
-        showArg.setValue(showName);
         return showDao.queryForFirst(query);
     }
 
@@ -61,10 +59,10 @@ public class TVDatabase {
 
     public ShowProgress getShowProgress(Show show, String tag) throws SQLException {
         QueryBuilder<Show, Integer> showQb = showDao.queryBuilder();
-        showQb.where().eq("name", show.getName());
+        showQb.where().eq("name", new SelectArg(show.getName()));
 
         QueryBuilder<ShowProgress, Integer> progressQb = showProgressDao.queryBuilder().join(showQb);
-        progressQb.where().eq("tag", tag);
+        progressQb.where().eq("tag", new SelectArg(tag));
 
         return showProgressDao.queryForFirst(progressQb.prepare());
     }

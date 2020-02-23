@@ -96,9 +96,9 @@ OPTIONS
       E.g. When used with pilot, latest, next, s02e01 etc..., the pointer will
       stay the same.
 
-   --library NAME
-      This option only works on Windows 7. It adds each directory that library
-      NAME consists of, as the source directories to look up TV shows. If using
+   --library PATH
+      This option only works on Windows 7+. It adds each directory that library
+      PATH consists of, as the source directories to look up TV shows. If using
       this option, then the --source argument doesn't need to be set although it
       can still be used in conjunction.
 
@@ -119,7 +119,7 @@ OPTIONS
       Sets DIR as a source folder that contains TV shows. This option can be
       used multiple times to add multiple source directories. There must be
       some source directory set, whether this by via an argument or set in a
-      configuration file. If using Windows 7 and the --library option is used,
+      configuration file. If using Windows 7+ and the --library option is used,
       then source doesn't need to be set, as the sources will be added from the
       library.
 

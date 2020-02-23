@@ -141,7 +141,7 @@ public class ArgsParserTest {
         // contains all possible arguments that will be parsed, but won't validate
         Arguments args = ArgsParser.parse(arg(
             "Scrubs", "s01", "-l", "--source", MockFileSystem.getSourceFolders().get(0),
-            "--library", "TV", "-p", "stdout", "--config", configFile.getAbsolutePath(),
+            "--library", "TV.library-ms", "-p", "stdout", "--config", configFile.getAbsolutePath(),
             "--trakt", "-r", "2", "-u", "testuser", "-i", "-s"
         ));
         assertEpisodeTestDataValid(args);
@@ -152,7 +152,7 @@ public class ArgsParserTest {
         assertEquals(args.getEpisodes(), "s01");
         assertEquals(args.getMediaAction(), Action.LIST);
         assertEquals(MockFileSystem.getSourceFolders(), args.getSourceFolders());
-        assertEquals(args.getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
+        assertEquals(args.getLibraryPath(), "TV.library-ms");
         assertEquals(args.getPlayerInfo(), new PlayerInfo("stdout"));
         assertEquals(args.getConfigPath(), configFile.getAbsolutePath());
         assertEquals(args.getRandomCount(), 2);
@@ -170,7 +170,7 @@ public class ArgsParserTest {
         String[] tvShowEpisodes = arg("Scrubs", "s01");
         String[][] argsOptions = new String[][] {
             arg("-l"), arg("--source", MockFileSystem.getSourceFolders().get(0)),
-            arg("--library", "TV"), arg("-p", "stdout"), arg("--config", configFile.getAbsolutePath()),
+            arg("--library", "TV.library-ms"), arg("-p", "stdout"), arg("--config", configFile.getAbsolutePath()),
             arg("--trakt"), arg("-r", "2"), arg("-u", "testuser"), arg("-i"), arg("-s")
         };
         List<String> curArgs = new ArrayList<>();
@@ -247,7 +247,7 @@ public class ArgsParserTest {
     public void testValidate() throws Exception {
         File f = folder.newFile("test.avi");
         Arguments args = ArgsParser.parse(arg(
-            "Scrubs", "s01", "-l", "--library", "Documents", "-p", "stdout",
+            "Scrubs", "s01", "-l", "--library", "C:\\Users\\Public\\Libraries\\RecordedTV.library-ms", "-p", "stdout",
             "--config", configFile.getAbsolutePath()
         ));
         ArgsParser.validate(args);
@@ -278,9 +278,7 @@ public class ArgsParserTest {
         };
         try {
             ArgsParser.validate(args);
-            if(LibraryManager.hasLibrarySupport()) {
-                fail();
-            }
+            fail();
         } catch (InvalidArgumentException ex) {}
         for(String[] arg : argsArray) {
             assertArgumentsInvalid(arg);

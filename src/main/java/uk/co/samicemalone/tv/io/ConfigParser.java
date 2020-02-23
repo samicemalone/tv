@@ -105,10 +105,8 @@ public class ConfigParser {
             case "MEDIAINFO_BINARY":
                 c.setMediainfoBinary(value);
                 break;
-            case "LIBRARY_NAME":
-                if(LibraryManager.hasLibrarySupport()) {
-                    c.setLibraryName(value);
-                }
+            case "LIBRARY_PATH":
+                c.setLibraryPath(value);
                 break;
             case "PLAYER":
                 c.setPlayer(value);

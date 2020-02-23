@@ -79,7 +79,7 @@ public class ConfigParserTest {
     public void testParseValid() throws Exception {
         writeConfig(getTestAllConfigString());
         Config result = ConfigParser.parse(configFile);
-        assertEquals(result.getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
+        assertEquals(result.getLibraryPath(), "TV.library-ms");
         assertEquals(result.getMediainfoBinary(), "/path/to/mediainfo");
         assertEquals(result.getPlayer(), "stdout");
         assertEquals(result.getPlayerExecutable(), "/path/to/executable");
@@ -117,7 +117,7 @@ public class ConfigParserTest {
         sb.append("SOURCE=/path/to/source1\n");
         sb.append("SOURCE=/path/to/source2\n");
         sb.append("\tMEDIAINFO_BINARY=/path/to/mediainfo\n");
-        sb.append(" LIBRARY_NAME=TV\n");
+        sb.append(" LIBRARY_PATH=TV.library-ms\n");
         sb.append("PLAYER=stdout\n");
         sb.append("PLAYER_EXECUTABLE=/path/to/executable\n");
         sb.append("PLAYER_ARGUMENTS=--arg\n");

@@ -87,13 +87,13 @@ public class EnvironmentTest extends FileSystemEnvironment {
      */
     @Test
     public void testValidateEnvironmentArgsPrecedence() throws Exception {
-        writeConfig("LIBRARY_NAME=Videos\nPLAYER=vlc");
+        writeConfig("LIBRARY_PATH=Videos\nPLAYER=vlc");
         Arguments args = ArgsParser.parse(arg(
-            "Scrubs", "s01", "--library", "TV", "-p", "stdout"
+            "Scrubs", "s01", "--library", "TV.library-ms", "-p", "stdout"
         ));
         env.setArguments(args);
         env.fromConfig(ConfigParser.parse(configFile));
-        assertEquals(env.getArguments().getLibraryName(), LibraryManager.hasLibrarySupport() ? "TV" : null);
+        assertEquals(env.getArguments().getLibraryPath(), "TV.library-ms");
         assertEquals(env.getArguments().getPlayerInfo().getPlayer(), "stdout");
     }
 

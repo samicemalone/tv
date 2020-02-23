@@ -41,7 +41,7 @@ public class Config {
     private String playerExecutable;
     private final List<String> playerArguments;
     private final List<String> sourceDirs;
-    private String libraryName;
+    private String libraryPath;
     private String mediainfoBinary;
     private String tvdbFile;
     
@@ -82,12 +82,12 @@ public class Config {
      * Get the windows library name if given in the config
      * @return windows library name or null if not specified
      */
-    public String getLibraryName() {
-        return libraryName;
+    public String getLibraryPath() {
+        return libraryPath;
     }
 
-    public void setLibraryName(String libraryName) {
-        this.libraryName = libraryName;
+    public void setLibraryPath(String libraryPath) {
+        this.libraryPath = libraryPath;
     }
 
     /**
