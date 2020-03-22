@@ -7,6 +7,7 @@ import uk.co.samicemalone.tv.tvdb.model.ShowProgress;
 
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -37,16 +38,30 @@ public class TVDatabaseTest extends AbstractTVDatabaseTest {
         String[] shows = new String[] {"The Walking Dead", "It's Always Sunny In Philadelphia"};
         for (String showName : shows) {
             Show show = new Show(showName);
-            Instant watchedAt = Instant.now();
+            Instant watchedAt = Instant.ofEpochSecond(1584885274);
             tvdb.createOrUpdateShow(show);
             ShowProgress expectedProgress = new ShowProgress(show, "", 1, 1);
             Episode episode = new Episode(show.getName(), "", 3, 2);
             episode.setWatchedAt(watchedAt);
+
+            // creates show progress
             tvdb.setShowProgress(expectedProgress, episode);
             ShowProgress actualProgress = tvdb.getShowProgress(show, "");
             assertNotNull(actualProgress);
             assertEquals(3, actualProgress.getSeason());
             assertEquals(2, actualProgress.getEpisode());
+            assertEquals(watchedAt.getEpochSecond(), actualProgress.getWatchedAt().toInstant().getEpochSecond());
+
+            // updates show progress
+            watchedAt = Instant.now();
+            expectedProgress = actualProgress;
+            episode.setEpisodes(Collections.singletonList(3));
+            episode.setWatchedAt(watchedAt);
+            tvdb.setShowProgress(expectedProgress, episode);
+            actualProgress = tvdb.getShowProgress(show, "");
+            assertNotNull(actualProgress);
+            assertEquals(3, actualProgress.getSeason());
+            assertEquals(3, actualProgress.getEpisode());
             assertEquals(watchedAt.getEpochSecond(), actualProgress.getWatchedAt().toInstant().getEpochSecond());
         }
     }
