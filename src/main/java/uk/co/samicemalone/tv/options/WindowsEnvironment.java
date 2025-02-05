@@ -52,7 +52,7 @@ public class WindowsEnvironment extends Environment {
 
     @Override
     public String getDefaultTVDB() {
-        return "C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tvdb.sqlite";
+        return System.getenv("USERPROFILE") + "\\tv\\tvdb.sqlite";
     }
 
     @Override
@@ -62,12 +62,12 @@ public class WindowsEnvironment extends Environment {
 
     @Override
     public File getDefaultConfig() {
-        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\tv.conf");
+        return new File(System.getenv("USERPROFILE") + "\\tv\\tv.conf");
     }
 
     @Override
     public File getDefaultTraktAuthFile() {
-        return new File("C:\\ProgramData\\" + System.getProperty("user.name") + "\\tv\\trakt.auth");
+        return new File(System.getenv("USERPROFILE") + "\\tv\\trakt.auth");
     }
 
     @Override

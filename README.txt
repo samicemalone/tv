@@ -158,7 +158,7 @@ FILES
          When using trakt integration, your access token will be stored here.
 
    Default Directories
-      Windows C:\ProgramData\$USER\tv\
+      Windows %USERPROFILE%\tv\
       Linux ~/.tv/
 
 EXAMPLES

@@ -36,7 +36,7 @@ the configuration file in the following place:
 
       Linux default:     $HOME/.tv/tv.conf
         Mac default:     $HOME/.tv/tv.conf
-    Windows default:     C:\ProgramData\$USER\tv\tv.conf
+    Windows default:     %USERPROFILE%\tv\tv.conf
 
 You can change the path to the config file via arguments given to the program.
 For more information see the --config argument in README.txt
