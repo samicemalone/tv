@@ -15,7 +15,6 @@ import uk.co.samicemalone.tv.tvdb.model.Show;
 import uk.co.samicemalone.tv.tvdb.model.ShowProgress;
 
 import java.sql.SQLException;
-import java.util.Date;
 
 public class TVDatabase {
 
@@ -84,7 +83,6 @@ public class TVDatabase {
             updateBuilder
                 .updateColumnValue("season", newEpisode.getSeason())
                 .updateColumnValue("episode", newEpisode.getEpisode())
-                .updateColumnValue("watchedAt", new Date(newEpisode.getWatchedAt().toEpochMilli()))
                 .where()
                 .idEq(currentProgress.getId());
             updateBuilder.update();

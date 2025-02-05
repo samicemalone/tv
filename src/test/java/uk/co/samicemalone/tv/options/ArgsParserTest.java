@@ -38,25 +38,20 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.co.samicemalone.tv.MockFileSystem;
 import uk.co.samicemalone.tv.action.Action;
-import uk.co.samicemalone.tv.action.MediaPlayerAction;
 import uk.co.samicemalone.tv.exception.FileNotFoundException;
 import uk.co.samicemalone.tv.exception.InvalidArgumentException;
 import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.filter.RandomFilter;
-import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.PlayerInfo;
-import uk.co.samicemalone.tv.plugin.PointerPlugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 

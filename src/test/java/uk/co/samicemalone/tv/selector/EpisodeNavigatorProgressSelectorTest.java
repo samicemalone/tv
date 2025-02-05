@@ -13,7 +13,6 @@ import uk.co.samicemalone.tv.TV;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
-import uk.co.samicemalone.tv.model.Episode;
 import uk.co.samicemalone.tv.options.ArgsParser;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
@@ -23,7 +22,6 @@ import uk.co.samicemalone.tv.tvdb.model.ShowProgress;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

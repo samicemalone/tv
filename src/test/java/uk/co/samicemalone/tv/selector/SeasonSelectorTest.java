@@ -16,7 +16,6 @@ import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
 import uk.co.samicemalone.tv.util.AssertionUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 

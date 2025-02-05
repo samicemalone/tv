@@ -75,8 +75,6 @@ public class TraktClient {
         
     private final TraktV2 trakt;
 
-    private TraktAuthToken token;
-
     public TraktClient(TraktAuthToken token) {
         trakt = new TraktV2Http11(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
         setAuthToken(token);
@@ -87,7 +85,6 @@ public class TraktClient {
     }
     
     private void setAuthToken(TraktAuthToken token) {
-        this.token = token;
         if(token != null) {
            trakt.accessToken(token.getAccessToken());
            trakt.refreshToken(token.getRefreshToken());

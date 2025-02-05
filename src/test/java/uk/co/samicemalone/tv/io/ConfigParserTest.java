@@ -67,9 +67,10 @@ public class ConfigParserTest {
     }
     
     private void writeConfig(String config) throws IOException {
-        FileWriter w = new FileWriter(configFile);
-        w.write(config);
-        w.flush();
+        try (FileWriter w = new FileWriter(configFile)) {
+            w.write(config);
+            w.flush();
+        }
     }
 
     /**

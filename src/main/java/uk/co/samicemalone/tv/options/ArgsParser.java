@@ -36,10 +36,8 @@ import uk.co.samicemalone.tv.exception.MissingArgumentException;
 import uk.co.samicemalone.tv.filter.RandomFilter;
 import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
-import uk.co.samicemalone.tv.selector.EpisodeSelector;
 
 import java.io.File;
-import java.util.List;
 
 /**
  *

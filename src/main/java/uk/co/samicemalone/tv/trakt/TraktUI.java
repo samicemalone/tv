@@ -37,7 +37,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author Ice
+ * @author Ice 
  */
 public class TraktUI {
     
@@ -45,11 +45,10 @@ public class TraktUI {
         System.out.format("Please visit the following URL to authorize access to Trakt\n\n  %s\n\n", deviceCode.verification_url);
         System.out.format("Enter the following app authorization code: %s\n\n", deviceCode.user_code);
         System.out.println("Press Enter to when the app has been authorized.");
-        Scanner s = new Scanner(System.in);
-        try {
+        try (Scanner s = new Scanner(System.in)) {
             s.nextLine();
         } catch(Exception e) {
-            
+
         }
     }
     
@@ -63,17 +62,18 @@ public class TraktUI {
      */
     private static int readShowChoiceFromStdin(int minValue, int maxValue, int cancel) {
         System.out.format("Enter the id that matches the show or %d to cancel: \n", cancel);
-        Scanner s = new Scanner(System.in);
-        while (true) {
-            try {
-                int i = s.nextInt();
-                if(i == cancel) {
-                    return cancel;
-                } else if(i >= minValue && i <= maxValue) {
-                    return i;
-                }
-            } catch (InputMismatchException ex) {}
-            System.out.format("Enter a value between %d and %d: \n", minValue, maxValue);
+        try (Scanner s = new Scanner(System.in)) {
+            while (true) {
+                try {
+                    int i = s.nextInt();
+                    if(i == cancel) {
+                        return cancel;
+                    } else if(i >= minValue && i <= maxValue) {
+                        return i;
+                    }
+                } catch (InputMismatchException ex) {}
+                System.out.format("Enter a value between %d and %d: \n", minValue, maxValue);
+            }
         }
     }
     

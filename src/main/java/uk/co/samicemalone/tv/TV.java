@@ -28,7 +28,9 @@
  */
 package uk.co.samicemalone.tv;
 
-import com.j256.ormlite.logger.LocalLog;
+import com.j256.ormlite.logger.Level;
+import com.j256.ormlite.logger.Logger;
+
 import uk.co.samicemalone.tv.action.FileAction;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.ConfigParser;
@@ -40,7 +42,6 @@ import uk.co.samicemalone.tv.options.Environment;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
 import uk.co.samicemalone.tv.tvdb.TVDatabase;
-import uk.co.samicemalone.tv.tvdb.model.Show;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -61,7 +62,7 @@ public class TV {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "INFO");
+        Logger.setGlobalLogLevel(Level.INFO);
         ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         try {
             ENV.setArguments(ArgsParser.parse(args));

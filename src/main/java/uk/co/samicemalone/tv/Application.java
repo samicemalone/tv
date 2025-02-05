@@ -21,7 +21,6 @@ import uk.co.samicemalone.tv.tvdb.TVDatabase;
 import uk.co.samicemalone.tv.tvdb.model.Show;
 import uk.co.samicemalone.tv.tvdb.model.ShowProgress;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,7 +125,7 @@ public class Application implements Lifecycle {
         currentProgressProvider = provider;
     }
 
-    public void run(Arguments args) throws SQLException, IOException, ExitException {
+    public void run(Arguments args) throws Exception {
         this.args = args;
         try (ConnectionSource connection = tvDatabase.connect(TV.ENV.getTVDB())) {
             onLoad();
