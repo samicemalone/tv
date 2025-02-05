@@ -4,7 +4,6 @@ import com.j256.ormlite.support.ConnectionSource;
 import org.junit.After;
 import org.junit.Before;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
 import uk.co.samicemalone.tv.options.WindowsEnvironment;
 
@@ -17,7 +16,7 @@ public abstract class AbstractTVDatabaseTest {
         tvdb = new TVDatabase();
         source = tvdb.connect(TVDatabase.IN_MEMORY_DATABASE);
 
-        TV.ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
+        TV.ENV = WindowsEnvironment.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         TV.ENV.setTVDB(TVDatabase.IN_MEMORY_DATABASE);
     }
 

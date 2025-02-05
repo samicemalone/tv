@@ -37,7 +37,6 @@ import uk.co.samicemalone.tv.FileSystemEnvironment;
 import uk.co.samicemalone.tv.MockFileSystem;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.ConfigParser;
-import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
 
 import java.io.File;
@@ -65,7 +64,7 @@ public class EnvironmentTest extends FileSystemEnvironment {
     @Before
     public void setUp() throws IOException {
         configFile = folder.newFile("tv.conf");
-        env = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
+        env = WindowsEnvironment.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
     }
 
     /**

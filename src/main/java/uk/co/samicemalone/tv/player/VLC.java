@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import uk.co.samicemalone.tv.URI;
-import uk.co.samicemalone.tv.io.LibraryManager;
+import uk.co.samicemalone.tv.options.WindowsEnvironment;
 
 /**
  *
@@ -42,7 +42,7 @@ import uk.co.samicemalone.tv.io.LibraryManager;
 public class VLC extends MediaPlayer {
     
     public VLC() {
-        if(LibraryManager.isWindows()) {
+        if(WindowsEnvironment.isWindows()) {
             setExecutableFile(new File("C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"));
         } else {
             setExecutableFile(new File("/usr/bin/vlc"));

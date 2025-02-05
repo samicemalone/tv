@@ -37,6 +37,14 @@ import java.io.File;
  * @author Sam Malone
  */
 public class WindowsEnvironment extends Environment {
+
+    /**
+     * Check if the current operating system is running Windows
+     * @return  true if OS is windows, false otherwise
+     */
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().startsWith("windows");
+    }
     
     public WindowsEnvironment() {
         

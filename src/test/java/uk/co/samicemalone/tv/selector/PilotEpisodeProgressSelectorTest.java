@@ -9,7 +9,6 @@ import uk.co.samicemalone.libtv.model.EpisodeMatch;
 import uk.co.samicemalone.tv.FileSystemEnvironment;
 import uk.co.samicemalone.tv.MockFileSystem;
 import uk.co.samicemalone.tv.TV;
-import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.options.ArgsParser;
 import uk.co.samicemalone.tv.options.UnixEnvironment;
@@ -31,7 +30,7 @@ public class PilotEpisodeProgressSelectorTest extends FileSystemEnvironment {
         TVPath tvPath = new StandardTVLibrary(MockFileSystem.getSourceFolders());
         selector = new PilotEpisodeProgressSelector(tvPath, null);
 
-        TV.ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
+        TV.ENV = WindowsEnvironment.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         TV.ENV.setArguments(args);
     }
 

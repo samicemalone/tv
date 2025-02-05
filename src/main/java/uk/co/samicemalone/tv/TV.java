@@ -34,7 +34,6 @@ import com.j256.ormlite.logger.Logger;
 import uk.co.samicemalone.tv.action.FileAction;
 import uk.co.samicemalone.tv.exception.ExitException;
 import uk.co.samicemalone.tv.io.ConfigParser;
-import uk.co.samicemalone.tv.io.LibraryManager;
 import uk.co.samicemalone.tv.model.Arguments;
 import uk.co.samicemalone.tv.model.Config;
 import uk.co.samicemalone.tv.options.ArgsParser;
@@ -63,7 +62,7 @@ public class TV {
      */
     public static void main(String[] args) {
         Logger.setGlobalLogLevel(Level.INFO);
-        ENV = LibraryManager.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
+        ENV = WindowsEnvironment.isWindows() ? new WindowsEnvironment() : new UnixEnvironment();
         try {
             ENV.setArguments(ArgsParser.parse(args));
             if(ENV.getArguments().isHelpSet()) {

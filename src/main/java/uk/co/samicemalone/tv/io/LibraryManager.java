@@ -45,14 +45,6 @@ import java.util.List;
  * @author Sam Malone
  */
 public class LibraryManager {
-
-    /**
-     * Check if the current operating system is running Windows
-     * @return  true if OS is windows, false otherwise
-     */
-    public static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().startsWith("windows");
-    }
     
     /**
      * Check if the given library name is valid and exists

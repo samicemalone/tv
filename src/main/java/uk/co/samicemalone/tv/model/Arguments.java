@@ -29,7 +29,9 @@
 package uk.co.samicemalone.tv.model;
 
 import uk.co.samicemalone.tv.action.Action;
+import uk.co.samicemalone.tv.options.WindowsEnvironment;
 import uk.co.samicemalone.tv.util.CygwinUtil;
+import uk.co.samicemalone.tv.util.WSLUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -85,8 +87,12 @@ public class Arguments {
      * @return path to the config file or null if none set
      */
     public String getConfigPath() {
-        if(CONFIG != null && CONFIG.startsWith(CygwinUtil.CYGWIN_PATH)) {
-            return CygwinUtil.toWindowsPath(CONFIG);
+        if(CONFIG != null && WindowsEnvironment.isWindows()) {
+            if(CONFIG.startsWith(CygwinUtil.CYGWIN_PATH)) {
+                return CygwinUtil.toWindowsPath(CONFIG);
+            } else if(CONFIG.startsWith(WSLUtil.WSL_PATH)) {
+                return WSLUtil.toWindowsPath(CONFIG);
+            }
         }
         return CONFIG;
     }
@@ -149,12 +155,16 @@ public class Arguments {
     
     /**
      * Get the File object representing the path argument given (with -f)
-     * Cygwin paths will be changed into Windows format
+     * Cygwin/WSL paths will be changed into Windows format
      * @return Single File object from -f argument
      */
     public File getFile() {
-        if(getFileString().startsWith(CygwinUtil.CYGWIN_PATH)) {
-            return new File(CygwinUtil.toWindowsPath(FILE));
+        if(WindowsEnvironment.isWindows()) {
+            if(getFileString().startsWith(CygwinUtil.CYGWIN_PATH)) {
+                return new File(CygwinUtil.toWindowsPath(FILE));
+            } else if(getFileString().startsWith(WSLUtil.WSL_PATH)) {
+                return new File(WSLUtil.toWindowsPath(FILE));
+            }
         }
         return new File(FILE);
     }

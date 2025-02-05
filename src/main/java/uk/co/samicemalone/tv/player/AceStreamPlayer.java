@@ -7,7 +7,7 @@
 package uk.co.samicemalone.tv.player;
 
 import java.io.File;
-import uk.co.samicemalone.tv.io.LibraryManager;
+import uk.co.samicemalone.tv.options.WindowsEnvironment;
 
 /**
  * 
@@ -16,7 +16,7 @@ import uk.co.samicemalone.tv.io.LibraryManager;
 public class AceStreamPlayer extends VLC {
 
     public AceStreamPlayer() {
-        if(LibraryManager.isWindows()) {
+        if(WindowsEnvironment.isWindows()) {
             String format = "%s\\AppData\\Roaming\\ACEStream\\player\\ace_player.exe";
             setExecutableFile(new File(String.format(format, System.getProperty("user.home"))));
         } else {
